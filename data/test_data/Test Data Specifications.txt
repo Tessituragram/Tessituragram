@@ -1,0 +1,4 @@
+This document outlines what is contained in the various test found in this folder.
+
+"ABCD Tenor.mid" has 4 quarter notes with the same tempo: A3, B3, C4, and D4. The corresponding frequencies 
+are 220Hz, 246.94Hz, 261.63Hz, and 293.66Hz.

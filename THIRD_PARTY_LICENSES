@@ -1,0 +1,57 @@
+his project uses the following third-party libraries:
+
+NumPy
+License: BSD 3-Clause
+https://numpy.org/doc/stable/license.html
+
+PyAudio
+License: MIT
+https://github.com/iovsiann/pyaudio/blob/master/LICENSE
+
+Colorama
+License: BSD 3-Clause
+https://github.com/tartley/colorama/blob/master/LICENSE.txt
+
+et_xmlfile
+License: MIT
+https://github.com/biydnd/et_xmlfile/blob/master/LICENCE.rst
+
+iniconfig
+License: MIT
+https://github.com/pytest-dev/iniconfig/blob/main/LICENSE
+
+openpyxl
+License: MIT
+https://github.com/fluidware/openpyxl/blob/master/LICENCE
+
+packaging
+License: Apache or BSD 2-Clause
+https://github.com/pypa/packaging/blob/main/LICENSE
+
+pandas
+License: BSD 3-Clause
+https://github.com/pandas-dev/pandas/blob/main/LICENSE
+
+pluggy
+License: MIT
+https://github.com/pytest-dev/pluggy/blob/main/LICENSE
+
+pygments
+License: BSD 2-Clause
+https://github.com/pygments/pygments/blob/master/LICENSE
+
+pytest
+License: MIT
+https://docs.pytest.org/en/stable/license.html
+
+python-dateutil
+License: Apache
+https://github.com/dateutil/dateutil/blob/master/LICENSE
+
+six
+License: MIT
+https://github.com/benjaminp/six/blob/main/LICENSE
+
+tzdata
+License: Apache
+https://github.com/python/tzdata/blob/master/LICENSE
