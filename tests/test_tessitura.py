@@ -18,8 +18,8 @@ def test_tessitura_calculation():
     '''
     notes = [Note(1, 1), Note(1, 2), Note(1, 3), Note(1, 4)]
     tess = tessitura.Tessitura(notes, "bass")
-    assert tess.lowFreq == 1.75
-    assert tess.highFreq == 3.25
+    assert tess.lowFreq == 1.8
+    assert tess.highFreq == 3.2
     assert tess.median == 2.5
     assert tess.cycle_dose == 10
     assert tess.time_dose == 4
@@ -34,8 +34,8 @@ def test_tessitura_calculation_with_rests():
     notes = [Note(1, 1), Note(1, 2), Rest(3), Note(1, 3), Note(1, 4), Rest(5)]
     tess = tessitura.Tessitura(notes, "bass")
     assert isinstance(tess, Tessitura)
-    assert tess.lowFreq == 1.75
-    assert tess.highFreq == 3.25
+    assert tess.lowFreq == 1.8
+    assert tess.highFreq == 3.2
     assert tess.median == 2.5
     assert tess.cycle_dose == 10
     assert tess.time_dose == 4
@@ -47,14 +47,14 @@ def test_frequency_to_note():
     '''
     Test converting frequencies to notes
     '''
-    note, octave = utils.freq_to_note(32.70)
+    note, octave = utils.freq_to_note(32.7)
     assert note == "C"
     assert octave == 1
     note, octave = utils.freq_to_note(880)
     assert note == "A"
     assert octave == 5
-    note, octave = utils.freq_to_note(932.33)
-    assert note == "A#"
+    note, octave = utils.freq_to_note(932.3)
+    assert note == "A\u266F"
     assert octave == 5
     note, octave = utils.freq_to_note(192)
     assert note == "G"

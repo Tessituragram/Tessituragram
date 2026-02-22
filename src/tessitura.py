@@ -7,7 +7,7 @@ class PassaggioMetrics:
         self.percentage = percentage
 
 class Passaggio:
-    def __init__(self, notes, clef, time_dose):
+    def __init__(self, notes, clef):
         self.pitches = []
         self.durations = []
         for note in notes:
@@ -24,7 +24,6 @@ class Passaggio:
         self.lvhp = None
         self.lvmp = None
         self.lvlp = None
-        self.time_dose = time_dose
         self.create_passagio_mapping()
 
     def calculate_passaggio(self, low, high):
@@ -35,7 +34,7 @@ class Passaggio:
         for pitch, duration in zip(self.pitches, self.durations):
             if low - 0.1 <= pitch <= high + 0.1:
                 sum_durations += duration
-        percent_p = round((sum_durations / sum(self.durations))*100, 2)
+        percent_p = round((sum_durations / sum(self.durations))*100, 1)
         return PassaggioMetrics(round(sum_durations, 1), percent_p)
     
     def create_passagio_mapping(self):
@@ -50,23 +49,23 @@ class Passaggio:
         self.lvlp = self.calculate_passaggio(196.0, 246.9)
 
     def print_passagio(self):
-        print("High Voice High Passaggio: ", str(self.hvhp.time_dose) + "s,", str(round((self.hvhp.time_dose / self.time_dose)*100,1)) + "%")
+        print("High Voice High Passaggio: ", str(self.hvhp.time_dose) + "s,", str(self.hvhp.percentage) + "%")
         
-        print("High Voice Middle Passaggio: ", str(self.hvmp.time_dose) + "s,", str(round((self.hvmp.time_dose / self.time_dose)*100,1)) + "%")
+        print("High Voice Middle Passaggio: ", str(self.hvmp.time_dose) + "s,", str(self.hvmp.percentage) + "%")
         
-        print("High Voice Low Passaggio: ", str(self.hvlp.time_dose) + "s,", str(round((self.hvlp.time_dose / self.time_dose)*100,1)) + "%")
+        print("High Voice Low Passaggio: ", str(self.hvlp.time_dose) + "s,", str(self.hvlp.percentage) + "%")
         
-        print("Medium Voice High Passaggio: ", str(self.mvhp.time_dose) + "s,", str(round((self.mvhp.time_dose / self.time_dose)*100,1)) + "%")
+        print("Medium Voice High Passaggio: ", str(self.mvhp.time_dose) + "s,", str(self.mvhp.percentage) + "%")
         
-        print("Medium Voice Middle Passaggio: ", str(self.mvmp.time_dose) + "s,", str(round((self.mvmp.time_dose / self.time_dose)*100,1)) + "%")
+        print("Medium Voice Middle Passaggio: ", str(self.mvmp.time_dose) + "s,", str(self.mvmp.percentage) + "%")
         
-        print("Medium Voice Low Passaggio: ", str(self.mvlp.time_dose) + "s,", str(round((self.mvlp.time_dose / self.time_dose)*100,1)) + "%")
+        print("Medium Voice Low Passaggio: ", str(self.mvlp.time_dose) + "s,", str(self.mvlp.percentage) + "%")
         
-        print("Low Voice High Passaggio: ", str(self.lvhp.time_dose) + "s,", str(round((self.lvhp.time_dose / self.time_dose)*100,1)) + "%")
+        print("Low Voice High Passaggio: ", str(self.lvhp.time_dose) + "s,", str(self.lvhp.percentage) + "%")
         
-        print("Low Voice Middle Passaggio: ", str(self.lvmp.time_dose) + "s,", str(round((self.lvmp.time_dose / self.time_dose)*100,1)) + "%")
+        print("Low Voice Middle Passaggio: ", str(self.lvmp.time_dose) + "s,", str(self.lvmp.percentage) + "%")
         
-        print("Low Voice Low Passaggio: ", str(self.lvlp.time_dose) + "s,", str(round((self.lvlp.time_dose / self.time_dose)*100,1)) + "%")
+        print("Low Voice Low Passaggio: ", str(self.lvlp.time_dose) + "s,", str(self.lvlp.percentage) + "%")
         print("=================================================")
 
 class Tessitura:
@@ -152,8 +151,8 @@ def get_tessitura_and_passaggio(notes, clef):
                 note.frequency *= 2
         tess_treble = Tessitura(notes_treble, "Treble")
         tess_bass = Tessitura(notes_bass, "Bass")
-        pass_treble = Passaggio(notes_treble, "Treble", tess_treble.time_dose)
-        pass_bass = Passaggio(notes_bass, "Bass", tess_bass.time_dose)
+        pass_treble = Passaggio(notes_treble, "Treble")
+        pass_bass = Passaggio(notes_bass, "Bass")
         return [tess_treble, tess_bass], [pass_treble, pass_bass], ["treble", "bass"]
     elif clef == "treble":
         notes_treble = notes
