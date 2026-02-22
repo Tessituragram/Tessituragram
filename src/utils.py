@@ -29,7 +29,7 @@ def get_frequency(note_number):
 
 # Credit: Wikipedia
 def freq_to_note(freq):
-    notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+    notes = ['A', 'A\u266F', 'B', 'C', 'C\u266F', 'D', 'D\u266F', 'E', 'F', 'F\u266F', 'G', 'G\u266F']
 
     note_number = 12 * math.log2(freq / 440) + 49  
     note_number = round(note_number)
@@ -48,3 +48,8 @@ def weighted_percentile_expand(data, q, weights, N=1000):
     counts = np.floor(weights * N).astype(int)
     expanded = np.repeat(data, counts)
     return np.percentile(expanded, q).item()
+
+def convert_digit_to_subscript(digit):
+    digit_map = {0: "\u2080", 1: "\u2081", 2: "\u2082", 3: "\u2083", 4: "\u2084", 5: "\u2085", 6: "\u2086", 
+                 7: "\u2087", 8: "\u2088", 9: "\u2089"}
+    return digit_map[digit]

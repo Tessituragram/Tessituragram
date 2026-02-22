@@ -7,7 +7,7 @@ class PassaggioMetrics:
         self.percentage = percentage
 
 class Passaggio:
-    def __init__(self, notes, clef):
+    def __init__(self, notes, clef, time_dose):
         self.pitches = []
         self.durations = []
         for note in notes:
@@ -24,6 +24,7 @@ class Passaggio:
         self.lvhp = None
         self.lvmp = None
         self.lvlp = None
+        self.time_dose = time_dose
         self.create_passagio_mapping()
 
     def calculate_passaggio(self, low, high):
@@ -35,7 +36,7 @@ class Passaggio:
             if low - 0.1 <= pitch <= high + 0.1:
                 sum_durations += duration
         percent_p = round((sum_durations / sum(self.durations))*100, 2)
-        return PassaggioMetrics(round(sum_durations, 2), percent_p)
+        return PassaggioMetrics(round(sum_durations, 1), percent_p)
     
     def create_passagio_mapping(self):
         self.hvhp = self.calculate_passaggio(622.3, 784.0)
@@ -49,17 +50,23 @@ class Passaggio:
         self.lvlp = self.calculate_passaggio(196.0, 246.9)
 
     def print_passagio(self):
-        print("\nPassagio: ")
-        print("Clef: ", self.clef)
-        print("High Voice High Passagio: ", str(self.hvhp.time_dose) + "s")
-        print("High Voice Middle Passagio: ", str(self.hvmp.time_dose) + "s")
-        print("High Voice Low Passagio: ", str(self.hvlp.time_dose) + "s")
-        print("Middle Voice High Passagio: ", str(self.mvhp.time_dose) + "s")
-        print("Middle Voice Middle Passagio: ", str(self.mvmp.time_dose) + "s")
-        print("Middle Voice Low Passagio: ", str(self.mvlp.time_dose) + "s")
-        print("Low Voice High Passagio: ", str(self.lvhp.time_dose) + "s")
-        print("Low Voice Middle Passagio: ", str(self.lvmp.time_dose) + "s")
-        print("Low Voice Low Passagio: ", str(self.lvlp.time_dose) + "s")
+        print("High Voice High Passaggio: ", str(self.hvhp.time_dose) + "s,", str(round((self.hvhp.time_dose / self.time_dose)*100,1)) + "%")
+        
+        print("High Voice Middle Passaggio: ", str(self.hvmp.time_dose) + "s,", str(round((self.hvmp.time_dose / self.time_dose)*100,1)) + "%")
+        
+        print("High Voice Low Passaggio: ", str(self.hvlp.time_dose) + "s,", str(round((self.hvlp.time_dose / self.time_dose)*100,1)) + "%")
+        
+        print("Medium Voice High Passaggio: ", str(self.mvhp.time_dose) + "s,", str(round((self.mvhp.time_dose / self.time_dose)*100,1)) + "%")
+        
+        print("Medium Voice Middle Passaggio: ", str(self.mvmp.time_dose) + "s,", str(round((self.mvmp.time_dose / self.time_dose)*100,1)) + "%")
+        
+        print("Medium Voice Low Passaggio: ", str(self.mvlp.time_dose) + "s,", str(round((self.mvlp.time_dose / self.time_dose)*100,1)) + "%")
+        
+        print("Low Voice High Passaggio: ", str(self.lvhp.time_dose) + "s,", str(round((self.lvhp.time_dose / self.time_dose)*100,1)) + "%")
+        
+        print("Low Voice Middle Passaggio: ", str(self.lvmp.time_dose) + "s,", str(round((self.lvmp.time_dose / self.time_dose)*100,1)) + "%")
+        
+        print("Low Voice Low Passaggio: ", str(self.lvlp.time_dose) + "s,", str(round((self.lvlp.time_dose / self.time_dose)*100,1)) + "%")
         print("=================================================")
 
 class Tessitura:
@@ -76,36 +83,43 @@ class Tessitura:
         self.time_dose = None
         self.rest_time = None
         self.median = None
+        self.medianNote = None
+        self.medianOctave = None
         self.min_pitch = None
         self.max_pitch = None
+        self.min_pitch_note = None
+        self.min_pitch_octave = None
+        self.max_pitch_note = None
+        self.max_pitch_octave = None
         self.calculate_tessitura(notes)
 
     def print_tessitura(self):
-        print("\nTessitura: ")
-        print("Clef: ", self.clef)
-        print("Minimum Frequency: ", str(self.lowFreq) + "Hz")
-        print("Minimum Note: ", self.lowNote + str(self.lowOctave))
-        print("Maximum Frequency: ", str(self.highFreq) + "Hz")
-        print("Maximum Note: ", self.highNote + str(self.highOctave))
+        print("\nMusical Demand Profile" + " (" + self.clef + " Clef Range)")
+        print("Compositional Range: " + str(self.min_pitch) + "\u2013" + str(self.max_pitch) + " Hz,", 
+              self.min_pitch_note + utils.convert_digit_to_subscript(self.min_pitch_octave) + "\u2013" + 
+              self.max_pitch_note + utils.convert_digit_to_subscript(self.max_pitch_octave))
+        print("Tessitura Range: ", str(self.lowFreq) + "\u2013" + str(self.highFreq) + " Hz,", 
+              self.lowNote + utils.convert_digit_to_subscript(self.lowOctave) + "\u2013" + 
+              self.highNote + utils.convert_digit_to_subscript(self.highOctave))
+        print("Median Frequency: " + str(self.median) + " Hz,", "~" + self.medianNote + 
+              utils.convert_digit_to_subscript(self.medianOctave))
         print("Cycle Dose: " + str(self.cycle_dose) + " vibrations")
-        print("Total Time: " + str(self.total_time) + "(s)")
-        print("Time Dose: " + str(self.time_dose) + "(s)")
-        print("Rest Time: " + str(self.rest_time) + "(s)")
-        print("Compositional Range: " + str(self.min_pitch) + "-" + str(self.max_pitch) + "Hz")
-        print("Median: " + str(self.median) + "Hz")
-        print("=================================================")
+        print("Total Time: " + str(self.total_time) + "s")
+        print("Time Dose: " + str(self.time_dose) + "s")
+        print("Rest Time: " + str(self.rest_time) + "s\n")
+
 
     def calculate_cycle_dose(self, pitches, durations):
         sum = 0
         for pitch, duration in zip(pitches, durations):
             sum += pitch*duration
-        return round(sum, 2)
+        return round(sum, 1)
 
     def calculate_total_time(self, notes):
         sum = 0 
         for note in notes:
             sum += note.duration
-        return round(sum, 2)
+        return round(sum, 1)
 
     def calculate_tessitura(self, notes):
         pitches = []
@@ -114,17 +128,20 @@ class Tessitura:
             if isinstance(note, events.Note):
                 pitches.append(note.frequency)
                 durations.append(note.duration)
-        self.lowFreq = round(utils.weighted_percentile_expand(pitches, 25, weights = durations), 2)
-        self.highFreq = round(utils.weighted_percentile_expand(pitches, 75, weights = durations), 2)
+        self.lowFreq = round(utils.weighted_percentile_expand(pitches, 25, weights = durations), 1)
+        self.highFreq = round(utils.weighted_percentile_expand(pitches, 75, weights = durations), 1)
         self.lowNote, self.lowOctave = utils.freq_to_note(self.lowFreq)
         self.highNote, self.highOctave = utils.freq_to_note(self.highFreq)
         self.cycle_dose = self.calculate_cycle_dose(pitches, durations)
         self.total_time = self.calculate_total_time(notes)
-        self.time_dose = round(sum(durations), 2)
-        self.rest_time = round(self.total_time - sum(durations), 2)
-        self.median = round(utils.weighted_percentile_expand(pitches, 50, weights = durations), 2)
-        self.min_pitch = round(min(pitches),2)
-        self.max_pitch = round(max(pitches), 2)
+        self.time_dose = round(sum(durations), 1)
+        self.rest_time = round(self.total_time - sum(durations), 1)
+        self.median = round(utils.weighted_percentile_expand(pitches, 50, weights = durations), 1)
+        self.medianNote, self.medianOctave = utils.freq_to_note(self.median)
+        self.min_pitch = round(min(pitches),1)
+        self.max_pitch = round(max(pitches), 1)
+        self.min_pitch_note, self.min_pitch_octave = utils.freq_to_note(self.min_pitch)
+        self.max_pitch_note, self.max_pitch_octave = utils.freq_to_note(self.max_pitch)
         
 def get_tessitura_and_passaggio(notes, clef):
     if clef == "bass":
@@ -135,8 +152,8 @@ def get_tessitura_and_passaggio(notes, clef):
                 note.frequency *= 2
         tess_treble = Tessitura(notes_treble, "Treble")
         tess_bass = Tessitura(notes_bass, "Bass")
-        pass_treble = Passaggio(notes_treble, "Treble")
-        pass_bass = Passaggio(notes_bass, "Bass")
+        pass_treble = Passaggio(notes_treble, "Treble", tess_treble.time_dose)
+        pass_bass = Passaggio(notes_bass, "Bass", tess_bass.time_dose)
         return [tess_treble, tess_bass], [pass_treble, pass_bass], ["treble", "bass"]
     elif clef == "treble":
         notes_treble = notes
@@ -146,12 +163,12 @@ def get_tessitura_and_passaggio(notes, clef):
                 note.frequency *= 0.5
         tess_treble = Tessitura(notes_treble, "Treble")
         tess_bass = Tessitura(notes_bass, "Bass")
-        pass_treble = Passaggio(notes_treble, "Treble")
-        pass_bass = Passaggio(notes_bass, "Bass")
+        pass_treble = Passaggio(notes_treble, "Treble", tess_treble.time_dose)
+        pass_bass = Passaggio(notes_bass, "Bass", tess_bass.time_dose)
         return [tess_treble, tess_bass], [pass_treble, pass_bass], ["treble", "bass"]
     else:
         tess = Tessitura(notes, "None")
-        passaggio = Passaggio(notes, "None")
+        passaggio = Passaggio(notes, "None", tess.time_dose)
         return [tess], [passaggio], ["None"]
 
     
