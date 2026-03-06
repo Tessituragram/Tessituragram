@@ -162,12 +162,12 @@ def get_tessitura_and_passaggio(notes, clef):
                 note.frequency *= 0.5
         tess_treble = Tessitura(notes_treble, "Treble")
         tess_bass = Tessitura(notes_bass, "Bass")
-        pass_treble = Passaggio(notes_treble, "Treble", tess_treble.time_dose)
-        pass_bass = Passaggio(notes_bass, "Bass", tess_bass.time_dose)
+        pass_treble = Passaggio(notes_treble, "Treble")
+        pass_bass = Passaggio(notes_bass, "Bass")
         return [tess_treble, tess_bass], [pass_treble, pass_bass], ["treble", "bass"]
     else:
         tess = Tessitura(notes, "None")
-        passaggio = Passaggio(notes, "None", tess.time_dose)
+        passaggio = Passaggio(notes, "None")
         return [tess], [passaggio], ["None"]
 
     
