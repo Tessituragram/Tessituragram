@@ -7,13 +7,13 @@ Tessituragram performs tessituragram analysis of single track MIDI files.
 Tessituragram allows users to upload single track MIDI files and outputs relevant metrics for student music selection including the vocal range, 
 pitch quartiles, performance time, and time spent singing in generalized vocal passaggi. This repository includes a test suite of 150 manually-verified arias and their corresponding MIDI files. Guidance for testing with other MIDI files is in the Data section. Tessituragram also includes playback features to verify correct MIDI file parsing.
 
-### Installation
+## Installation
 
-  #### Using Executable Files (Easier Method)
+  ### Using Executable Files (Easier Method)
   
   To run the application without installing Python and required libraries, download main.exe (Windows) or main.app (Mac).
   
-  #### Using Git
+  ### Using Git
   * This method has the following dependencies to install:
     * [Python 3.12.10](https://www.python.org/downloads/release/python-31210/) 
     * [Git](https://git-scm.com/install/)
@@ -27,7 +27,7 @@ pitch quartiles, performance time, and time spent singing in generalized vocal p
     python install -r requirements.txt
     ```
 
-### Executing Program (.exe / .app)
+## Executing Program (.exe / .app)
 
   1. Open command line (Command Prompt or Terminal).
   2. Copy the program's folder path (right click folder containing .exe / .app and copy as path) and run `cd "path/to/folder"`.
@@ -44,9 +44,12 @@ pitch quartiles, performance time, and time spent singing in generalized vocal p
     ```
     main.exe --filepath "data\test_data_arias\1-I.mid" --clef "bass"
     ```
+
+    <img width="350" height="200" alt="image" src="https://github.com/user-attachments/assets/c1e147d3-7a81-457b-8417-d9381daf4a53" />
+
      
 
-### Executing Program (Git)
+## Executing Program (Git)
 
 * From the root directory run
   ```
@@ -61,6 +64,15 @@ pitch quartiles, performance time, and time spent singing in generalized vocal p
   ```
   python main.py --filepath "data\test_data_arias\1-I.mid" --clef "bass"
   ```
+  <img width="350" height="300" alt="image" src="https://github.com/user-attachments/assets/7aace345-5867-4c83-b3a1-268874781436" />
+
+* The Git installation method also includes testing functions. To reproduce the results from the 150 arias run
+  ```
+  python "tests\system_tests\get_stats.py"
+  ```
+  * This will pull in the arias listed in the `data\test_data_arias` folder, process them, and compare the output to the manually analyzed data at `tests\system_tests\Master Data Calculation.xlsx`. An output file names `results.csv` is produced and can be viewed in Excel.
+ 
+* Run `pytest` to execute unit tests for each of the functions in the project.
 
 ## Creating Data
 
