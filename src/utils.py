@@ -1,6 +1,10 @@
 import math
 import numpy as np
 
+"""utils.py: Contains commonly used (non-event) classes and helper functions for statistical analysis."""
+
+__author__      = "Troy Conklin"
+
 class TimeSignature:
     def __init__(self, numerator, denominator, clocks_per_click, num_32_notes_per_quarter):
         self.numerator = numerator

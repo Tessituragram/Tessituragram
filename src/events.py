@@ -1,3 +1,7 @@
+"""events.py: File for class definitions to parse data from various MIDI event types."""
+
+__author__      = "Troy Conklin"
+
 # MidiEvent class is the parent class for all events.
 class MidiEvent:
     def __init__(self, time, event_name):

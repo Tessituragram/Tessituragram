@@ -1,5 +1,5 @@
 import argparse
-from src import midi_reader, play_song, tessitura
+from src import midi_reader, tessitura
 import os
 
 """main.py: Execution file for tessitura analysis. Takes in command line arguments 
@@ -16,9 +16,6 @@ Arguments:
     clef: Optional, specifies the clef of the uploaded midi file. Including the clef will return tessiturogram analysis
     for both treble and bass clefs given the input. If not specified, performs tessiturogram analysis of the midi file
     as is.
-
-    play_song: Optional, if included as an argument uses PyAudio to play back the parsed MIDI file. Used for debugging or
-    verifying the file was parsed correctly.
 """
 
 __author__      = "Troy Conklin"
@@ -34,7 +31,6 @@ def parse_arguments():
         choices=['bass', 'treble'],
         help="Specify the clef: 'treble' or 'bass'"
     )
-    parser.add_argument("--play_song", action='store_true')
     return parser.parse_args()
 
 def main(args):
@@ -59,9 +55,8 @@ def main(args):
     for i in range(len(tesses)):
         tesses[i].print_tessitura()
         pasaggios[i].print_passagio()
-
-    if args.play_song:
-        play_song.play_song(notes)
+    # if args.play_song:
+    #     play_song.play_song(notes)
     return 0  # Return 0 for success, non-zero for error
 
 if __name__ == "__main__":

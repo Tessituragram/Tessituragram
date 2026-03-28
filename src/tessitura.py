@@ -1,6 +1,11 @@
 from src import events, utils
 import copy
 
+"""tessitura.py: File containing classes and functions for computing, storing, and printing
+tessituragram analysis."""
+
+__author__      = "Troy Conklin"
+
 class PassaggioMetrics:
     def __init__(self, time_dose, percentage):
         self.time_dose = time_dose

@@ -343,7 +343,8 @@ class MidiParser:
         v_time, length = self.parse_varlen_value()
         next_byte = int.from_bytes(self.f.read(1))
         self.byte_counter += 1
-        while next_byte < 0x80:  # still running status
+        # If using running status:
+        while next_byte < 0x80:
             lsb = next_byte
             msb = int.from_bytes(self.f.read(1))
             self.byte_counter += 1
@@ -365,19 +366,19 @@ class MidiParser:
         """
         # Map of system message -> number of data bytes that follow
         system_message_lengths = {
-            0xF1: 1,  # MTC Quarter Frame
-            0xF2: 2,  # Song Position Pointer
-            0xF3: 1,  # Song Select
+            0xF1: 1,
+            0xF2: 2,
+            0xF3: 1,
             0xF4: 0, 
             0xF5: 0,
-            0xF6: 0,  # Tune Request
-            0xF8: 0,  # Timing Clock
+            0xF6: 0,
+            0xF8: 0,
             0xF9: 0,
-            0xFA: 0,  # Start
-            0xFB: 0,  # Continue
-            0xFC: 0,  # Stop
+            0xFA: 0,
+            0xFB: 0,
+            0xFC: 0,
             0xFD: 0,
-            0xFE: 0,  # Active Sensing
+            0xFE: 0,
         }
 
         # Find how many bytes to skip
@@ -447,7 +448,7 @@ class MidiParser:
                 case 0x7F:
                     return self.parse_meta(v_time, "Sequencer Specific Event", v_length)
                 case _:
-                # Skip unknown meta events
+                    # Skip unknown meta events
                     print(f"Skipped unknown meta event 0x{meta_type:02X} of length {v_length}")
                     return self.parse_meta(v_time, f"Unknown Meta Event 0x{meta_type:02X}", v_length)
         if event >= 0xA0 and event <= 0xAF:
@@ -667,7 +668,7 @@ class MidiParser:
                     return -1
                 if current_time_secs > last_event_time_secs:
                     rest_duration_secs = current_time_secs - last_event_time_secs
-                    note_list.append(events.Rest(rest_duration_secs))   # pass seconds
+                    note_list.append(events.Rest(rest_duration_secs))
                 note_start_time_secs = current_time_secs
                 note_number = event.noteNumber
             elif isinstance(event, events.NoteOffEvent) or (
@@ -675,7 +676,7 @@ class MidiParser:
                 if note_start_time_secs is not None:
                     duration_secs = current_time_secs - note_start_time_secs
                     frequency = utils.get_frequency(note_number)
-                    note_list.append(events.Note(duration_secs, frequency))  # pass seconds
+                    note_list.append(events.Note(duration_secs, frequency))
                     last_event_time_secs = current_time_secs
                     note_start_time_secs = None
                     note_number = None
