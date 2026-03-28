@@ -11,7 +11,7 @@ pitch quartiles, performance time, and time spent singing in generalized vocal p
 
   ### Using Executable Files (Easier Method)
   
-  To run the application without installing Python and required libraries, download main.exe (Windows) or main.app (Mac).
+  To run the application without installing Python and required libraries, download main.exe (Windows) or main (Mac).
   
   ### Using Git
   * This method has the following dependencies to install:
@@ -27,18 +27,18 @@ pitch quartiles, performance time, and time spent singing in generalized vocal p
     python install -r requirements.txt
     ```
 
-## Executing Program (.exe / .app)
+## Executing Program main.exe (Windows) / main (Mac)
 
   1. Open command line (Command Prompt or Terminal).
-  2. Copy the program's folder path (right click folder containing .exe / .app and copy as path) and run `cd "path/to/folder"`.
-  3. To run the program run:
+  2. Copy the program's folder path (right click folder containing main.exe / main and copy as path) and run `cd "path/to/folder"`.
+  3. If using the Mac installation run `chmod -x main` to allow execution.
+  4. To run the program run:
      ```
-     [./main.exe OR ./main.app] --filepath [PATH/TO/MIDI/FILE] --clef ["bass" OR "treble"] --play_song
+     [./main.exe OR ./main] --filepath [PATH/TO/MIDI/FILE] --clef ["bass" OR "treble"]
      ```
   * `--filepath` is a required argument followed by the path to the MIDI file being processed.
   * `--clef` is an optional argument followd by "bass" or "treble" to describe the clef of the input file. Including this argument will output
   the tessituragram analysis of the MIDI file in both treble and bass clef. If omitted, the file is processed as is.
-  * `--playsong` is an optional argument that uses PyAudio to play back the MIDI file.
  
   * Example:
     ```
@@ -46,6 +46,8 @@ pitch quartiles, performance time, and time spent singing in generalized vocal p
     ```
 
     <img width="350" height="200" alt="image" src="https://github.com/user-attachments/assets/c1e147d3-7a81-457b-8417-d9381daf4a53" />
+
+    NOTE: Apple's security settings may flag the executable and not allow execution. To bypass go to System Settings > Privacy & Security and scroll down to the Security section to allow the file to run.
 
      
 
