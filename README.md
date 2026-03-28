@@ -33,7 +33,7 @@ pitch quartiles, performance time, and time spent singing in generalized vocal p
   2. Copy the program's folder path (right click folder containing .exe / .app and copy as path) and run `cd "path/to/folder"`.
   3. To run the program run:
      ```
-     [main.exe OR main.app] --filepath [PATH/TO/MIDI/FILE] --clef ["bass" OR "treble"] --play_song
+     [./main.exe OR ./main.app] --filepath [PATH/TO/MIDI/FILE] --clef ["bass" OR "treble"] --play_song
      ```
   * `--filepath` is a required argument followed by the path to the MIDI file being processed.
   * `--clef` is an optional argument followd by "bass" or "treble" to describe the clef of the input file. Including this argument will output
