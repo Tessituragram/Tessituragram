@@ -16,9 +16,17 @@ et_xmlfile
 License: MIT
 https://github.com/biydnd/et_xmlfile/blob/master/LICENCE.rst
 
+fpdf
+License: MIT
+https://github.com/paliari/fpdf/blob/master/LICENSE
+
 iniconfig
 License: MIT
 https://github.com/pytest-dev/iniconfig/blob/main/LICENSE
+
+music21
+License: BSD 3 Clause
+https://github.com/cuthbertLab/music21/blob/master/LICENSE
 
 openpyxl
 License: MIT
