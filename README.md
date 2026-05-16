@@ -5,7 +5,7 @@ Tessituragram performs tessituragram analysis of single-track Musical Instrument
 ## Description
 
 Tessituragram allows users to upload single-track MIDI files and outputs relevant metrics including vocal range, 
-pitch quartiles, performance time, and time spent singing in generalized vocal *passaggi*. This repository includes a test suite of 150 manually-verified arias and their corresponding MIDI files. Guidance for testing with other MIDI files is in the Data section.
+pitch quartiles, performance time, and time spent singing in generalized vocal *passaggi*. The program outputs tessituragram results to the console and to a PDF for storage and visualization. This repository includes a test suite of 150 manually-verified arias and their corresponding MIDI files. Guidance for testing with other MIDI files is in the Data section.
 
 ## Installation
 
@@ -34,11 +34,12 @@ pitch quartiles, performance time, and time spent singing in generalized vocal *
   3. If using the Mac installation, run `chmod -x main` to allow execution.
   4. To run the program run:
      ```
-     [./main.exe OR ./main] --filepath [PATH/TO/MIDI/FILE] --clef ["bass" OR "treble"]
+     [.\main.exe OR ./main] --filepath [PATH/TO/MIDI/FILE] --clef ["bass" OR "treble"] --musescore_path [PATH/TO/MUSESCORE/EXECUTABLE]
      ```
   * `--filepath` is a required argument followed by the path to the processed MIDI file.
   * `--clef` is an optional argument followed by "bass" or "treble" to describe the clef of the input file. Including this argument will output
   the tessituragram analysis of the MIDI file in both treble and bass clef. If omitted, Tessituragram processes the file as is.
+  * `--musescore_path` is an optional argument followed by the path to the Musescore executable on your machine (`'C:\\Program Files\\MuseScore 4\\bin\\MuseScore4.exe'`, for example). The program searches for Musescore installation by default, this is intended to only be used if the Musescore path cannot be found. The program will still run without Musescore installation but will not provide score visualization in the output PDF.
  
   * Example:
     ```
@@ -55,11 +56,12 @@ pitch quartiles, performance time, and time spent singing in generalized vocal *
 
 * From the root directory, run:
   ```
-  python main.py --filepath [PATH/TO/MIDI/FILE] --clef ["bass" OR "treble"]
+  python main.py --filepath [PATH/TO/MIDI/FILE] --clef ["bass" OR "treble"] --musescore_path [PATH/TO/MUSESCORE/EXECUTABLE]
   ```
   * `--filepath` is a required argument followed by the path to the processed MIDI file.
   * `--clef` is an optional argument followed by "bass" or "treble" to describe the clef of the input file. Including this argument will output
   the tessituragram analysis of the MIDI file in both treble and bass clef. If omitted, Tessituragram processes the file as is.
+  * `--musescore_path` is an optional argument followed by the path to the Musescore executable on your machine (`'C:\\Program Files\\MuseScore 4\\bin\\MuseScore4.exe'`, for example). The program searches for Musescore installation by default, this is intended to only be used if the Musescore path cannot be found. The program will still run without Musescore installation but will not provide score visualization in the output PDF.
  
 * Example:
   ```
@@ -74,6 +76,15 @@ pitch quartiles, performance time, and time spent singing in generalized vocal *
   * This will pull in the arias listed in the `data\test_data_arias` folder, process them, and compare the output to the manually analyzed data at `tests\system_tests\Master Data Calculation.xlsx`. Tessituragram produces an output file named `results.csv` that users can open using Microsoft Excel.
  
 * Run `pytest` to execute unit tests for each function in the project.
+
+## PDF Visualization
+
+* The program will also return PDF outputs to a results folder within the project. The PDF contains the same tessituragram information that is printed to the console as well as images that visualize the tessitura range. For score visualization in output PDFs, users must install [Musescore](https://musescore.org/en/download).
+
+  <img width="600" height="200" alt="image" src="https://github.com/user-attachments/assets/eaa49cac-3bca-4995-8fc8-99a0fdb5c155" />
+  <br>
+  <img width="300" height="450" alt="image" src="https://github.com/user-attachments/assets/1164c85b-fe54-48c5-b77f-d948df240b0a" />
+
 
 ## Creating Data
 
