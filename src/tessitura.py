@@ -1,17 +1,17 @@
+"""tessitura.py: File containing classes and functions for computing, storing, and printing
+tessituragram analysis."""
+
 import copy
 import music21
 import io
 import pathlib
 import shutil
-import pathlib
 import sys
 import os
 from concurrent.futures import ThreadPoolExecutor
 from PIL import Image, ImageDraw, ImageFont
 from src import events, utils
-
-"""tessitura.py: File containing classes and functions for computing, storing, and printing
-tessituragram analysis."""
+from fpdf import FPDF
 
 __author__      = "Troy Conklin"
 
@@ -38,6 +38,7 @@ class PassaggioMetrics:
     def __init__(self, time_dose, percentage):
         self.time_dose = time_dose
         self.percentage = percentage
+
 
 class Passaggio:
     def __init__(self, notes, clef):
@@ -81,7 +82,8 @@ class Passaggio:
         self.lvmp = self.calculate_passaggio(261.6, 329.6)
         self.lvlp = self.calculate_passaggio(196.0, 246.9)
 
-class Tessitura:
+
+class Tessitura:   
     def __init__(self, notes, clef):
         self.clef = clef
         self.lowFreq = None
@@ -106,10 +108,10 @@ class Tessitura:
         self.calculate_tessitura(notes)
 
     def calculate_cycle_dose(self, pitches, durations):
-        sum = 0
+        total = 0
         for pitch, duration in zip(pitches, durations):
-            sum += pitch*duration
-        return round(sum, 1)
+            total += pitch*duration
+        return round(total, 1)
 
     def calculate_total_time(self, notes):
         sum = 0 
@@ -124,8 +126,8 @@ class Tessitura:
             if isinstance(note, events.Note):
                 pitches.append(note.frequency)
                 durations.append(note.duration)
-        self.lowFreq = round(utils.weighted_percentile_expand(pitches, 25, weights = durations), 1)
-        self.highFreq = round(utils.weighted_percentile_expand(pitches, 75, weights = durations), 1)
+        self.lowFreq = round(utils.weighted_percentile_expand(pitches, 25, weights=durations), 1)
+        self.highFreq = round(utils.weighted_percentile_expand(pitches, 75, weights=durations), 1)
         self.lowNote, self.lowOctave = utils.freq_to_note(self.lowFreq)
         self.highNote, self.highOctave = utils.freq_to_note(self.highFreq)
         self.cycle_dose = self.calculate_cycle_dose(pitches, durations)
@@ -167,14 +169,14 @@ def get_tessitura_and_passaggio(notes, clef):
         passaggio = Passaggio(notes, "None")
         return [tess], [passaggio], ["None"]
 
+
 class TessPassContainer:
-    def __init__(self, tess: Tessitura, passa: Passaggio, filename, pdf, musescore_path=None):
+    def __init__(self, tess: Tessitura, passa: Passaggio, filename, pdf: FPDF, musescore_path=None):
         self.tess = tess
         self.passa = passa
         self.filename = filename
         self.pdf = pdf
         self.musescore_path = musescore_path
-        self.font = ImageFont.truetype("data\Times New Roman.ttf", size=18)
 
     def print_tessitura(self):
         print("\nMusical Demand Profile" + " (" + self.tess.clef + " Clef Range)")
@@ -200,7 +202,6 @@ class TessPassContainer:
 
         # Fall back to known install locations
         for path_str in MUSESCORE_PATHS.get(sys.platform, []):
-            print(path_str)
             p = pathlib.Path(path_str)
             if p.exists():
                 return p
@@ -248,143 +249,198 @@ class TessPassContainer:
         print("Low Voice Low Passaggio: ", str(self.passa.lvlp.time_dose) + "s,", str(self.passa.lvlp.percentage) + "%")
         print("=================================================")
 
+    def _passaggio_cell(self, label, abbrev, width=50, height=5):
+        """
+        Draws a table cell like:
+        High passaggio (Hp)
+        where 'passaggio' and 'Hp' are italicized.
+        """
+        x = self.pdf.get_x()
+        y = self.pdf.get_y()
+
+        # Draw border
+        self.pdf.cell(width, height, "", border=0, align="C")
+
+        # Write styled text inside
+        self.pdf.set_xy(x, y)  # padding
+
+        self.pdf.set_font("times_new", "", 12)
+        self.pdf.write(5, f"{label} ")
+
+        self.pdf.set_font("times_new", "I", 12)
+        self.pdf.write(5, "passaggio")
+
+        self.pdf.set_font("times_new", "", 12)
+        self.pdf.write(5, " (")
+
+        self.pdf.set_font("times_new", "I", 12)
+        self.pdf.write(5, abbrev)
+
+        self.pdf.set_font("times_new", "", 12)
+        self.pdf.write(5, ")")
+
+        # Move cursor to right of cell
+        self.pdf.set_xy(x + width, y)
+
     def write_to_pdf(self):
+
+        def convert_to_minutes(num):
+            return round(num / 60, 1)
+
         # Title
-        self.pdf.set_font("times2", "B", 16)
-        if self.tess.clef != "None":
-            self.pdf.cell(0, 10, self.filename + " Results " + self.tess.clef.capitalize() + " Clef", new_x="LMARGIN", new_y="NEXT", align="C")
-        else:
-            self.pdf.cell(0, 10, self.filename + " Results ", new_x="LMARGIN", new_y="NEXT", align="C")
-        self.pdf.ln(8)
+        self.pdf.set_margins(left=20, top=20, right=20)
 
-        pass_data = [
-            ("Generalized Voice Type", "High Passaggio", "Middle Passaggio", "Low Passaggio"),
-            ("High Voice",
-            f"{self.passa.hvhp.time_dose}s, {self.passa.hvhp.percentage}%",
-            f"{self.passa.hvmp.time_dose}s, {self.passa.hvmp.percentage}%",
-            f"{self.passa.hvlp.time_dose}s, {self.passa.hvlp.percentage}%"),
-            ("Medium Voice",
-            f"{self.passa.mvhp.time_dose}s, {self.passa.mvhp.percentage}%",
-            f"{self.passa.mvmp.time_dose}s, {self.passa.mvmp.percentage}%",
-            f"{self.passa.mvlp.time_dose}s, {self.passa.mvlp.percentage}%"),
-            ("Low Voice",
-            f"{self.passa.lvhp.time_dose}s, {self.passa.lvhp.percentage}%",
-            f"{self.passa.lvmp.time_dose}s, {self.passa.lvmp.percentage}%",
-            f"{self.passa.lvlp.time_dose}s, {self.passa.lvlp.percentage}%")
-        ]
+        self.pdf.set_font("times_new", "B", 16)
+        self.pdf.cell(0, 6, f"\"{self.filename}\"", new_x="LMARGIN", new_y="NEXT", align="C")
+        self.pdf.cell(0, 6, "Musical Demand Profile", new_x="LMARGIN", new_y="NEXT", align="C")
 
-        self.write_data_table(pass_data)
+        self.pdf.ln(5)
+        self.pdf.set_draw_color(0, 0, 0)
+        self.pdf.set_line_width(0.5)
+        self.pdf.line(self.pdf.l_margin, self.pdf.get_y(), self.pdf.w - self.pdf.r_margin, self.pdf.get_y())
+        self.pdf.ln(5)
 
-        tess_data = [
-            ("Compositional Range", "Tessitura Range", "Median Frequency",
-            "Cycle Dose", "Total Time", "Time Dose", "Rest Time"),
-            (f"{self.tess.min_pitch}-{self.tess.max_pitch} Hz",
-            f"{self.tess.min_pitch_note}{self.tess.min_pitch_octave}-"
-            f"{self.tess.max_pitch_note}{self.tess.max_pitch_octave}",
-            f"{self.tess.median} Hz (~{self.tess.medianNote}{self.tess.medianOctave})",
-            f"{self.tess.cycle_dose} vibrations",
-            f"{self.tess.total_time}s",
-            f"{self.tess.time_dose}s",
-            f"{self.tess.rest_time}s")
-        ]
+        self.pdf.set_font("times_new", "B", 12)
+        self.pdf.cell(0, 5, f"General", new_x="LMARGIN", new_y="NEXT", align="L")
+        self.pdf.set_x(40)
+        self.pdf.set_font("times_new", "",12)
+        self.pdf.write_html(f"Cycle Dose (<i>\u0192<sub>p</sub>t<sub>p</sub></i>): {self.tess.cycle_dose} vibrations")
+        self.pdf.ln(1)
+        self.pdf.set_x(40)
+        self.pdf.write_html(f"Total Time (<i>t</i>): {convert_to_minutes(self.tess.total_time)} minutes, {self.tess.total_time} s")
+        self.pdf.ln(1)
+        self.pdf.set_x(40)
+        self.pdf.write_html(f"Time Dose (<i>t<sub>p</sub></i>): {convert_to_minutes(self.tess.time_dose)} minutes, {self.tess.time_dose} s")
+        self.pdf.ln(1)
+        self.pdf.set_x(40)
+        self.pdf.write_html(f"Rest Time (<i>t<sub>r</sub></i>): {convert_to_minutes(self.tess.rest_time)} minutes, {self.tess.rest_time} s")
 
-        self.pdf.ln(15)
+        self.pdf.ln(5)
+        self.pdf.set_draw_color(0, 0, 0)
+        self.pdf.set_line_width(0.5)
+        self.pdf.line(self.pdf.l_margin, self.pdf.get_y(), self.pdf.w - self.pdf.r_margin, self.pdf.get_y())
+        self.pdf.ln(5)
 
-        self.write_data_table(tess_data)
+        self.pdf.set_font("times_new", "B", 12)
+        self.pdf.cell(0, 5, f"Tessitura", new_x="LMARGIN", new_y="NEXT", align="L")
+        self.pdf.set_x(40)
+        self.pdf.set_font("times_new", "",12)
+        self.pdf.write_html(f"Range (<i>Q<sub>0p</sub>–Q<sub>4p</sub></i>): {self.tess.min_pitch_note}<sub>{str(self.tess.min_pitch_octave)}</sub><i>-</i>{self.tess.max_pitch_note}<sub>{str(self.tess.max_pitch_octave)}</sub>, {self.tess.min_pitch}–{self.tess.max_pitch} Hz")
+        self.pdf.ln(1)
+        self.pdf.set_x(40)
+        self.pdf.write_html(f"Tessitura (<i>Q<sub>1p</sub>–Q<sub>3p</sub></i>): ≈{self.tess.lowNote}<sub>{str(self.tess.lowOctave)}</sub>-≈{self.tess.highNote}<sub>{str(self.tess.highOctave)}</sub>, {self.tess.lowFreq}–{self.tess.highFreq} Hz")
+        self.pdf.ln(1)
+        self.pdf.set_x(40)
+        self.pdf.write_html(f"Median \u0192<sub>o</sub> (<i>Q<sub>2p</sub></i>): ≈{self.tess.medianNote}<sub>{str(self.tess.medianOctave)}</sub>, {self.tess.median} Hz")
+        self.pdf.ln(3)
 
-        if not self.ensure_musescore_configured():
-            return
-
-        def make_divider():
-            self.pdf.ln(1)
-            self.pdf.set_draw_color(200, 200, 200)
-            self.pdf.set_line_width(0.3)
-            self.pdf.line(self.pdf.l_margin, self.pdf.get_y(), self.pdf.w - self.pdf.r_margin, self.pdf.get_y())
-            self.pdf.ln(3)
-        
         passaggio_images = self.generate_passaggio_image()
         tess_success = self.generate_tess_image()
 
-        tess_fp = "results/" + self.filename + "-Tessitura-" + self.passa.clef + "-1.png"
+        if tess_success == 1:
+            tess_fp = "results/" + self.filename + "-Tessitura-" + self.passa.clef + "-1.png"
+            self.pdf.image(tess_fp, w=65, h=0, x="C")
+        else:
+            self.pdf.set_font("times_new", "B", 12)
+            self.pdf.set_fill_color(255, 255, 0)
+            self.pdf.cell(0, 5, "NO TESSITURA / RANGE IMAGE: MUSESCORE FILEPATH NOT FOUND.", align="C", fill=True)
+            self.pdf.ln(5)
 
-        images = [
-            ("Tessitura (Max, Q3, Median, Q1, Min)", tess_fp),
-            ("High Voice Passaggio",                 passaggio_images["High Voice"]),
-            ("Medium Voice Passaggio",               passaggio_images["Medium Voice"]),
-            ("Low Voice Passaggio",                  passaggio_images["Low Voice"]),
-        ]
+        self.pdf.ln(5)
+        self.pdf.set_draw_color(0, 0, 0)
+        self.pdf.set_line_width(0.5)
+        self.pdf.line(self.pdf.l_margin, self.pdf.get_y(), self.pdf.w - self.pdf.r_margin, self.pdf.get_y())
+        self.pdf.ln(5)
 
-        if tess_success == -1:
-            images.pop(0)
+        self.pdf.set_font("times_new", "BI", 12)
+        self.pdf.cell(0, 5, f"Passaggi", new_x="LMARGIN", new_y="NEXT", align="L")
 
-        self.pdf.set_font("times2", "B", 12)
-        for label, img in images:
-            self.pdf.cell(200, 10, txt=label, ln=True, align='L')
-            self.pdf.image(img, w=50, h=0)
-            make_divider()
+        # ======================= WRITE TABLE =====================
+
+        margin_offset = 30
+
+        # Header
+        self.pdf.set_x(margin_offset)
+        self.pdf.set_font("times_new", "", 12)
+        self.pdf.cell(50, 5, "", border=0, align="L")
+        self.pdf.cell(35, 5, "High Voice (HV)", border=0, align="C")
+        self.pdf.cell(35, 5, "Medium Voice (MV)", border=0, align="C")
+        self.pdf.cell(35, 5, "Low Voice (LV)", border=0, align="C")
+        self.pdf.ln()
+
+        # Row 1
+        self.pdf.set_x(margin_offset)
+        self._passaggio_cell("High", "Hp")
+        self.pdf.cell(35, 5, f"{self.passa.hvhp.percentage}%", border=0, align="C")
+        self.pdf.cell(35, 5, f"{self.passa.mvhp.percentage}%", border=0, align="C")
+        self.pdf.cell(35, 5, f"{self.passa.lvhp.percentage}%", border=0, align="C")
+        self.pdf.ln()
+
+        # Row 2
+        self.pdf.set_x(margin_offset)
+        self._passaggio_cell("Middle", "Mp")
+        self.pdf.cell(35, 5, f"{self.passa.hvmp.percentage}%", border=0, align="C")
+        self.pdf.cell(35, 5, f"{self.passa.mvmp.percentage}%", border=0, align="C")
+        self.pdf.cell(35, 5, f"{self.passa.lvmp.percentage}%", border=0, align="C")
+        self.pdf.ln()
+
+        # Row 3
+        self.pdf.set_x(margin_offset)
+        self._passaggio_cell("Low", "Lp")
+        self.pdf.cell(35, 5, f"{self.passa.hvlp.percentage}%", border=0, align="C")
+        self.pdf.cell(35, 5, f"{self.passa.mvlp.percentage}%", border=0, align="C")
+        self.pdf.cell(35, 5, f"{self.passa.lvlp.percentage}%", border=0, align="C")
+        self.pdf.ln()
+
+        # Total row divider
+        self.pdf.ln(5)
+
+        # Row 4
+        self.pdf.set_x(margin_offset)
+        self.pdf.cell(50, 5, f"Total", border=0, align="L")
+        hv_arr = [self.passa.hvhp.percentage, self.passa.hvmp.percentage, self.passa.hvlp.percentage]
+        self.pdf.cell(35, 5, f"{round(sum(hv_arr), 1)}%", border=0, align="C")
+        mv_arr = [self.passa.mvhp.percentage, self.passa.mvmp.percentage, self.passa.mvlp.percentage]
+        self.pdf.cell(35, 5, f"{round(sum(mv_arr), 1)}%", border=0, align="C")
+        lv_arr = [self.passa.lvhp.percentage, self.passa.lvmp.percentage, self.passa.lvlp.percentage]
+        self.pdf.cell(35, 5, f"{round(sum(lv_arr), 1)}%", border=0, align="C")
+        self.pdf.ln()
+
+        # ================================================================
+
+        self.pdf.ln(15)
+
+        images = [(passaggio_images["High Voice"], "HV"),(passaggio_images["Medium Voice"], "MV"),(passaggio_images["Low Voice"], "LV")]
+
+        page_width = self.pdf.w - 2 * self.pdf.l_margin
+
+        img_width = 40
+        gap = 15
+
+        total_width = 3 * img_width + 2 * gap
+        start_x = self.pdf.l_margin + (page_width - total_width) / 2
+
+        y = self.pdf.get_y()
+
+        x = start_x
+        for img, txt in images:
+            self.pdf.text(x=x+16, y=y-2, text=txt)
+            self.pdf.image(img, x=x, y=y, w=img_width)
+            x += img_width + gap
 
         if tess_success == 1:
-            os.remove("results/" + self.filename + "-Tessitura-" + self.passa.clef + "-1.png")
-            os.remove("results/" + self.filename + "-Tessitura-" + self.passa.clef + ".musicxml")
+            os.remove(os.path.join("results", self.filename + "-Tessitura-" + self.passa.clef + "-1.png"))
+        if os.path.exists(os.path.join("results", self.filename + "-Tessitura-" + self.passa.clef + ".musicxml")):
+            os.remove(os.path.join("results", self.filename + "-Tessitura-" + self.passa.clef + ".musicxml"))
 
-    def write_data_table(self, data):
-        page_width = self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
-        columns = len(data[0])
-        col_width = page_width / columns
-        line_height = 6
-
-        def get_line_count(text, width):
-            # fpdf2 supports split_only -> returns wrapped lines
-            return len(self.pdf.multi_cell(width, line_height, text, split_only=True))
-
-        def draw_row(row, is_header=False):
-            # compute required row height
-            max_lines = 1
-
-            for i, cell in enumerate(row):
-                lines = get_line_count(str(cell), col_width)
-                max_lines = max(max_lines, lines)
-
-            row_height = line_height * max_lines
-
-            x_start = self.pdf.get_x()
-            y_start = self.pdf.get_y()
-
-            self.pdf.set_font("times2", "B" if is_header else "", 12 if is_header else 11)
-            self.pdf.set_text_color(50, 50, 50 if is_header else 80)
-
-            for i, cell in enumerate(row):
-                x = x_start + i * col_width
-                y = y_start
-
-                self.pdf.set_xy(x, y)
-
-                self.pdf.multi_cell(
-                    col_width,
-                    line_height,
-                    str(cell),
-                    border=0,
-                    align="L"
-                )
-
-            self.pdf.set_xy(x_start, y_start + row_height)
-
-        # HEADER
-        draw_row(data[0], is_header=True)
-
-        # subtle divider
-        self.pdf.ln(1)
-        self.pdf.set_draw_color(200, 200, 200)
-        self.pdf.set_line_width(0.3)
-        self.pdf.line(self.pdf.l_margin, self.pdf.get_y(), self.pdf.w - self.pdf.r_margin, self.pdf.get_y())
-        self.pdf.ln(3)
-
-        # BODY
-        for row in data[1:]:
-            draw_row(row, is_header=False)
-            self.pdf.ln(2)
+        self.pdf.ln(5)
+        self.pdf.set_draw_color(0, 0, 0)
+        self.pdf.set_line_width(0.5)
+        self.pdf.line(self.pdf.l_margin, self.pdf.get_y() + 25, self.pdf.w - self.pdf.r_margin, self.pdf.get_y() + 25)
+        self.pdf.ln(5)
 
     def print_and_write_metrics(self):
+        self.ensure_musescore_configured()
         self.print_tessitura()
         self.print_passagio()
         self.write_to_pdf()
@@ -403,12 +459,11 @@ class TessPassContainer:
             return note + str(octave)
 
         low = convert_to_music_21_note(self.tess.min_pitch_note, self.tess.min_pitch_octave)
-        p25 = convert_to_music_21_note(self.tess.lowNote, self.tess.lowOctave) 
-        p50 = convert_to_music_21_note(self.tess.medianNote, self.tess.medianOctave)  
+        p25 = convert_to_music_21_note(self.tess.lowNote, self.tess.lowOctave)  
         p75 = convert_to_music_21_note(self.tess.highNote, self.tess.highOctave)
         high = convert_to_music_21_note(self.tess.max_pitch_note, self.tess.max_pitch_octave)
 
-        notes = [low, p25, p50, p75, high]
+        notes = [low, p25, p75, high]
         c = music21.chord.Chord(notes)
         c.quarterLength = 4.0
 
@@ -419,22 +474,25 @@ class TessPassContainer:
         ts.style.hideObjectOnPrint = True
         m.insert(0, ts)
 
-        fp="results/" + self.filename + "-Tessitura-" + self.tess.clef
+        fp = os.path.join("results", self.filename + "-Tessitura-" + self.tess.clef)
         try:
             m.write('musicxml.png', fp=fp)
-        except:
-            print("Musescore path found but could not be used.")
+        except Exception:
+            print("WARNING: Musescore path not found or could not be used.")
             return -1
         return 1
 
     def _render_voice(self, voice_type_pass, voice_type):
-        img = Image.open(f"data/images/{voice_type}.png")
+
+        font = ImageFont.truetype(utils.resource_path(os.path.join("data", "Times New Roman.ttf")), size=48)
+
+        img = Image.open(utils.resource_path(f"data/images/{voice_type}.png"))
 
         draw = ImageDraw.Draw(img)
-        draw.rectangle([225, 0, 350, 250], fill="white", outline="white")
-        draw.text((240, voice_type_pass[0][2]), str(voice_type_pass[0][1]) + "%", fill="black", font=self.font)
-        draw.text((240, voice_type_pass[1][2]), str(voice_type_pass[1][1]) + "%", fill="black", font=self.font)
-        draw.text((240, voice_type_pass[2][2]), str(voice_type_pass[2][1]) + "%", fill="black", font=self.font)
+        draw.rectangle([535, 0, 700, 350], fill="white", outline="white")
+        draw.text((550, voice_type_pass[0][1]), str(voice_type_pass[0][0]) + "%", fill="black", font=font)
+        draw.text((550, voice_type_pass[1][1]), str(voice_type_pass[1][0]) + "%", fill="black", font=font)
+        draw.text((550, voice_type_pass[2][1]), str(voice_type_pass[2][0]) + "%", fill="black", font=font)
 
         buf = io.BytesIO()
         img.save(buf, format="PNG")
@@ -442,9 +500,9 @@ class TessPassContainer:
         return buf
 
     def generate_passaggio_image(self):
-        hv_notes = [("F5", self.passa.hvhp.percentage, 25), ("F4", self.passa.hvmp.percentage, 110), ("C4", self.passa.hvlp.percentage, 145)]
-        mv_notes = [("E5", self.passa.mvhp.percentage, 40), ("E4", self.passa.mvmp.percentage, 120), ("B3", self.passa.mvlp.percentage, 160)]
-        lv_notes = [("D5", self.passa.lvhp.percentage, 50), ("D4", self.passa.lvmp.percentage, 140), ("A3", self.passa.lvlp.percentage, 170)]
+        hv_notes = [(self.passa.hvhp.percentage, 50), (self.passa.hvmp.percentage, 195), (self.passa.hvlp.percentage, 260)]
+        mv_notes = [(self.passa.mvhp.percentage, 70), (self.passa.mvmp.percentage, 217), (self.passa.mvlp.percentage, 285)]
+        lv_notes = [(self.passa.lvhp.percentage, 90), (self.passa.lvmp.percentage, 237), (self.passa.lvlp.percentage, 305)]
 
         with ThreadPoolExecutor(max_workers=3) as executor:
             futures = {

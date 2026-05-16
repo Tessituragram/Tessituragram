@@ -172,6 +172,5 @@ def main():
         # Write averages to the CSV
         csv_average_errors(all_errors, writer)
 
-
 if __name__ == "__main__":
     main()

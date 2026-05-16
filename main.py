@@ -2,7 +2,7 @@ import argparse
 from src import midi_reader, tessitura
 import os
 from fpdf import FPDF
-import music21
+from src import utils
 import shutil
 
 """main.py: Execution file for tessitura analysis. Takes in command line arguments 
@@ -74,8 +74,10 @@ def main(args):
         
     tesses, pasaggios, _ = tessitura.get_tessitura_and_passaggio(notes, args.clef)
     pdf = FPDF()
-    pdf.add_font("times2", "", "data\\Times New Roman.ttf")
-    pdf.add_font("times2", "B", "data\\Times New Roman.ttf")
+    pdf.add_font("times_new", "", utils.resource_path(os.path.join("data", "Times New Roman.ttf")))
+    pdf.add_font("times_new", "B", utils.resource_path(os.path.join("data", "Times New Roman Bold.ttf")))
+    pdf.add_font("times_new", "I", utils.resource_path(os.path.join("data", "Times New Roman Italic.ttf")))
+    pdf.add_font("times_new", "BI", utils.resource_path(os.path.join("data", "Times New Roman Bold Italic.ttf")))
 
     for i in range(len(tesses)):
         pdf.add_page()

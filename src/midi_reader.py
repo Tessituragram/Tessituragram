@@ -1,8 +1,7 @@
-# Open a midi file and parse it
-from src import utils, events
-
 """midi_reader.py: Defines the MidiParser class, which opens a midi file and reads it. Converts
     the binary midi file to notes and rests with durations."""
+
+from src import utils, events
 
 __author__      = "Troy Conklin"
 
@@ -222,9 +221,9 @@ class MidiParser:
             for time, note_number, velocity in zip(times, note_numbers, velocities)]
     
     def parse_channel_aftertouch_event(self, channel_number, v_time):
-        '''
+        """
         Parses the ChannelAftertouchEvent at the current MIDI position and returns it.
-        '''
+        """
         times = []
         amounts = []
         amount = int.from_bytes(self.f.read(1))
@@ -243,9 +242,7 @@ class MidiParser:
             for time, amount in zip(times, amounts)]
     
     def parse_note_aftertouch_event(self, channel_number, v_time):
-        '''
-        Parses the NoteAfterTouchEvent the current MIDI position and returns it.
-        '''
+        """Parses the NoteAfterTouchEvent the current MIDI position and returns it."""
         times = []
         note_numbers = []
         amounts = []
@@ -268,9 +265,9 @@ class MidiParser:
             for time, note_number, amount in zip(times, note_numbers, amounts)]
     
     def parse_meta(self, v_time, name, v_length, decode=False):
-        '''
+        """
         Parses the generic meta event at the current MIDI position and returns it.
-        '''
+        """
         data = self.f.read(v_length)
         self.byte_counter += v_length
         if decode:
@@ -278,9 +275,9 @@ class MidiParser:
         return events.MetaEvent(v_time, name, data)
     
     def parse_time_signature(self, v_time):
-        '''
+        """
         Parses the time signature MetaEvent at the current MIDI position and returns it.
-        '''
+        """
         numerator = int.from_bytes(self.f.read(1))
         denominator = int.from_bytes(self.f.read(1))
         num_midi_clocks = int.from_bytes(self.f.read(1))
@@ -290,9 +287,9 @@ class MidiParser:
         return events.MetaEvent(v_time, "Time Signature", ts)
     
     def parse_smpte_offset(self, v_time):
-        '''
+        """
         Parses the SMPTEOffset MetaEvent at the current MIDI position and returns it.
-        '''
+        """
         hours = int.from_bytes(self.f.read(1))
         minutes = int.from_bytes(self.f.read(1))
         seconds = int.from_bytes(self.f.read(1))
@@ -302,22 +299,22 @@ class MidiParser:
         return events.MetaEvent(v_time, "SMPTE Offset",utils.SMPTEOffset(hours, minutes, seconds, frames, subframes))
     
     def parse_tempo_event(self, v_time):
-        '''
+        """
         Parses the TempoEvent at the current MIDI position and returns it.
-        '''
+        """
         tempo = int.from_bytes(self.f.read(3))
         self.byte_counter += 3
         return events.TempoEvent(v_time, tempo)
     
     def parse_system_exclusive_event(self, v_time):
-        '''
+        """
         Parses the SystemExclusiveEvent at the current MIDI position and returns it.
-        '''
+        """
         while True:
             self.byte_counter += 1
             if int.from_bytes(self.f.read(1)) == 0xF7:
                 break
-        return events.SystemExclusiveEvent(v_time)  
+        return events.SystemExclusiveEvent(v_time)
     
     def parse_pitch_bend_event(self, channel_number, v_time):
         """
@@ -481,12 +478,12 @@ class MidiParser:
             return self.parse_note_on_event(0b1111 & event, v_time)
 
     def parse_track(self) -> list[events.MidiEvent]:
-        '''
+        """
         Parses the track at the current position and returns a list of MidiEvents for the
         track. Returns -1 on error.
-        '''
+        """
         self.byte_counter = 0
-        events = []
+        events_list = []
         is_track = self.f.read(4)
         if is_track != bytes('MTrk', 'utf-8'):
             print("Could not find a track.")
@@ -501,28 +498,28 @@ class MidiParser:
                 break
             if isinstance(event, list):
                 for e in event:
-                    events.append(e)
+                    events_list.append(e)
             else:
-                events.append(event)
+                events_list.append(event)
         if self.byte_counter != track_length:
             print("Could not read the full file")
             return -1
-        return events
+        return events_list
 
     def contains_notes(self, event_list):
-        '''
+        """
         Given a list of midi events checks if that list contains notes
-        '''
+        """
         for event in event_list:
             if isinstance(event, events.NoteOnEvent):
                 return True
         return False
     
     def combine_tracks(self, meta_track, inst_track):
-        '''
+        """
         Merge the tempo change events from meta_track into the
         events in in inst_track.
-        '''
+        """
         output_track = []
         cur_inst = 0
         cur_meta = 0
@@ -542,18 +539,17 @@ class MidiParser:
             output_track = output_track + inst_track[cur_inst:]
         if cur_meta < len(meta_track):
             for meta_event in meta_track[cur_meta:]:
-              if isinstance(meta_event, events.TempoEvent):
-                    output_track.append(cur_meta_event)  
+                if isinstance(meta_event, events.TempoEvent):
+                    output_track.append(meta_event)  
         return output_track
-    
 
     def parse_header(self):
-        '''
+        """
         Parses the midi file header. Fails if the file type is invalid or the number of tracks is != 1 or 2.
 
         Returns:
             int: -1 on failure, 1 on passing.
-        '''
+        """
         is_midi = self.f.read(4)
         if is_midi != bytes('MThd', 'utf-8'):
             print("Invalid file type.")
@@ -563,7 +559,7 @@ class MidiParser:
             print("Invalid file type.")
             return -1
         format_mapping = {0: "Single Track", 1: "Multiple Tracks", 2: "Multiple Songs"}
-        format = format_mapping[int.from_bytes(self.f.read(2))]
+        file_format = format_mapping[int.from_bytes(self.f.read(2))]
         self.number_tracks = int.from_bytes(self.f.read(2))
         if self.number_tracks != 1 and self.number_tracks != 2:
             print("Incorrect number of tracks. There should only be 1 or 2 tracks. Found " + str(self.number_tracks) + " tracks.")
@@ -609,7 +605,7 @@ class MidiParser:
         return 0
         
     def find_micro_rest(self, note_list, eps=0.02):
-        '''
+        """
         Finds microrests if they exist. Assumes all microrests in the piece
         have the same duration.
 
@@ -617,18 +613,18 @@ class MidiParser:
             eps: Time (in seconds) to be considered a microrest
 
         Returns: The corresponding microrest duration (in seconds)
-        '''
+        """
         for note in note_list:
             if isinstance(note, events.Rest) and note.duration <= eps:
                 return note.duration
         return -1
     
     def remove_micro_rests(self, note_list, eps=0.02):
-        '''
+        """
         Normalizes the duration of notes in the midi file by removing short
         rests under the threshold eps. A second pass filters the list to remove
         notes that have a duration less than 0.001 seconds.
-        '''
+        """
         micro_dur = self.find_micro_rest(note_list, eps)
         if micro_dur != -1:
             for note in note_list:
@@ -693,5 +689,4 @@ class MidiParser:
         if exc_type:
             print(f"An error occurred: {exc_value}")
         return True
-
-            
+           
