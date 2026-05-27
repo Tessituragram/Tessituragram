@@ -48,7 +48,13 @@ pitch quartiles, performance time, and time spent singing in generalized vocal *
 
     <img width="350" height="200" alt="image" src="https://github.com/user-attachments/assets/c1e147d3-7a81-457b-8417-d9381daf4a53" />
 
-    NOTE: Apple's security settings may flag the executable and not allow execution. To bypass this setting, go to System Settings > Privacy & Security, and then scroll down to the Security section to allow the file to run.
+    NOTE: Apple's security settings may flag the executable and not allow execution. To bypass this setting, run:
+
+    ```
+    chmod +x main
+    ```
+
+    Then go to System Settings > Privacy & Security, and scroll down to the Security section to allow the file to run.
 
      
 
