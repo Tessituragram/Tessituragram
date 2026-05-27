@@ -34,7 +34,7 @@ pitch quartiles, performance time, and time spent singing in generalized vocal *
   3. If using the Mac installation, run `chmod -x main` to allow execution.
   4. To run the program, run:
      ```
-     [.\main.exe OR ./main] --filepath [PATH/TO/MIDI/FILE] --clef ["bass" OR "treble"] --musescore_path [PATH/TO/MUSESCORE/EXECUTABLE]
+     [main.exe OR ./main] --filepath [PATH/TO/MIDI/FILE] --clef ["bass" OR "treble"] --musescore_path [PATH/TO/MUSESCORE/EXECUTABLE]
      ```
   * `--filepath` is a required argument followed by the path to the processed MIDI file.
   * `--clef` is an optional argument followed by "bass" or "treble" to describe the clef of the input file. Including this argument will output
