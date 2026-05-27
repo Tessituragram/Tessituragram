@@ -111,7 +111,7 @@ Paul M. Patinka
 
 ## License
 
-We have project this project licensed under the MIT License - see the LICENSE file for details
+This project is licensed under the MIT License - see the LICENSE file for details
 
 
 
