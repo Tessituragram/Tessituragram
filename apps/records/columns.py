@@ -4,7 +4,7 @@ AVAILABLE_COLUMNS = [
     ("composer", "Composer", "composer", lambda r: r.composer),
     ("author", "Author", "author", lambda r: r.author),
     ("style", "Style", "style", lambda r: r.get_style_display()),
-    ("clef_range", "Clef", "clef_range", lambda r: r.clef_range),
+    ("clef_range", "Clef Range", "clef_range", lambda r: r.clef_range),
     ("submitter", "Submitted By", "submitter", lambda r: f"{r.submitted_by.first_name} {r.submitted_by.last_name}" if r.submitted_by else ""),
     ("created_at", "Submitted On", "created_at", lambda r: r.created_at.strftime("%b %-d, %Y") if r.created_at else ""),
     ("tessitura_range", "Tessitura Range", "q1_freq", lambda r: f"{r.q1_pitch}{r.q1_octave}–{r.q3_pitch}{r.q3_octave}"),
