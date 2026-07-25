@@ -1,0 +1,22 @@
+{% if sort_field %}
+<th>
+    {% if current_sort == sort_field %}
+        <a href="?sort=-{{ sort_field }}&{{ search_querystring }}" class="sortable-header">
+            {{ label }}
+            <svg class="sort-icon active" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 15l-6-6-6 6"/></svg>
+        </a>
+    {% elif current_sort == "-"|add:sort_field %}
+        <a href="?{{ search_querystring }}" class="sortable-header">
+            {{ label }}
+            <svg class="sort-icon active" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
+        </a>
+    {% else %}
+        <a href="?sort={{ sort_field }}&{{ search_querystring }}" class="sortable-header">
+            {{ label }}
+            <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>
+        </a>
+    {% endif %}
+</th>
+{% else %}
+<th>{{ label }}</th>
+{% endif %}

@@ -34,16 +34,16 @@ pitch quartiles, performance time, and time spent singing in generalized vocal *
   3. If using the Mac installation, run `chmod -x main` to allow execution.
   4. To run the program, run:
      ```
-     [.\main.exe OR ./main] --filepath [PATH/TO/MIDI/FILE] --clef ["bass" OR "treble"] --musescore_path [PATH/TO/MUSESCORE/EXECUTABLE]
+     [.\main.exe OR ./main] --filepath [PATH/TO/MIDI/FILE] --clef_range ["bass" OR "treble"] --musescore_path [PATH/TO/MUSESCORE/EXECUTABLE]
      ```
   * `--filepath` is a required argument followed by the path to the processed MIDI file.
-  * `--clef` is an optional argument followed by "bass" or "treble" to describe the clef of the input file. Including this argument will output
-  the tessituragram analysis of the MIDI file in both treble and bass clef. If omitted, Tessituragram processes the file as is.
+  * `--clef_range` is an optional argument followed by "bass" or "treble" to describe the clef range of the input file. Including this argument will output
+  the tessituragram analysis of the MIDI file in both treble and bass clef range. If omitted, Tessituragram processes the file as is.
   * `--musescore_path` is an optional argument followed by the path to the Musescore executable on your machine (`'C:\\Program Files\\MuseScore 4\\bin\\MuseScore4.exe'`, for example). The program searches for MuseScore installation by default, and this is intended to only be used if the Musescore path cannot be found by Tessituragram. The program will still run without MuseScore installation but will not provide score visualization in the output PDF.
  
   * Example:
     ```
-    .\main.exe --filepath "data\test_data_arias\1-I.mid" --clef "bass"
+    .\main.exe --filepath "data\test_data_arias\1-I.mid" --clef_range "bass"
     ```
 
     <img width="350" height="200" alt="image" src="https://github.com/user-attachments/assets/c1e147d3-7a81-457b-8417-d9381daf4a53" />
@@ -62,16 +62,16 @@ pitch quartiles, performance time, and time spent singing in generalized vocal *
 
 * From the root directory, run:
   ```
-  python main.py --filepath [PATH/TO/MIDI/FILE] --clef ["bass" OR "treble"] --musescore_path [PATH/TO/MUSESCORE/EXECUTABLE]
+  python main.py --filepath [PATH/TO/MIDI/FILE] --clef_range ["bass" OR "treble"] --musescore_path [PATH/TO/MUSESCORE/EXECUTABLE]
   ```
   * `--filepath` is a required argument followed by the path to the processed MIDI file.
-  * `--clef` is an optional argument followed by "bass" or "treble" to describe the clef of the input file. Including this argument will output
-  the tessituragram analysis of the MIDI file in both treble and bass clef. If omitted, Tessituragram processes the file as is.
+  * `--clef_range` is an optional argument followed by "bass" or "treble" to describe the clef range of the input file. Including this argument will output
+  the tessituragram analysis of the MIDI file in both treble and bass clef range. If omitted, Tessituragram processes the file as is.
   * `--musescore_path` is an optional argument followed by the path to the MuseScore executable on your machine (`'C:\\Program Files\\MuseScore 4\\bin\\MuseScore4.exe'`, for example). The program searches for MuseScore installation by default, and this should only apply if the MuseScore path cannot be found by Tessituragram. The program will still run without Musescore installation but will not provide score visualization in the output PDF.
  
 * Example:
   ```
-  python main.py --filepath "data\test_data_arias\1-I.mid" --clef "bass"
+  python main.py --filepath "data\test_data_arias\1-I.mid" --clef_range "bass"
   ```
   <img width="350" height="300" alt="image" src="https://github.com/user-attachments/assets/7aace345-5867-4c83-b3a1-268874781436" />
 

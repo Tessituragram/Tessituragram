@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<h1>{{ page_title }}</h1>
+<div class="content-card">
+    {% for paragraph in content %}
+    <p class="b1">{{ paragraph }}</p>
+    {% endfor %}
+</div>
+{% endblock %}

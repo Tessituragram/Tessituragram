@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Review {{ record.title }}{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <h1>{{ record.title }}</h1>
+    <p class="b1">Composer: {{ record.composer }} &mdash; Clef: {{ record.clef_range }}</p>
+    <p class="b2">Submitted by {{ record.submitted_by }} on {{ record.created_at|date:"M j, Y" }}</p>
+
+    <h2>Tessitura</h2>
+    <p class="b1">Range: {{ record.q1_pitch }}{{ record.q1_octave }}&ndash;{{ record.q3_pitch }}{{ record.q3_octave }} ({{ record.q1_freq }}&ndash;{{ record.q3_freq }} Hz)</p>
+    <p class="b1">Full range: {{ record.min_freq }}&ndash;{{ record.max_freq }} Hz</p>
+    <p class="b1">Median: {{ record.median_freq }} Hz</p>
+
+    {% if user.is_staff and record.midi_file %}
+    <p class="b2"><a href="{% url 'records:midi_download' record.id %}">Download original MIDI file</a></p>
+    {% endif %}
+
+    {% if record.pdf_file %}
+    <p class="b1"><a href="{{ record.pdf_file.url }}" target="_blank">View generated PDF</a></p>
+    {% endif %}
+
+    <p class="b2"><a href="{% url 'submissions:edit_resubmit' record.id %}">Edit &amp; resubmit on submitter's behalf</a></p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="action" value="approve">Approve</button>
+        <button type="submit" name="action" value="reject">Reject</button>
+    </form>
+</div>
+{% endblock %}

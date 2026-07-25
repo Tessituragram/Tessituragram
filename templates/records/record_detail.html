@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ record.title }}{% endblock %}
+
+{% block content %}
+<h1>{{ record.title }}</h1>
+<div class="content-card">
+    <p class="b1">Composer: {{ record.composer }} &mdash; Clef Range: {{ record.clef_range }}</p>
+
+    <h2>Tessitura</h2>
+    <p class="b1">Range: {{ record.q1_pitch }}{{ record.q1_octave }}&ndash;{{ record.q3_pitch }}{{ record.q3_octave }} ({{ record.q1_freq }}&ndash;{{ record.q3_freq }} Hz)</p>
+    <p class="b1">Full range: {{ record.min_freq }}&ndash;{{ record.max_freq }} Hz</p>
+    <p class="b1">Median: {{ record.median_freq }} Hz</p>
+
+    {% if record.pdf_file %}
+    <h2>Musical demand profile</h2>
+    <iframe src="{{ record.pdf_file.url }}" width="100%" height="800px" style="border: 1px solid var(--muted-teal);"></iframe>
+    <p class="b2"><a href="{{ record.pdf_file.url }}" target="_blank">Open in new tab</a></p>
+    {% endif %}
+
+    {% if user.is_staff %}
+    <hr style="margin: 24px 0; border: none; border-top: 1px solid rgba(148, 161, 135, 0.3);">
+    <h2>Admin actions</h2>
+
+    <p class="b2"><a href="{% url 'submissions:edit_resubmit' record.id %}">Edit &amp; resubmit on submitter's behalf</a></p>
+
+    <form method="post" style="margin-bottom: 16px;">
+        {% csrf_token %}
+        <label for="status">Status:</label>
+        <select name="status" id="status">
+            <option value="pending" {% if record.status == "pending" %}selected{% endif %}>Pending Review</option>
+            <option value="public" {% if record.status == "public" %}selected{% endif %}>Public</option>
+            <option value="private" {% if record.status == "private" %}selected{% endif %}>Private</option>
+            <option value="rejected" {% if record.status == "rejected" %}selected{% endif %}>Rejected</option>
+        </select>
+        <button type="submit">Update status</button>
+    </form>
+
+    {% if record.midi_file %}
+    <p class="b2"><a href="{% url 'records:midi_download' record.id %}">Download original MIDI file</a></p>
+    {% endif %}
+    <p class="b2"><a href="{% url 'records:delete_record' record.id %}" style="color: var(--night-bordeaux);">Delete this record</a></p>
+    {% endif %}
+</div>
+{% endblock %}

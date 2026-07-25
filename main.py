@@ -10,14 +10,14 @@ and does the tessitura analysis accordingly.
 
 USAGE:
 
-python main.py --filepath [PATH_TO_MIDI_FILE] --clef ["treble" or "bass"] --playsong
+python main.py --filepath [PATH_TO_MIDI_FILE] --clef_range_range ["treble" or "bass"] --playsong
 
 
 Arguments:
     filepath: Required, specifies the relative or absolute path to a .mid or .midi file to be tested
     
-    clef: Optional, specifies the clef of the uploaded midi file. Including the clef will return tessiturogram analysis
-    for both treble and bass clefs given the input. If not specified, performs tessiturogram analysis of the midi file
+    clef_range: Optional, specifies the clef_range of the uploaded midi file. Including the clef_range will return tessiturogram analysis
+    for both treble and bass clef_ranges given the input. If not specified, performs tessiturogram analysis of the midi file
     as is.
 """
 
@@ -30,9 +30,9 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="Description of your script.")
     parser.add_argument("--filepath", required=True, type=str, help="Midi filepath")
     parser.add_argument(
-        '--clef',
+        '--clef_range',
         choices=['bass', 'treble'],
-        help="Specify the clef: 'treble' or 'bass'"
+        help="Specify the clef_range: 'treble' or 'bass'"
     )
     parser.add_argument(
         "--musescore_path",
@@ -72,7 +72,7 @@ def main(args):
         if notes == -1:
             return -1
         
-    tesses, pasaggios, _ = tessitura.get_tessitura_and_passaggio(notes, args.clef)
+    tesses, pasaggios, _ = tessitura.get_tessitura_and_passaggio(notes, args.clef_range)
     pdf = FPDF()
     pdf.add_font("times_new", "", utils.resource_path(os.path.join("data", "Times New Roman.ttf")))
     pdf.add_font("times_new", "B", utils.resource_path(os.path.join("data", "Times New Roman Bold.ttf")))

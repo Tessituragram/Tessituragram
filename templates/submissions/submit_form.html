@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Submit a MIDI File{% endblock %}
+
+{% block content %}
+<h1>Submit a MIDI file</h1>
+<div class="content-card">
+    <p class="b1">Upload a MIDI file for analysis. Your submission will be reviewed before it appears in the public database — but you'll be able to view your own results right away from your Profile page.</p>
+
+    <form method="post" enctype="multipart/form-data" id="submission-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" id="submit-button">Submit</button>
+    </form>
+</div>
+
+<div id="processing-overlay" class="processing-overlay" hidden>
+    <div class="processing-box">
+        <div class="spinner"></div>
+        <p class="b1">Processing your submission&hellip;</p>
+        <p class="b3">This may take a few seconds while we analyze your file.</p>
+    </div>
+</div>
+
+<script>
+window.addEventListener("pageshow", function () {
+    document.getElementById("processing-overlay").hidden = true;
+
+    const button = document.getElementById("submit-button");
+    button.disabled = false;
+    button.textContent = "Submit";
+});
+
+document.getElementById("submission-form").addEventListener("submit", function () {
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput && fileInput.files.length === 0) {
+        return;
+    }
+
+    document.getElementById("submit-button").disabled = true;
+    document.getElementById("submit-button").textContent = "Processing...";
+    document.getElementById("processing-overlay").hidden = false;
+});
+</script>
+{% endblock %}

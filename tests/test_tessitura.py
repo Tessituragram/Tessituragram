@@ -20,7 +20,7 @@ def test_tessitura_calculation():
     tess = tessitura.Tessitura(notes, "bass")
     assert tess.lowFreq == 1.8
     assert tess.highFreq == 3.2
-    assert tess.median == 2.5
+    assert tess.median_freq == 2.5
     assert tess.cycle_dose == 10
     assert tess.time_dose == 4
     assert tess.max_pitch == 4
@@ -36,7 +36,7 @@ def test_tessitura_calculation_with_rests():
     assert isinstance(tess, Tessitura)
     assert tess.lowFreq == 1.8
     assert tess.highFreq == 3.2
-    assert tess.median == 2.5
+    assert tess.median_freq == 2.5
     assert tess.cycle_dose == 10
     assert tess.time_dose == 4
     assert tess.max_pitch == 4

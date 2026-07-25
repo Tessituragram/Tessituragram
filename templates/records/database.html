@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% load record_extras %}
+{% block title %}Database{% endblock %}
+
+{% block content %}
+<h1>Database</h1>
+
+<details>
+    <summary>Advanced search</summary>
+    <form method="get" class="search-form">
+        <input type="hidden" name="sort" value="{{ current_sort }}">
+
+        <fieldset>
+            <legend>General</legend>
+            <div class="search-grid-3">
+                {{ search_form.title.label_tag }} {{ search_form.title }}
+                {{ search_form.composer.label_tag }} {{ search_form.composer }}
+                {{ search_form.author.label_tag }} {{ search_form.author }}
+                {{ search_form.submitter.label_tag }} {{ search_form.submitter }}
+                {{ search_form.style.label_tag }} {{ search_form.style }}
+                {{ search_form.clef_range.label_tag }} {{ search_form.clef_range }}
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Tessitura</legend>
+            <div class="search-grid-2">
+                {{ search_form.q1_freq_min.label_tag }} {{ search_form.q1_freq_min }}
+                {{ search_form.q1_freq_max.label_tag }} {{ search_form.q1_freq_max }}
+                {{ search_form.q3_freq_min.label_tag }} {{ search_form.q3_freq_min }}
+                {{ search_form.q3_freq_max.label_tag }} {{ search_form.q3_freq_max }}
+                {{ search_form.median_freq_min.label_tag }} {{ search_form.median_freq_min }}
+                {{ search_form.median_freq_max.label_tag }} {{ search_form.median_freq_max }}
+                {{ search_form.min_freq_min.label_tag }} {{ search_form.min_freq_min }}
+                {{ search_form.min_freq_max.label_tag }} {{ search_form.min_freq_max }}
+                {{ search_form.max_freq_min.label_tag }} {{ search_form.max_freq_min }}
+                {{ search_form.max_freq_max.label_tag }} {{ search_form.max_freq_max }}
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Timing</legend>
+            <div class="search-grid-2">
+                {{ search_form.cycle_dose_min.label_tag }} {{ search_form.cycle_dose_min }}
+                {{ search_form.cycle_dose_max.label_tag }} {{ search_form.cycle_dose_max }}
+                {{ search_form.time_dose_min.label_tag }} {{ search_form.time_dose_min }}
+                {{ search_form.time_dose_max.label_tag }} {{ search_form.time_dose_max }}
+                {{ search_form.rest_time_min.label_tag }} {{ search_form.rest_time_min }}
+                {{ search_form.rest_time_max.label_tag }} {{ search_form.rest_time_max }}
+                {{ search_form.total_time_min.label_tag }} {{ search_form.total_time_min }}
+                {{ search_form.total_time_max.label_tag }} {{ search_form.total_time_max }}
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>High Voice Passaggio</legend>
+            <div class="search-grid-2">
+                {{ search_form.hvhp_time_dose_min.label_tag }} {{ search_form.hvhp_time_dose_min }}
+                {{ search_form.hvhp_time_dose_max.label_tag }} {{ search_form.hvhp_time_dose_max }}
+                {{ search_form.hvmp_time_dose_min.label_tag }} {{ search_form.hvmp_time_dose_min }}
+                {{ search_form.hvmp_time_dose_max.label_tag }} {{ search_form.hvmp_time_dose_max }}
+                {{ search_form.hvlp_time_dose_min.label_tag }} {{ search_form.hvlp_time_dose_min }}
+                {{ search_form.hvlp_time_dose_max.label_tag }} {{ search_form.hvlp_time_dose_max }}
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Medium Voice Passaggio</legend>
+            <div class="search-grid-2">
+                {{ search_form.mvhp_time_dose_min.label_tag }} {{ search_form.mvhp_time_dose_min }}
+                {{ search_form.mvhp_time_dose_max.label_tag }} {{ search_form.mvhp_time_dose_max }}
+                {{ search_form.mvmp_time_dose_min.label_tag }} {{ search_form.mvmp_time_dose_min }}
+                {{ search_form.mvmp_time_dose_max.label_tag }} {{ search_form.mvmp_time_dose_max }}
+                {{ search_form.mvlp_time_dose_min.label_tag }} {{ search_form.mvlp_time_dose_min }}
+                {{ search_form.mvlp_time_dose_max.label_tag }} {{ search_form.mvlp_time_dose_max }}
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Low Voice Passaggio</legend>
+            <div class="search-grid-2">
+                {{ search_form.lvhp_time_dose_min.label_tag }} {{ search_form.lvhp_time_dose_min }}
+                {{ search_form.lvhp_time_dose_max.label_tag }} {{ search_form.lvhp_time_dose_max }}
+                {{ search_form.lvmp_time_dose_min.label_tag }} {{ search_form.lvmp_time_dose_min }}
+                {{ search_form.lvmp_time_dose_max.label_tag }} {{ search_form.lvmp_time_dose_max }}
+                {{ search_form.lvlp_time_dose_min.label_tag }} {{ search_form.lvlp_time_dose_min }}
+                {{ search_form.lvlp_time_dose_max.label_tag }} {{ search_form.lvlp_time_dose_max }}
+            </div>
+        </fieldset>
+
+        <div class="search-actions">
+            <button type="submit">Search</button>
+            <a href="{% url 'records:database' %}">Clear</a>
+        </div>
+    </form>
+</details>
+
+<details>
+    <summary>Export to Excel</summary>
+    <form method="get" action="{% url 'records:export_database' %}" class="search-form">
+        {% for key, value in active_filters %}
+        <input type="hidden" name="{{ key }}" value="{{ value }}">
+        {% endfor %}
+
+        <fieldset>
+            <legend>Choose columns to export</legend>
+            <div class="export-columns">
+                <label><input type="checkbox" name="columns" value="title" checked> Title</label>
+                <label><input type="checkbox" name="columns" value="composer" checked> Composer</label>
+                <label><input type="checkbox" name="columns" value="author" checked> Author</label>
+                <label><input type="checkbox" name="columns" value="style" checked> Style</label>
+                <label><input type="checkbox" name="columns" value="clef_range" checked> Clef</label>
+                <label><input type="checkbox" name="columns" value="submitter"> Submitted By</label>
+                <label><input type="checkbox" name="columns" value="created_at"> Submitted On</label>
+                <label><input type="checkbox" name="columns" value="q1_range" checked> Tessitura Range</label>
+                <label><input type="checkbox" name="columns" value="q1_freq"> Q1 (Hz)</label>
+                <label><input type="checkbox" name="columns" value="q3_freq"> Q3 (Hz)</label>
+                <label><input type="checkbox" name="columns" value="median_freq"> Median (Hz)</label>
+                <label><input type="checkbox" name="columns" value="full_range"> Full Range (Hz)</label>
+                <label><input type="checkbox" name="columns" value="cycle_dose"> Cycle Dose</label>
+                <label><input type="checkbox" name="columns" value="time_dose"> Time Dose</label>
+                <label><input type="checkbox" name="columns" value="rest_time"> Rest Time</label>
+                <label><input type="checkbox" name="columns" value="total_time"> Total Time</label>
+                <label><input type="checkbox" name="columns" value="hvhp_time_dose"> HV High Passaggio</label>
+                <label><input type="checkbox" name="columns" value="hvmp_time_dose"> HV Middle Passaggio</label>
+                <label><input type="checkbox" name="columns" value="hvlp_time_dose"> HV Low Passaggio</label>
+                <label><input type="checkbox" name="columns" value="mvhp_time_dose"> MV High Passaggio</label>
+                <label><input type="checkbox" name="columns" value="mvmp_time_dose"> MV Middle Passaggio</label>
+                <label><input type="checkbox" name="columns" value="mvlp_time_dose"> MV Low Passaggio</label>
+                <label><input type="checkbox" name="columns" value="lvhp_time_dose"> LV High Passaggio</label>
+                <label><input type="checkbox" name="columns" value="lvmp_time_dose"> LV Middle Passaggio</label>
+                <label><input type="checkbox" name="columns" value="lvlp_time_dose"> LV Low Passaggio</label>
+            </div>
+        </fieldset>
+
+        <button type="submit">Export to Excel</button>
+    </form>
+</details>
+
+<div class="content-card">
+
+    <p class="b2">{{ total_count }} result{{ total_count|pluralize }}</p>
+
+    <details>
+        <summary>Customize columns</summary>
+        <form method="get" class="search-form">
+            {% for key, value in active_filters %}
+                {% if key != "cols" %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                {% endif %}
+            {% endfor %}
+
+            <fieldset>
+                <legend>Choose columns to display</legend>
+                <div class="export-columns">
+                    {% for key, label, sort_field, accessor in all_columns %}
+                    <label>
+                        <input type="checkbox" name="cols" value="{{ key }}" {% if key in selected_columns %}checked{% endif %}>
+                        {{ label }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </fieldset>
+
+            <button type="submit">Apply</button>
+        </form>
+    </details>
+
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        {% if current_sort == 'title' %}
+                            <a href="?sort=-title&{{ search_querystring }}" class="sortable-header">
+                                Title
+                                <svg class="sort-icon active" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 15l-6-6-6 6"/></svg>
+                            </a>
+                        {% elif current_sort == '-title' %}
+                            <a href="?{{ search_querystring }}" class="sortable-header">
+                                Title
+                                <svg class="sort-icon active" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
+                            </a>
+                        {% else %}
+                            <a href="?sort=title&{{ search_querystring }}" class="sortable-header">
+                                Title
+                                <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>
+                            </a>
+                        {% endif %}
+                    </th>
+
+                    {% for key, label, sort_field in display_columns %}
+                        {% include "records/_column_header.html" %}
+                    {% endfor %}
+
+                    <th>PDF</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in page_obj %}
+                <tr>
+                    <td><a href="{% url 'records:record_detail' record.id %}">{{ record.title }}</a></td>
+                    {% for key, label, sort_field in display_columns %}
+                    <td>
+                        {% if key == "status" %}
+                            <span class="status-badge status-{{ record.status }}">{{ record.get_status_display }}</span>
+                        {% else %}
+                            {{ record|column_value:key }}
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                    <td>{% if record.pdf_file %}<a href="{{ record.pdf_file.url }}" target="_blank">View</a>{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="{{ display_columns|length|add:2 }}" class="empty-state">No records match your search.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page=1&{{ querystring }}">First</a>
+            <a href="?page={{ page_obj.previous_page_number }}&{{ querystring }}">Previous</a>
+        {% endif %}
+
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&{{ querystring }}">Next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}&{{ querystring }}">Last</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

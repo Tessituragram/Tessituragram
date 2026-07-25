@@ -108,7 +108,7 @@ def main():
                 parser = MidiParser(filepath)
                 parser.parse_midi()
                 notes = parser.get_notes()
-                tess, passaggio, clefs = get_tessitura_and_passaggio(notes, "None")
+                tess, passaggio, clef_ranges = get_tessitura_and_passaggio(notes, "None")
             except Exception as e:
                 print(f"Failed to parse {filename}: {e}")
                 continue
@@ -139,7 +139,7 @@ def main():
                 add_result("total_time", tess[0].total_time, float(measurement_values[1]))  
                 add_result("rest_time", tess[0].rest_time, float(measurement_values[3]))    
                 add_result("first_quartile", tess[0].lowFreq, float(measurement_values[5]))
-                add_result("median", tess[0].median, float(measurement_values[6]))        
+                add_result("median_freq", tess[0].median_freq, float(measurement_values[6]))        
                 add_result("third_quartile", tess[0].highFreq, float(measurement_values[7]))
                 # Passaggio values
                 p = passaggio[0]

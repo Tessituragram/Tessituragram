@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Deleted records{% endblock %}
+
+{% block content %}
+<h1>Deleted records</h1>
+<p class="b2"><a href="{% url 'submissions:review_list' %}">Back to review queue</a></p>
+
+<div class="content-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Composer</th>
+                <th>Submitted by</th>
+                <th>Deleted by</th>
+                <th>Deleted on</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td><a href="{% url 'records:record_detail' record.id %}">{{ record.title }}</a></td>
+                <td>{{ record.composer }}</td>
+                <td>{{ record.submitted_by }}</td>
+                <td>{{ record.deleted_by }}</td>
+                <td>{{ record.deleted_at|date:"M j, Y" }}</td>
+                <td><a href="{% url 'records:reinstate_record' record.id %}">Reinstate</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">No deleted records.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

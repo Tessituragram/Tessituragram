@@ -41,14 +41,14 @@ class PassaggioMetrics:
 
 
 class Passaggio:
-    def __init__(self, notes, clef):
+    def __init__(self, notes, clef_range):
         self.pitches = []
         self.durations = []
         for note in notes:
             if isinstance(note, events.Note):
                 self.pitches.append(note.frequency)
                 self.durations.append(note.duration)
-        self.clef = clef
+        self.clef_range = clef_range
         self.hvhp = None
         self.hvmp = None
         self.hvlp = None
@@ -84,8 +84,8 @@ class Passaggio:
 
 
 class Tessitura:   
-    def __init__(self, notes, clef):
-        self.clef = clef
+    def __init__(self, notes, clef_range):
+        self.clef_range = clef_range
         self.lowFreq = None
         self.lowNote = None
         self.lowOctave = None
@@ -96,9 +96,9 @@ class Tessitura:
         self.total_time = None
         self.time_dose = None
         self.rest_time = None
-        self.median = None
-        self.medianNote = None
-        self.medianOctave = None
+        self.median_freq = None
+        self.median_freqNote = None
+        self.median_freqOctave = None
         self.min_pitch = None
         self.max_pitch = None
         self.min_pitch_note = None
@@ -134,15 +134,15 @@ class Tessitura:
         self.total_time = self.calculate_total_time(notes)
         self.time_dose = round(sum(durations), 1)
         self.rest_time = round(self.total_time - sum(durations), 1)
-        self.median = round(utils.weighted_percentile_expand(pitches, 50, weights = durations), 1)
-        self.medianNote, self.medianOctave = utils.freq_to_note(self.median)
+        self.median_freq = round(utils.weighted_percentile_expand(pitches, 50, weights = durations), 1)
+        self.median_freqNote, self.median_freqOctave = utils.freq_to_note(self.median_freq)
         self.min_pitch = round(min(pitches),1)
         self.max_pitch = round(max(pitches), 1)
         self.min_pitch_note, self.min_pitch_octave = utils.freq_to_note(self.min_pitch)
         self.max_pitch_note, self.max_pitch_octave = utils.freq_to_note(self.max_pitch)
         
-def get_tessitura_and_passaggio(notes, clef):
-    if clef == "bass":
+def get_tessitura_and_passaggio(notes, clef_range):
+    if clef_range == "bass":
         notes_bass = notes
         notes_treble = copy.deepcopy(notes)
         for note in notes_treble: 
@@ -153,7 +153,7 @@ def get_tessitura_and_passaggio(notes, clef):
         pass_treble = Passaggio(notes_treble, "Treble")
         pass_bass = Passaggio(notes_bass, "Bass")
         return [tess_treble, tess_bass], [pass_treble, pass_bass], ["treble", "bass"]
-    elif clef == "treble":
+    elif clef_range == "treble":
         notes_treble = notes
         notes_bass = copy.deepcopy(notes)
         for note in notes_bass: 
@@ -171,23 +171,25 @@ def get_tessitura_and_passaggio(notes, clef):
 
 
 class TessPassContainer:
-    def __init__(self, tess: Tessitura, passa: Passaggio, filename, pdf: FPDF, musescore_path=None):
+    def __init__(self, tess: Tessitura, passa: Passaggio, filename, pdf: FPDF, musescore_path=None, output_dir="results", submitted_by=None):
         self.tess = tess
         self.passa = passa
         self.filename = filename
         self.pdf = pdf
         self.musescore_path = musescore_path
+        self.output_dir = output_dir
+        self.submitted_by = submitted_by
 
     def print_tessitura(self):
-        print("\nMusical Demand Profile" + " (" + self.tess.clef + " Clef Range)")
+        print("\nMusical Demand Profile" + " (" + self.tess.clef_range + " Clef Range)")
         print("Compositional Range: " + str(self.tess.min_pitch) + "\u2013" + str(self.tess.max_pitch) + " Hz,", 
               self.tess.min_pitch_note + utils.convert_digit_to_subscript(self.tess.min_pitch_octave) + "\u2013" + 
               self.tess.max_pitch_note + utils.convert_digit_to_subscript(self.tess.max_pitch_octave))
         print("Tessitura Range: ", str(self.tess.lowFreq) + "\u2013" + str(self.tess.highFreq) + " Hz,", 
               self.tess.lowNote + utils.convert_digit_to_subscript(self.tess.lowOctave) + "\u2013" + 
               self.tess.highNote + utils.convert_digit_to_subscript(self.tess.highOctave))
-        print("Median Frequency: " + str(self.tess.median) + " Hz,", "~" + self.tess.medianNote + 
-              utils.convert_digit_to_subscript(self.tess.medianOctave))
+        print("Median Frequency: " + str(self.tess.median_freq) + " Hz,", "~" + self.tess.median_freqNote + 
+              utils.convert_digit_to_subscript(self.tess.median_freqOctave))
         print("Cycle Dose: " + str(self.tess.cycle_dose) + " vibrations")
         print("Total Time: " + str(self.tess.total_time) + "s")
         print("Time Dose: " + str(self.tess.time_dose) + "s")
@@ -331,14 +333,14 @@ class TessPassContainer:
         self.pdf.write_html(f"Tessitura (<i>Q<sub>1p</sub>–Q<sub>3p</sub></i>): ≈{self.tess.lowNote}<sub>{str(self.tess.lowOctave)}</sub>-≈{self.tess.highNote}<sub>{str(self.tess.highOctave)}</sub>, {self.tess.lowFreq}–{self.tess.highFreq} Hz")
         self.pdf.ln(1)
         self.pdf.set_x(40)
-        self.pdf.write_html(f"Median \u0192<sub>o</sub> (<i>Q<sub>2p</sub></i>): ≈{self.tess.medianNote}<sub>{str(self.tess.medianOctave)}</sub>, {self.tess.median} Hz")
+        self.pdf.write_html(f"Median \u0192<sub>o</sub> (<i>Q<sub>2p</sub></i>): ≈{self.tess.median_freqNote}<sub>{str(self.tess.median_freqOctave)}</sub>, {self.tess.median_freq} Hz")
         self.pdf.ln(3)
 
         passaggio_images = self.generate_passaggio_image()
         tess_success = self.generate_tess_image()
 
         if tess_success == 1:
-            tess_fp = "results/" + self.filename + "-Tessitura-" + self.passa.clef + "-1.png"
+            tess_fp = os.path.join(self.output_dir, self.filename + "-Tessitura-" + self.passa.clef_range + "-1.png")
             self.pdf.image(tess_fp, w=65, h=0, x="C")
         else:
             self.pdf.set_font("times_new", "B", 12)
@@ -429,15 +431,25 @@ class TessPassContainer:
             x += img_width + gap
 
         if tess_success == 1:
-            os.remove(os.path.join("results", self.filename + "-Tessitura-" + self.passa.clef + "-1.png"))
-        if os.path.exists(os.path.join("results", self.filename + "-Tessitura-" + self.passa.clef + ".musicxml")):
-            os.remove(os.path.join("results", self.filename + "-Tessitura-" + self.passa.clef + ".musicxml"))
+            os.remove(os.path.join(self.output_dir, self.filename + "-Tessitura-" + self.passa.clef_range + "-1.png"))
+        if os.path.exists(os.path.join(self.output_dir, self.filename + "-Tessitura-" + self.passa.clef_range + ".musicxml")):
+            os.remove(os.path.join(self.output_dir, self.filename + "-Tessitura-" + self.passa.clef_range + ".musicxml"))
 
         self.pdf.ln(5)
         self.pdf.set_draw_color(0, 0, 0)
         self.pdf.set_line_width(0.5)
         self.pdf.line(self.pdf.l_margin, self.pdf.get_y() + 25, self.pdf.w - self.pdf.r_margin, self.pdf.get_y() + 25)
         self.pdf.ln(5)
+
+        if self.submitted_by:
+            auto_page_break = self.pdf.auto_page_break
+            bottom_margin = self.pdf.b_margin
+
+            self.pdf.set_auto_page_break(False)
+            self.pdf.set_y(-15)
+            self.pdf.set_font("times_new", "", 10)
+            self.pdf.cell(0, 5, f"Submitted by: {self.submitted_by}", align="C")
+            self.pdf.set_auto_page_break(auto_page_break, margin=bottom_margin)
 
     def print_and_write_metrics(self):
         self.ensure_musescore_configured()
@@ -447,7 +459,7 @@ class TessPassContainer:
 
     def generate_tess_image(self):
         m = music21.stream.Measure()
-        if self.tess.clef == "Bass":
+        if self.tess.clef_range == "Bass":
             m.append(music21.clef.BassClef())
         else:
             m.append(music21.clef.TrebleClef())
@@ -474,7 +486,7 @@ class TessPassContainer:
         ts.style.hideObjectOnPrint = True
         m.insert(0, ts)
 
-        fp = os.path.join("results", self.filename + "-Tessitura-" + self.tess.clef)
+        fp = os.path.join(self.output_dir, self.filename + "-Tessitura-" + self.tess.clef_range)
         try:
             m.write('musicxml.png', fp=fp)
         except Exception:

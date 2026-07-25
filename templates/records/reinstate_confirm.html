@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Reinstate {{ record.title }}{% endblock %}
+
+{% block content %}
+<h1>Reinstate this record?</h1>
+<div class="content-card">
+    <p class="b1">You're about to reinstate <strong>{{ record.title }}</strong> ({{ record.composer }}).</p>
+    <p class="b1">It will become visible again according to its status ({{ record.get_status_display }}).</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Yes, reinstate this record</button>
+        <a href="{% url 'records:deleted_list' %}">Cancel</a>
+    </form>
+</div>
+{% endblock %}
