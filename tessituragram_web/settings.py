@@ -24,9 +24,6 @@ MS_CLIENT_SECRET = os.environ.get("MS_CLIENT_SECRET")
 EMAIL_BACKEND = "apps.accounts.graph_email_backend.GraphEmailBackend"
 DEFAULT_FROM_EMAIL = "verify_email@tessituragram.com"
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-#4)gf(6@u*!tkd_i%+ld84=gf2h+=n%=)9&hho@=h4##w#*6q='
 X_FRAME_OPTIONS = "SAMEORIGIN"
