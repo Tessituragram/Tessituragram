@@ -17,6 +17,7 @@ def test_3quarter_notes_and_rest():
     code = parser.parse_midi()
     assert code == 0
     notes = parser.get_notes()
+    notes = parser.remove_micro_rests(notes)
     assert len(notes) == 4
     assert isinstance(notes[0], Note)
     assert round(notes[0].duration, 2) == 0.50
@@ -38,6 +39,7 @@ def test_3quarter_notes_and_rest_final_whole_note():
     code = parser.parse_midi()
     assert code == 0
     notes = parser.get_notes()
+    notes = parser.post_process(notes)
     assert len(notes) == 5
     assert isinstance(notes[0], Note)
     assert round(notes[0].duration, 2) == 0.50
@@ -58,6 +60,7 @@ def test_tempo_change_1():
     code = parser.parse_midi()
     assert code == 0
     notes = parser.get_notes()
+    notes = parser.remove_micro_rests(notes)
     assert len(notes) == 11
     assert isinstance(notes[0], Note)
     assert round(notes[0].duration, 2) == 0.50
@@ -99,6 +102,7 @@ def test_signal_midi():
     code = parser.parse_midi()
     assert code == 0
     notes = parser.get_notes()
+    notes = parser.remove_micro_rests(notes)
     assert len(notes) == 8
     assert isinstance(notes[0], Note)
     assert round(notes[0].duration, 2) == 0.25
@@ -112,6 +116,7 @@ def test_note_off():
     code = parser.parse_midi()
     assert code == 0
     notes = parser.get_notes()
+    notes = parser.remove_micro_rests(notes)
     assert len(notes) == 8
     for note in notes:
         assert round(note.duration, 2) == 0.25

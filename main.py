@@ -71,6 +71,9 @@ def main(args):
         notes = parser.get_notes()
         if notes == -1:
             return -1
+        notes = parser.post_process(notes)
+        if notes == -1:
+            return -1
         
     tesses, pasaggios, _ = tessitura.get_tessitura_and_passaggio(notes, args.clef_range)
     pdf = FPDF()

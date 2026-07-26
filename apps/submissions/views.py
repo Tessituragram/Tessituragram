@@ -69,6 +69,10 @@ def submit_form(request):
                     if notes == -1:
                         form.add_error(None, "Could not extract notes from MIDI file.")
                         return render(request, "submissions/submit_form.html", {"form": form})
+                    notes = parser.post_process(notes)
+                    if notes == -1:
+                        form.add_error(None, "File does not end with C1 note.")
+                        return render(request, "submissions/submit_form.html", {"form": form})
 
                 tesses, passaggios, _ = tessitura.get_tessitura_and_passaggio(notes, clef_range)
 
@@ -232,6 +236,10 @@ def edit_resubmit(request, pk):
                     if notes == -1:
                         form.add_error(None, "Could not extract notes from MIDI file.")
                         return render(request, "submissions/edit_resubmit.html", {"form": form, "record": record})
+                    notes = parser.post_process(notes)
+                    if notes == -1:
+                        form.add_error(None, "File does not end with C1 note.")
+                        return render(request, "submissions/edit_resubmit.html", {"form": form})
 
                 selected_clef_range = form.cleaned_data["clef_range"]
                 clef_range_param = None if selected_clef_range == "None" else selected_clef_range.lower()

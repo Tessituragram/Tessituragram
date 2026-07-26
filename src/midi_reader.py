@@ -676,10 +676,19 @@ class MidiParser:
                     last_event_time_secs = current_time_secs
                     note_start_time_secs = None
                     note_number = None
-        note_list = self.remove_micro_rests(note_list)
-        if (note_list and isinstance(note_list[-1], events.Note) and round(note_list[-1].frequency, 2) == 32.70):
-            note_list.pop()
         return note_list
+
+    def post_process(self, notes):
+        '''
+        Removes micro rests from note_list. Validates and removes C1 from end of track.
+        '''
+        notes = self.remove_micro_rests(notes)
+        if (notes and isinstance(notes[-1], events.Note) and round(notes[-1].frequency, 2) == 32.70):
+            notes.pop()
+        else:
+            print("Need to include a C1 note at the end of file.")
+            return -1
+        return notes
     
     def __enter__(self):
         return self
