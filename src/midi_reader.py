@@ -25,6 +25,7 @@ class MidiParser:
         self.events = []
         self.division = None
         self.number_tracks = None
+        self.error_message = None
 
     def parse_varlen_value(self):
         """
@@ -403,6 +404,7 @@ class MidiParser:
         event = int.from_bytes(self.f.read(1))
         self.byte_counter += 1
         if event < 0x80:
+            self.error_message = f"Found an invalid event in the MIDI file (status byte {event}). The file may be corrupted."
             print("Could not read MIDI file. Found an event with invalid status " + str(event) + ".")
             return -1
         if event == 0xFF:
@@ -486,6 +488,7 @@ class MidiParser:
         events_list = []
         is_track = self.f.read(4)
         if is_track != bytes('MTrk', 'utf-8'):
+            self.error_message = "Could not find a valid track in the MIDI file. The file may be corrupted or not a standard MIDI file."
             print("Could not find a track.")
             return -1
         track_length = int.from_bytes(self.f.read(4))
@@ -502,6 +505,7 @@ class MidiParser:
             else:
                 events_list.append(event)
         if self.byte_counter != track_length:
+            self.error_message = "The MIDI file appears to be incomplete or corrupted (unexpected end of track data)."
             print("Could not read the full file")
             return -1
         return events_list
@@ -552,16 +556,19 @@ class MidiParser:
         """
         is_midi = self.f.read(4)
         if is_midi != bytes('MThd', 'utf-8'):
+            self.error_message = "This doesn't appear to be a valid MIDI file -- MIDI header invalid."
             print("Invalid file type.")
             return -1
         header_size = int.from_bytes(self.f.read(4))
         if header_size != 6:
+            self.error_message = "This doesn't appear to be a valid MIDI file (unexpected header size)."
             print("Invalid file type.")
             return -1
         format_mapping = {0: "Single Track", 1: "Multiple Tracks", 2: "Multiple Songs"}
         file_format = format_mapping[int.from_bytes(self.f.read(2))]
         self.number_tracks = int.from_bytes(self.f.read(2))
         if self.number_tracks != 1 and self.number_tracks != 2:
+            self.error_message = f"This MIDI file has {self.number_tracks} tracks, but only files with 1 or 2 tracks are supported."
             print("Incorrect number of tracks. There should only be 1 or 2 tracks. Found " + str(self.number_tracks) + " tracks.")
             return -1
         division = int.from_bytes(self.f.read(2))
@@ -591,6 +598,7 @@ class MidiParser:
             instrument_track = None
             meta_track = None
             if self.contains_notes(events_track_1) and self.contains_notes(events_track_2):
+                self.error_message = "This MIDI file has notes on two separate tracks. Please combine them into a single melodic line."
                 print("Incorrect number of tracks. Found 2 tracks with notes.")
                 return -1
             if self.contains_notes(events_track_1):
@@ -660,6 +668,8 @@ class MidiParser:
                 continue
             if isinstance(event, events.NoteOnEvent) and event.velocity > 0:
                 if note_number:
+                    self.error_message = "This MIDI file contains overlapping notes (a new note starts before the previous one ends). " \
+                    "Please ensure the melody is a single monophonic line."
                     print("Found overlapping notes.")
                     return -1
                 if current_time_secs > last_event_time_secs:
@@ -686,6 +696,7 @@ class MidiParser:
         if (notes and isinstance(notes[-1], events.Note) and round(notes[-1].frequency, 2) == 32.70):
             notes.pop()
         else:
+            self.error_message = "The MIDI file is missing the required trailing C1 note used for reference."
             print("Need to include a C1 note at the end of file.")
             return -1
         return notes

@@ -63,15 +63,13 @@ def submit_form(request):
                 with midi_reader.MidiParser(midi_path) as parser:
                     status = parser.parse_midi()
                     if status == -1:
-                        form.add_error(None, "Could not parse MIDI file.")
+                        error_msg = parser.error_message or "Could not parse MIDI file."
+                        form.add_error(None, error_msg)
                         return render(request, "submissions/submit_form.html", {"form": form})
                     notes = parser.get_notes()
                     if notes == -1:
-                        form.add_error(None, "Could not extract notes from MIDI file.")
-                        return render(request, "submissions/submit_form.html", {"form": form})
-                    notes = parser.post_process(notes)
-                    if notes == -1:
-                        form.add_error(None, "File does not end with C1 note.")
+                        error_msg = parser.error_message or "Could not extract notes from MIDI file."
+                        form.add_error(None, error_msg)
                         return render(request, "submissions/submit_form.html", {"form": form})
 
                 tesses, passaggios, _ = tessitura.get_tessitura_and_passaggio(notes, clef_range)
