@@ -3,16 +3,16 @@ from django.core.mail import EmailMessage
 from django.views.generic import TemplateView
 from .forms import ContactForm
 
+
 def home(request):
     return render(request, "pages/home.html")
+
 
 class AboutView(TemplateView):
     template_name = "pages/static_page.html"
     extra_context = {
         "page_title": "About",
-        "content": [
-            "This is the about page."
-        ],
+        "content": ["This is the about page."],
     }
 
 
@@ -30,10 +30,9 @@ class MethodologyView(TemplateView):
     template_name = "pages/static_page.html"
     extra_context = {
         "page_title": "Methodology",
-        "content": [
-            "Here is our methodology."
-        ],
+        "content": ["Here is our methodology."],
     }
+
 
 def contact(request):
     if request.method == "POST":

@@ -14,14 +14,27 @@ from .forms import AdvancedSearchForm
 from .filtering import get_filtered_records
 from urllib.parse import urlencode
 
-
 NUMERIC_RANGE_FIELDS = [
-    "q1_freq", "q3_freq", "median_freq", "min_freq", "max_freq",
-    "cycle_dose", "time_dose", "rest_time", "total_time",
-    "hvhp_time_dose", "hvmp_time_dose", "hvlp_time_dose",
-    "mvhp_time_dose", "mvmp_time_dose", "mvlp_time_dose",
-    "lvhp_time_dose", "lvmp_time_dose", "lvlp_time_dose",
+    "q1_freq",
+    "q3_freq",
+    "median_freq",
+    "min_freq",
+    "max_freq",
+    "cycle_dose",
+    "time_dose",
+    "rest_time",
+    "total_time",
+    "hvhp_time_dose",
+    "hvmp_time_dose",
+    "hvlp_time_dose",
+    "mvhp_time_dose",
+    "mvmp_time_dose",
+    "mvlp_time_dose",
+    "lvhp_time_dose",
+    "lvmp_time_dose",
+    "lvlp_time_dose",
 ]
+
 
 @login_required
 def delete_record(request, pk):
@@ -38,6 +51,7 @@ def delete_record(request, pk):
         return redirect("records:database")
 
     return render(request, "records/delete_confirm.html", {"record": record})
+
 
 @login_required
 def database(request):
@@ -64,18 +78,23 @@ def database(request):
         if key in selected_columns
     ]
 
-    return render(request, "records/database.html", {
-        "page_obj": page_obj,
-        "total_count": total_count,
-        "current_sort": sort,
-        "search_form": search_form,
-        "querystring": querystring,
-        "search_querystring": search_querystring,
-        "active_filters": active_filters,
-        "all_columns": AVAILABLE_COLUMNS,
-        "selected_columns": selected_columns,
-        "display_columns": display_columns,
-    })
+    return render(
+        request,
+        "records/database.html",
+        {
+            "page_obj": page_obj,
+            "total_count": total_count,
+            "current_sort": sort,
+            "search_form": search_form,
+            "querystring": querystring,
+            "search_querystring": search_querystring,
+            "active_filters": active_filters,
+            "all_columns": AVAILABLE_COLUMNS,
+            "selected_columns": selected_columns,
+            "display_columns": display_columns,
+        },
+    )
+
 
 @login_required
 def record_detail(request, pk):
@@ -100,12 +119,18 @@ def record_detail(request, pk):
 
     return render(request, "records/record_detail.html", {"record": record})
 
+
 @staff_member_required
 def midi_download(request, pk):
     record = get_object_or_404(Record, pk=pk)
     if not record.midi_file:
         raise Http404
-    return FileResponse(record.midi_file.open("rb"), as_attachment=True, filename=record.midi_file.name.split("/")[-1])
+    return FileResponse(
+        record.midi_file.open("rb"),
+        as_attachment=True,
+        filename=record.midi_file.name.split("/")[-1],
+    )
+
 
 @login_required
 def deleted_list(request):

@@ -15,7 +15,11 @@ from fpdf import FPDF
 from src import midi_reader, tessitura, utils
 from src.tessitura import TessPassContainer
 from apps.records.models import Record
-from apps.records.columns import AVAILABLE_COLUMNS, DEFAULT_REVIEW_COLUMNS, get_display_columns
+from apps.records.columns import (
+    AVAILABLE_COLUMNS,
+    DEFAULT_REVIEW_COLUMNS,
+    get_display_columns,
+)
 from .forms import SubmissionForm, ReviewerEditForm
 
 NOTIFICATION_EMAIL = "tessituragram@tessituragram.com"
@@ -28,13 +32,14 @@ def notify_admins_of_submission(request, record):
     send_mail(
         subject=f"New submission for review: {record.filename}",
         message=(
-            f"{record.submitted_by} submitted \"{record.filename}\" "
+            f'{record.submitted_by} submitted "{record.filename}" '
             f"({record.composer}) for review.\n\n"
             f"Review it here: {review_url}"
         ),
         from_email=None,
         recipient_list=[NOTIFICATION_EMAIL],
     )
+
 
 @login_required
 def submit_form(request):
@@ -48,7 +53,6 @@ def submit_form(request):
             style = form.cleaned_data["style"]
             author = form.cleaned_data.get("author", "")
             clef_range = form.cleaned_data.get("clef_range") or None
-            
 
             work_dir = tempfile.mkdtemp(prefix="tessitura_")
             output_dir = os.path.join(work_dir, "results")
@@ -65,14 +69,23 @@ def submit_form(request):
                     if status == -1:
                         error_msg = parser.error_message or "Could not parse MIDI file."
                         form.add_error(None, error_msg)
-                        return render(request, "submissions/submit_form.html", {"form": form})
+                        return render(
+                            request, "submissions/submit_form.html", {"form": form}
+                        )
                     notes = parser.get_notes()
                     if notes == -1:
-                        error_msg = parser.error_message or "Could not extract notes from MIDI file."
+                        error_msg = (
+                            parser.error_message
+                            or "Could not extract notes from MIDI file."
+                        )
                         form.add_error(None, error_msg)
-                        return render(request, "submissions/submit_form.html", {"form": form})
+                        return render(
+                            request, "submissions/submit_form.html", {"form": form}
+                        )
 
-                tesses, passaggios, _ = tessitura.get_tessitura_and_passaggio(notes, clef_range)
+                tesses, passaggios, _ = tessitura.get_tessitura_and_passaggio(
+                    notes, clef_range
+                )
 
                 keep_private = form.cleaned_data.get("keep_private", False)
                 initial_status = "private" if keep_private else "pending"
@@ -112,24 +125,55 @@ def submit_form(request):
                     )
 
                     with open(midi_path, "rb") as midi_f:
-                        record.midi_file.save(uploaded_file.name, File(midi_f), save=True)
+                        record.midi_file.save(
+                            uploaded_file.name, File(midi_f), save=True
+                        )
 
                     pdf = FPDF()
-                    pdf.add_font("times_new", "", utils.resource_path(os.path.join("data", "Times New Roman.ttf")))
-                    pdf.add_font("times_new", "B", utils.resource_path(os.path.join("data", "Times New Roman Bold.ttf")))
-                    pdf.add_font("times_new", "I", utils.resource_path(os.path.join("data", "Times New Roman Italic.ttf")))
-                    pdf.add_font("times_new", "BI", utils.resource_path(os.path.join("data", "Times New Roman Bold Italic.ttf")))
+                    pdf.add_font(
+                        "times_new",
+                        "",
+                        utils.resource_path(
+                            os.path.join("data", "Times New Roman.ttf")
+                        ),
+                    )
+                    pdf.add_font(
+                        "times_new",
+                        "B",
+                        utils.resource_path(
+                            os.path.join("data", "Times New Roman Bold.ttf")
+                        ),
+                    )
+                    pdf.add_font(
+                        "times_new",
+                        "I",
+                        utils.resource_path(
+                            os.path.join("data", "Times New Roman Italic.ttf")
+                        ),
+                    )
+                    pdf.add_font(
+                        "times_new",
+                        "BI",
+                        utils.resource_path(
+                            os.path.join("data", "Times New Roman Bold Italic.ttf")
+                        ),
+                    )
                     pdf.add_page()
 
                     container = TessPassContainer(
-                        tess, passaggio, title, pdf,
+                        tess,
+                        passaggio,
+                        title,
+                        pdf,
                         output_dir=output_dir,
                         submitted_by=f"{request.user.first_name} {request.user.last_name}",
                     )
                     container.ensure_musescore_configured()
                     container.write_to_pdf()
 
-                    pdf_filename = f"{record.pk}-{tess.clef_range}-{uuid.uuid4().hex[:8]}.pdf"
+                    pdf_filename = (
+                        f"{record.pk}-{tess.clef_range}-{uuid.uuid4().hex[:8]}.pdf"
+                    )
                     pdf_path = os.path.join(work_dir, pdf_filename)
                     pdf.output(pdf_path)
 
@@ -148,9 +192,11 @@ def submit_form(request):
 
     return render(request, "submissions/submit_form.html", {"form": form})
 
+
 @login_required
 def submission_success(request):
     return render(request, "submissions/submission_success.html")
+
 
 @staff_member_required
 def review_list(request):
@@ -158,24 +204,38 @@ def review_list(request):
 
     sort = request.GET.get("sort", "created_at")
     if sort == "submitter":
-        records = records.order_by("submitted_by__first_name", "submitted_by__last_name")
+        records = records.order_by(
+            "submitted_by__first_name", "submitted_by__last_name"
+        )
     elif sort == "-submitter":
-        records = records.order_by("-submitted_by__first_name", "-submitted_by__last_name")
-    elif sort.lstrip("-") in {key for key, *_ in AVAILABLE_COLUMNS} | {"title", "created_at"}:
+        records = records.order_by(
+            "-submitted_by__first_name", "-submitted_by__last_name"
+        )
+    elif sort.lstrip("-") in {key for key, *_ in AVAILABLE_COLUMNS} | {
+        "title",
+        "created_at",
+    }:
         records = records.order_by(sort)
 
-    selected_columns, display_columns = get_display_columns(request, DEFAULT_REVIEW_COLUMNS)
+    selected_columns, display_columns = get_display_columns(
+        request, DEFAULT_REVIEW_COLUMNS
+    )
 
     active_filters = [(k, v) for k, values in request.GET.lists() for v in values if v]
 
-    return render(request, "submissions/review_list.html", {
-        "records": records,
-        "current_sort": sort,
-        "active_filters": active_filters,
-        "all_columns": AVAILABLE_COLUMNS,
-        "selected_columns": selected_columns,
-        "display_columns": display_columns,
-    })
+    return render(
+        request,
+        "submissions/review_list.html",
+        {
+            "records": records,
+            "current_sort": sort,
+            "active_filters": active_filters,
+            "all_columns": AVAILABLE_COLUMNS,
+            "selected_columns": selected_columns,
+            "display_columns": display_columns,
+        },
+    )
+
 
 @staff_member_required
 def review_detail(request, pk):
@@ -196,6 +256,7 @@ def review_detail(request, pk):
 
     return render(request, "submissions/review_detail.html", {"record": record})
 
+
 @staff_member_required
 def edit_resubmit(request, pk):
     record = get_object_or_404(Record, pk=pk, is_deleted=False)
@@ -206,8 +267,15 @@ def edit_resubmit(request, pk):
             uploaded_file = form.cleaned_data.get("midi_file")
 
             if not uploaded_file and not record.midi_file:
-                form.add_error(None, "No MIDI file is on record. Please upload one to reprocess this submission.")
-                return render(request, "submissions/edit_resubmit.html", {"form": form, "record": record})
+                form.add_error(
+                    None,
+                    "No MIDI file is on record. Please upload one to reprocess this submission.",
+                )
+                return render(
+                    request,
+                    "submissions/edit_resubmit.html",
+                    {"form": form, "record": record},
+                )
 
             work_dir = tempfile.mkdtemp(prefix="tessitura_edit_")
             output_dir = os.path.join(work_dir, "results")
@@ -221,28 +289,48 @@ def edit_resubmit(request, pk):
                         for chunk in uploaded_file.chunks():
                             f.write(chunk)
                 else:
-                    midi_path = os.path.join(work_dir, os.path.basename(record.midi_file.name))
-                    with record.midi_file.open("rb") as source, open(midi_path, "wb") as dest:
+                    midi_path = os.path.join(
+                        work_dir, os.path.basename(record.midi_file.name)
+                    )
+                    with record.midi_file.open("rb") as source, open(
+                        midi_path, "wb"
+                    ) as dest:
                         shutil.copyfileobj(source, dest)
 
                 with midi_reader.MidiParser(midi_path) as parser:
                     status = parser.parse_midi()
                     if status == -1:
                         form.add_error(None, "Could not parse MIDI file.")
-                        return render(request, "submissions/edit_resubmit.html", {"form": form, "record": record})
+                        return render(
+                            request,
+                            "submissions/edit_resubmit.html",
+                            {"form": form, "record": record},
+                        )
                     notes = parser.get_notes()
                     if notes == -1:
                         form.add_error(None, "Could not extract notes from MIDI file.")
-                        return render(request, "submissions/edit_resubmit.html", {"form": form, "record": record})
+                        return render(
+                            request,
+                            "submissions/edit_resubmit.html",
+                            {"form": form, "record": record},
+                        )
                     notes = parser.post_process(notes)
                     if notes == -1:
                         form.add_error(None, "File does not end with C1 note.")
-                        return render(request, "submissions/edit_resubmit.html", {"form": form})
+                        return render(
+                            request, "submissions/edit_resubmit.html", {"form": form}
+                        )
 
                 selected_clef_range = form.cleaned_data["clef_range"]
-                clef_range_param = None if selected_clef_range == "None" else selected_clef_range.lower()
+                clef_range_param = (
+                    None
+                    if selected_clef_range == "None"
+                    else selected_clef_range.lower()
+                )
 
-                tesses, passaggios, _ = tessitura.get_tessitura_and_passaggio(notes, clef_range_param)
+                tesses, passaggios, _ = tessitura.get_tessitura_and_passaggio(
+                    notes, clef_range_param
+                )
 
                 match = None
                 for tess, passaggio in zip(tesses, passaggios):
@@ -251,8 +339,14 @@ def edit_resubmit(request, pk):
                         break
 
                 if match is None:
-                    form.add_error(None, "Could not compute results for the selected clef_range.")
-                    return render(request, "submissions/edit_resubmit.html", {"form": form, "record": record})
+                    form.add_error(
+                        None, "Could not compute results for the selected clef_range."
+                    )
+                    return render(
+                        request,
+                        "submissions/edit_resubmit.html",
+                        {"form": form, "record": record},
+                    )
 
                 tess, passaggio = match
 
@@ -291,21 +385,52 @@ def edit_resubmit(request, pk):
                 record.lvlp_time_dose = passaggio.lvlp.time_dose
 
                 pdf = FPDF()
-                pdf.add_font("times_new", "", utils.resource_path(os.path.join("data", "Times New Roman.ttf")))
-                pdf.add_font("times_new", "B", utils.resource_path(os.path.join("data", "Times New Roman Bold.ttf")))
-                pdf.add_font("times_new", "I", utils.resource_path(os.path.join("data", "Times New Roman Italic.ttf")))
-                pdf.add_font("times_new", "BI", utils.resource_path(os.path.join("data", "Times New Roman Bold Italic.ttf")))
+                pdf.add_font(
+                    "times_new",
+                    "",
+                    utils.resource_path(os.path.join("data", "Times New Roman.ttf")),
+                )
+                pdf.add_font(
+                    "times_new",
+                    "B",
+                    utils.resource_path(
+                        os.path.join("data", "Times New Roman Bold.ttf")
+                    ),
+                )
+                pdf.add_font(
+                    "times_new",
+                    "I",
+                    utils.resource_path(
+                        os.path.join("data", "Times New Roman Italic.ttf")
+                    ),
+                )
+                pdf.add_font(
+                    "times_new",
+                    "BI",
+                    utils.resource_path(
+                        os.path.join("data", "Times New Roman Bold Italic.ttf")
+                    ),
+                )
                 pdf.add_page()
 
                 container = TessPassContainer(
-                    tess, passaggio, record.title, pdf,
+                    tess,
+                    passaggio,
+                    record.title,
+                    pdf,
                     output_dir=output_dir,
-                    submitted_by=f"{record.submitted_by.first_name} {record.submitted_by.last_name}" if record.submitted_by else None,
+                    submitted_by=(
+                        f"{record.submitted_by.first_name} {record.submitted_by.last_name}"
+                        if record.submitted_by
+                        else None
+                    ),
                 )
                 container.ensure_musescore_configured()
                 container.write_to_pdf()
 
-                pdf_filename = f"{record.pk}-{tess.clef_range}-{uuid.uuid4().hex[:8]}.pdf"
+                pdf_filename = (
+                    f"{record.pk}-{tess.clef_range}-{uuid.uuid4().hex[:8]}.pdf"
+                )
                 pdf_path = os.path.join(work_dir, pdf_filename)
                 pdf.output(pdf_path)
 
@@ -318,7 +443,9 @@ def edit_resubmit(request, pk):
                     if record.midi_file:
                         record.midi_file.delete(save=False)
                     with open(midi_path, "rb") as midi_f:
-                        record.midi_file.save(uploaded_file.name, File(midi_f), save=False)
+                        record.midi_file.save(
+                            uploaded_file.name, File(midi_f), save=False
+                        )
 
                 record.save()
 
@@ -327,12 +454,16 @@ def edit_resubmit(request, pk):
             finally:
                 shutil.rmtree(work_dir, ignore_errors=True)
     else:
-        form = ReviewerEditForm(initial={
-            "title": record.title,
-            "composer": record.composer,
-            "author": record.author,
-            "style": record.style,
-            "clef_range": record.clef_range,
-        })
+        form = ReviewerEditForm(
+            initial={
+                "title": record.title,
+                "composer": record.composer,
+                "author": record.author,
+                "style": record.style,
+                "clef_range": record.clef_range,
+            }
+        )
 
-    return render(request, "submissions/edit_resubmit.html", {"form": form, "record": record})
+    return render(
+        request, "submissions/edit_resubmit.html", {"form": form, "record": record}
+    )

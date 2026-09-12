@@ -10,9 +10,25 @@ COLUMN_DEFINITIONS = [
     ("author", "Author", lambda r: r.author),
     ("style", "Style", lambda r: r.get_style_display()),
     ("clef_range", "Clef", lambda r: r.clef_range),
-    ("submitter", "Submitted By", lambda r: f"{r.submitted_by.first_name} {r.submitted_by.last_name}" if r.submitted_by else ""),
-    ("created_at", "Submitted On", lambda r: r.created_at.strftime("%Y-%m-%d") if r.created_at else ""),
-    ("q1_range", "Tessitura Range", lambda r: f"{r.q1_pitch}{r.q1_octave}–{r.q3_pitch}{r.q3_octave}"),
+    (
+        "submitter",
+        "Submitted By",
+        lambda r: (
+            f"{r.submitted_by.first_name} {r.submitted_by.last_name}"
+            if r.submitted_by
+            else ""
+        ),
+    ),
+    (
+        "created_at",
+        "Submitted On",
+        lambda r: r.created_at.strftime("%Y-%m-%d") if r.created_at else "",
+    ),
+    (
+        "q1_range",
+        "Tessitura Range",
+        lambda r: f"{r.q1_pitch}{r.q1_octave}–{r.q3_pitch}{r.q3_octave}",
+    ),
     ("q1_freq", "Q1 (Hz)", lambda r: r.q1_freq),
     ("q3_freq", "Q3 (Hz)", lambda r: r.q3_freq),
     ("median_freq", "Median (Hz)", lambda r: r.median_freq),
@@ -40,10 +56,18 @@ def export_database(request):
     records, _, _ = get_filtered_records(request)
 
     selected_keys = request.GET.getlist("columns") or DEFAULT_COLUMNS
-    columns = [(key, label, accessor) for key, label, accessor in COLUMN_DEFINITIONS if key in selected_keys]
+    columns = [
+        (key, label, accessor)
+        for key, label, accessor in COLUMN_DEFINITIONS
+        if key in selected_keys
+    ]
 
     if not columns:
-        columns = [(key, label, accessor) for key, label, accessor in COLUMN_DEFINITIONS if key in DEFAULT_COLUMNS]
+        columns = [
+            (key, label, accessor)
+            for key, label, accessor in COLUMN_DEFINITIONS
+            if key in DEFAULT_COLUMNS
+        ]
 
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -61,7 +85,9 @@ def export_database(request):
         ws.append(row)
 
     for i, (_, label, _) in enumerate(columns, start=1):
-        ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = max(len(label) + 2, 12)
+        ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = max(
+            len(label) + 2, 12
+        )
 
     response = HttpResponse(
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

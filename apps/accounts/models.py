@@ -4,6 +4,7 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 
+
 # apps/accounts/models.py
 class PendingSignup(models.Model):
     username = models.CharField(max_length=150, unique=True)
@@ -16,6 +17,7 @@ class PendingSignup(models.Model):
 
     def is_expired(self):
         return timezone.now() > self.created_at + timedelta(hours=24)
+
 
 class PendingEmailChange(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

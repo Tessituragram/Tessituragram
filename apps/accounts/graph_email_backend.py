@@ -10,9 +10,13 @@ class GraphEmailBackend(BaseEmailBackend):
     def get_access_token(self):
         authority = f"https://login.microsoftonline.com/{settings.MS_TENANT_ID}"
         app = msal.ConfidentialClientApplication(
-            settings.MS_CLIENT_ID, authority=authority, client_credential=settings.MS_CLIENT_SECRET
+            settings.MS_CLIENT_ID,
+            authority=authority,
+            client_credential=settings.MS_CLIENT_SECRET,
         )
-        result = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
+        result = app.acquire_token_for_client(
+            scopes=["https://graph.microsoft.com/.default"]
+        )
         if "access_token" not in result:
             raise Exception(f"Failed to get token: {result.get('error_description')}")
         return result["access_token"]
@@ -32,7 +36,9 @@ class GraphEmailBackend(BaseEmailBackend):
                 "message": {
                     "subject": message.subject,
                     "body": {"contentType": "Text", "content": message.body},
-                    "toRecipients": [{"emailAddress": {"address": addr}} for addr in message.to],
+                    "toRecipients": [
+                        {"emailAddress": {"address": addr}} for addr in message.to
+                    ],
                 }
             }
 
@@ -43,7 +49,10 @@ class GraphEmailBackend(BaseEmailBackend):
 
             response = requests.post(
                 url,
-                headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json",
+                },
                 json=payload,
             )
             if response.status_code == 202:

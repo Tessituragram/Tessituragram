@@ -8,7 +8,11 @@ from apps.records.models import Record
 from urllib.parse import urlencode
 from .forms import ProfileEditForm, SignUpForm, EmailChangeForm
 from .models import PendingSignup, PendingEmailChange
-from apps.records.columns import AVAILABLE_COLUMNS, DEFAULT_PROFILE_COLUMNS, get_display_columns
+from apps.records.columns import (
+    AVAILABLE_COLUMNS,
+    DEFAULT_PROFILE_COLUMNS,
+    get_display_columns,
+)
 
 
 def signup(request):
@@ -26,7 +30,9 @@ def signup(request):
                 from_email=None,
                 recipient_list=[pending.email],
             )
-            return render(request, "registration/check_email.html", {"email": pending.email})
+            return render(
+                request, "registration/check_email.html", {"email": pending.email}
+            )
     else:
         form = SignUpForm()
     return render(request, "registration/signup.html", {"form": form})
@@ -53,6 +59,7 @@ def verify_email(request, token):
     pending.delete()
 
     return render(request, "registration/verify_success.html")
+
 
 @login_required
 def profile(request):
@@ -92,30 +99,43 @@ def profile(request):
 
     sort = request.GET.get("sort", "-created_at")
     if sort == "submitter":
-        records = records.order_by("submitted_by__first_name", "submitted_by__last_name")
+        records = records.order_by(
+            "submitted_by__first_name", "submitted_by__last_name"
+        )
     elif sort == "-submitter":
-        records = records.order_by("-submitted_by__first_name", "-submitted_by__last_name")
-    elif sort.lstrip("-") in {key for key, *_ in AVAILABLE_COLUMNS} | {"title", "created_at"}:
+        records = records.order_by(
+            "-submitted_by__first_name", "-submitted_by__last_name"
+        )
+    elif sort.lstrip("-") in {key for key, *_ in AVAILABLE_COLUMNS} | {
+        "title",
+        "created_at",
+    }:
         records = records.order_by(sort)
 
-    selected_columns, display_columns = get_display_columns(request, DEFAULT_PROFILE_COLUMNS)
+    selected_columns, display_columns = get_display_columns(
+        request, DEFAULT_PROFILE_COLUMNS
+    )
 
     querydict = {k: v for k, values in request.GET.lists() for v in values if v}
     active_filters = [(k, v) for k, values in request.GET.lists() for v in values if v]
 
     pending_email = PendingEmailChange.objects.filter(user=request.user).first()
 
-    return render(request, "accounts/profile.html", {
-        "profile_form": profile_form,
-        "email_form": email_form,
-        "records": records,
-        "pending_email": pending_email,
-        "current_sort": sort,
-        "active_filters": active_filters,
-        "all_columns": AVAILABLE_COLUMNS,
-        "selected_columns": selected_columns,
-        "display_columns": display_columns,
-    })
+    return render(
+        request,
+        "accounts/profile.html",
+        {
+            "profile_form": profile_form,
+            "email_form": email_form,
+            "records": records,
+            "pending_email": pending_email,
+            "current_sort": sort,
+            "active_filters": active_filters,
+            "all_columns": AVAILABLE_COLUMNS,
+            "selected_columns": selected_columns,
+            "display_columns": display_columns,
+        },
+    )
 
 
 def verify_email_change(request, token):

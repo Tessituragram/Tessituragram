@@ -3,21 +3,41 @@ from .models import Record
 from .forms import AdvancedSearchForm
 
 NUMERIC_RANGE_FIELDS = [
-    "q1_freq", "q3_freq", "median_freq", "min_freq", "max_freq",
-    "cycle_dose", "time_dose", "rest_time", "total_time",
-    "hvhp_time_dose", "hvmp_time_dose", "hvlp_time_dose",
-    "mvhp_time_dose", "mvmp_time_dose", "mvlp_time_dose",
-    "lvhp_time_dose", "lvmp_time_dose", "lvlp_time_dose",
+    "q1_freq",
+    "q3_freq",
+    "median_freq",
+    "min_freq",
+    "max_freq",
+    "cycle_dose",
+    "time_dose",
+    "rest_time",
+    "total_time",
+    "hvhp_time_dose",
+    "hvmp_time_dose",
+    "hvlp_time_dose",
+    "mvhp_time_dose",
+    "mvmp_time_dose",
+    "mvlp_time_dose",
+    "lvhp_time_dose",
+    "lvmp_time_dose",
+    "lvlp_time_dose",
 ]
 
 ALLOWED_SORTS = {
-    "title", "-title",
-    "composer", "-composer",
-    "author", "-author",
-    "clef_range", "-clef_range",
-    "q1_freq", "-q1_freq",
-    "created_at", "-created_at",
-    "submitter", "-submitter",
+    "title",
+    "-title",
+    "composer",
+    "-composer",
+    "author",
+    "-author",
+    "clef_range",
+    "-clef_range",
+    "q1_freq",
+    "-q1_freq",
+    "created_at",
+    "-created_at",
+    "submitter",
+    "-submitter",
 }
 
 
@@ -41,8 +61,8 @@ def get_filtered_records(request):
         if data.get("submitter"):
             submitter_query = data["submitter"]
             records = records.filter(
-                Q(submitted_by__first_name__icontains=submitter_query) |
-                Q(submitted_by__last_name__icontains=submitter_query)
+                Q(submitted_by__first_name__icontains=submitter_query)
+                | Q(submitted_by__last_name__icontains=submitter_query)
             )
 
         for field in NUMERIC_RANGE_FIELDS:
@@ -55,9 +75,13 @@ def get_filtered_records(request):
 
     sort = request.GET.get("sort", "-created_at")
     if sort == "submitter":
-        records = records.order_by("submitted_by__first_name", "submitted_by__last_name")
+        records = records.order_by(
+            "submitted_by__first_name", "submitted_by__last_name"
+        )
     elif sort == "-submitter":
-        records = records.order_by("-submitted_by__first_name", "-submitted_by__last_name")
+        records = records.order_by(
+            "-submitted_by__first_name", "-submitted_by__last_name"
+        )
     elif sort in ALLOWED_SORTS:
         records = records.order_by(sort)
 

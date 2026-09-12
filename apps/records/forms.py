@@ -7,7 +7,7 @@ class AdvancedSearchForm(forms.Form):
     composer = forms.CharField(max_length=200, required=False)
     author = forms.CharField(max_length=200, required=False)
     style = forms.ChoiceField(
-    choices=[("", "Any")] + Record.STYLE_CHOICES,
+        choices=[("", "Any")] + Record.STYLE_CHOICES,
         required=False,
     )
     submitter = forms.CharField(required=False, label="Submitted by")
@@ -44,29 +44,65 @@ class AdvancedSearchForm(forms.Form):
     total_time_min = forms.FloatField(required=False, label="Total time (min)")
     total_time_max = forms.FloatField(required=False, label="Total time (max)")
 
-    hvhp_time_dose_min = forms.FloatField(required=False, label="HV High passaggio (min)")
-    hvhp_time_dose_max = forms.FloatField(required=False, label="HV High passaggio (max)")
+    hvhp_time_dose_min = forms.FloatField(
+        required=False, label="HV High passaggio (min)"
+    )
+    hvhp_time_dose_max = forms.FloatField(
+        required=False, label="HV High passaggio (max)"
+    )
 
-    hvmp_time_dose_min = forms.FloatField(required=False, label="HV Middle passaggio (min)")
-    hvmp_time_dose_max = forms.FloatField(required=False, label="HV Middle passaggio (max)")
+    hvmp_time_dose_min = forms.FloatField(
+        required=False, label="HV Middle passaggio (min)"
+    )
+    hvmp_time_dose_max = forms.FloatField(
+        required=False, label="HV Middle passaggio (max)"
+    )
 
-    hvlp_time_dose_min = forms.FloatField(required=False, label="HV Low passaggio (min)")
-    hvlp_time_dose_max = forms.FloatField(required=False, label="HV Low passaggio (max)")
+    hvlp_time_dose_min = forms.FloatField(
+        required=False, label="HV Low passaggio (min)"
+    )
+    hvlp_time_dose_max = forms.FloatField(
+        required=False, label="HV Low passaggio (max)"
+    )
 
-    mvhp_time_dose_min = forms.FloatField(required=False, label="MV High passaggio (min)")
-    mvhp_time_dose_max = forms.FloatField(required=False, label="MV High passaggio (max)")
+    mvhp_time_dose_min = forms.FloatField(
+        required=False, label="MV High passaggio (min)"
+    )
+    mvhp_time_dose_max = forms.FloatField(
+        required=False, label="MV High passaggio (max)"
+    )
 
-    mvmp_time_dose_min = forms.FloatField(required=False, label="MV Middle passaggio (min)")
-    mvmp_time_dose_max = forms.FloatField(required=False, label="MV Middle passaggio (max)")
+    mvmp_time_dose_min = forms.FloatField(
+        required=False, label="MV Middle passaggio (min)"
+    )
+    mvmp_time_dose_max = forms.FloatField(
+        required=False, label="MV Middle passaggio (max)"
+    )
 
-    mvlp_time_dose_min = forms.FloatField(required=False, label="MV Low passaggio (min)")
-    mvlp_time_dose_max = forms.FloatField(required=False, label="MV Low passaggio (max)")
+    mvlp_time_dose_min = forms.FloatField(
+        required=False, label="MV Low passaggio (min)"
+    )
+    mvlp_time_dose_max = forms.FloatField(
+        required=False, label="MV Low passaggio (max)"
+    )
 
-    lvhp_time_dose_min = forms.FloatField(required=False, label="LV High passaggio (min)")
-    lvhp_time_dose_max = forms.FloatField(required=False, label="LV High passaggio (max)")
+    lvhp_time_dose_min = forms.FloatField(
+        required=False, label="LV High passaggio (min)"
+    )
+    lvhp_time_dose_max = forms.FloatField(
+        required=False, label="LV High passaggio (max)"
+    )
 
-    lvmp_time_dose_min = forms.FloatField(required=False, label="LV Middle passaggio (min)")
-    lvmp_time_dose_max = forms.FloatField(required=False, label="LV Middle passaggio (max)")
+    lvmp_time_dose_min = forms.FloatField(
+        required=False, label="LV Middle passaggio (min)"
+    )
+    lvmp_time_dose_max = forms.FloatField(
+        required=False, label="LV Middle passaggio (max)"
+    )
 
-    lvlp_time_dose_min = forms.FloatField(required=False, label="LV Low passaggio (min)")
-    lvlp_time_dose_max = forms.FloatField(required=False, label="LV Low passaggio (max)")
+    lvlp_time_dose_min = forms.FloatField(
+        required=False, label="LV Low passaggio (min)"
+    )
+    lvlp_time_dose_max = forms.FloatField(
+        required=False, label="LV Low passaggio (max)"
+    )
