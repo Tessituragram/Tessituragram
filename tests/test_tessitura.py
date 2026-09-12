@@ -6,8 +6,8 @@ sys.path.insert(
 )
 
 from src.events import Note, Rest
-import tessitura
-from tessitura import Tessitura, Passaggio
+from src import tessitura
+from src.tessitura import Tessitura, Passaggio
 from src import utils
 
 """test_tessitura.py: Test file for performing tessiturogram analysis 
