@@ -5,6 +5,7 @@ on:
     branches: [web-dev]
     paths:
       - 'src/**'
+      - 'tests/**'
 
 jobs:
   test:
@@ -31,4 +32,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
       - run: git subtree split --prefix=src -b backend-split
+      - run: git subtree split --prefix=tests -b backend-split
       - run: git push origin backend-split:main --force
