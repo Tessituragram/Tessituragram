@@ -1,19 +1,24 @@
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
+)
 
 from src import midi_reader
 from src.events import Note, Rest, TempoEvent, NoteOnEvent, NoteOffEvent
 
 """test_parsing.py: Test file for parsing MIDI files to notes and rests"""
 
-__author__      = "Troy Conklin"
+__author__ = "Troy Conklin"
+
 
 def test_3quarter_notes_and_rest():
-    '''
+    """
     Tests parsing a midi file with 2 quarter notes, a quarter rest, and a quarter note
-    '''
-    parser = midi_reader.MidiParser("data\\test_parsing\\3 Quarter Notes and Rest.mid")
+    """
+    test_path = os.path.join("data", "test_parsing", "3 Quarter Notes and Rest.mid")
+    parser = midi_reader.MidiParser(test_path)
     code = parser.parse_midi()
     assert code == 0
     notes = parser.get_notes()
@@ -31,11 +36,15 @@ def test_3quarter_notes_and_rest():
     assert round(notes[3].duration, 2) == 0.50
     assert notes[3].frequency == 440
 
+
 def test_3quarter_notes_and_rest_final_whole_note():
-    '''
+    """
     Tests parsing a midi file with a final C1 whole note
-    '''
-    parser = midi_reader.MidiParser("data\\test_parsing\\3 Quarter Notes and Rest with Final C1 Whole Note.mid")
+    """
+    test_path = os.path.join(
+        "data", "test_parsing", "3 Quarter Notes and Rest with Final C1 Whole Note.mid"
+    )
+    parser = midi_reader.MidiParser(test_path)
     code = parser.parse_midi()
     assert code == 0
     notes = parser.get_notes()
@@ -52,11 +61,13 @@ def test_3quarter_notes_and_rest_final_whole_note():
     assert isinstance(notes[4], Rest)
     assert round(notes[4].duration, 2) == 2.00
 
+
 def test_tempo_change_1():
-    '''
+    """
     Tests a midi file with two tempo changes and rests
-    '''
-    parser = midi_reader.MidiParser("data\\test_parsing\\Test Tempo Change 1.mid")
+    """
+    test_path = os.path.join("data", "test_parsing", "Test Tempo Change 1.mid")
+    parser = midi_reader.MidiParser(test_path)
     code = parser.parse_midi()
     assert code == 0
     notes = parser.get_notes()
@@ -85,20 +96,26 @@ def test_tempo_change_1():
     assert isinstance(notes[10], Note)
     assert round(notes[10].duration, 2) == 1.00
 
+
 def test_overlapping_notes():
-    '''
+    """
     Getting a list of notes should fail for a file with notes that overlap.
-    '''
-    parser = midi_reader.MidiParser("data\\test_parsing\\Test Overlapping Notes.mid")
+    """
+    test_path = os.path.join("data", "test_parsing", "Test Overlapping Notes.mid")
+    parser = midi_reader.MidiParser(test_path)
     parser.parse_midi()
     notes = parser.get_notes()
     assert notes == -1
 
+
 def test_signal_midi():
-    '''
+    """
     Test a MIDI file made with a different app
-    '''
-    parser = midi_reader.MidiParser("data\\test_parsing\\Test Midi Made with Signal MIDI.mid")
+    """
+    test_path = os.path.join(
+        "data", "test_parsing", "Test Midi Made with Signal MIDI.mid"
+    )
+    parser = midi_reader.MidiParser(test_path)
     code = parser.parse_midi()
     assert code == 0
     notes = parser.get_notes()
@@ -108,11 +125,15 @@ def test_signal_midi():
     assert round(notes[0].duration, 2) == 0.25
     assert notes[0].frequency == 246.94
 
+
 def test_note_off():
-    '''
+    """
     Test a MIDI file with Note Off events
-    '''
-    parser = midi_reader.MidiParser("data\\test_parsing\\Test Midi Made with Signal MIDI.mid")
+    """
+    test_path = os.path.join(
+        "data", "test_parsing", "Test Midi Made with Signal MIDI.mid"
+    )
+    parser = midi_reader.MidiParser(test_path)
     code = parser.parse_midi()
     assert code == 0
     notes = parser.get_notes()
@@ -129,11 +150,15 @@ def test_note_off():
     assert notes[6].frequency == 293.66
     assert notes[7].frequency == 293.66
 
+
 def test_two_tracks():
-    '''
+    """
     Test a MIDI file with a meta track and an instrument track (made with signal MIDI)
-    '''
-    parser = midi_reader.MidiParser("data\\test_parsing\\Two Track MIDI with Tempo Changes.mid")
+    """
+    test_path = os.path.join(
+        "data", "test_parsing", "Two Track MIDI with Tempo Changes.mid"
+    )
+    parser = midi_reader.MidiParser(test_path)
     code = parser.parse_midi()
     assert code == 0
     notes = parser.get_notes()
@@ -151,25 +176,33 @@ def test_two_tracks():
     assert isinstance(notes[6], Rest)
     assert notes[7].frequency == 311.13
 
+
 def test_two_tracks_with_notes():
-    '''
+    """
     Verify a midi file with two tracks containing notes in each track results in an error
-    '''
-    reader = midi_reader.MidiParser("data\\test_parsing\\Two Track MIDI with Notes in Each Track.mid")
+    """
+    test_path = os.path.join(
+        "data", "test_parsing", "Two Track MIDI with Notes in Each Track.mid"
+    )
+    reader = midi_reader.MidiParser(test_path)
     output = reader.parse_midi()
     assert output == -1
 
+
 def test_two_tracks_notes_on_second_tempo_on_first():
-    '''
+    """
     Test parsing a midi file with tempo changes on the first track and notes on the second track.
     File has contents
-	4D 54 68 64 00 00 00 06 00 01 00 02 
-    01 E0 4D 54 72 6B 00 00 00 0D 00 92 
-    01 02 83 60 92 01 00 00 FF 2F 00 4D 
-    54 72 6B 00 00 00 0B 00 FF 51 03 0F 
+        4D 54 68 64 00 00 00 06 00 01 00 02
+    01 E0 4D 54 72 6B 00 00 00 0D 00 92
+    01 02 83 60 92 01 00 00 FF 2F 00 4D
+    54 72 6B 00 00 00 0B 00 FF 51 03 0F
     42 40 00 FF 2F 00 00
-    '''
-    reader = midi_reader.MidiParser("data\\test_parsing\\Two Track MIDI with Tempo Change in Track 2.mid")
+    """
+    test_path = os.path.join(
+        "data", "test_parsing", "Two Track MIDI with Tempo Change in Track 2.mid"
+    )
+    reader = midi_reader.MidiParser(test_path)
     output = reader.parse_midi()
     assert output == 0
     assert len(reader.events) == 3
@@ -193,27 +226,36 @@ def test_two_tracks_notes_on_second_tempo_on_first():
     assert notes[0].duration == 1
     assert notes[0].frequency == 8.66
 
+
 def test_track_1_error():
-    '''
+    """
     Test a midi file with an incorrect event in the first track
-    '''
-    reader = midi_reader.MidiParser("data\\test_parsing\\track_1_errors.mid")
+    """
+    test_path = os.path.join("data", "test_parsing", "track_1_errors.mid")
+    reader = midi_reader.MidiParser(test_path)
     output = reader.parse_midi()
     assert output == -1
 
+
 def test_track_2_error():
-    '''
+    """
     Test a midi file with an incorrect event in the second track
-    '''
-    reader = midi_reader.MidiParser("data\\test_parsing\\track_2_errors.mid")
+    """
+    test_path = os.path.join("data", "test_parsing", "track_2_errors.mid")
+    reader = midi_reader.MidiParser(test_path)
     output = reader.parse_midi()
     assert output == -1
 
 
 def test_combine_tracks():
     meta_track = [TempoEvent(30, 10), TempoEvent(50, 40), TempoEvent(35, 20)]
-    note_track = [NoteOnEvent(10, 1, 10, 10), NoteOffEvent(40, 10, 20, 30), NoteOnEvent(100, 3, 20, 20)]
-    reader = midi_reader.MidiParser("data\\test_event_parsing\\copyright_event.mid")
+    note_track = [
+        NoteOnEvent(10, 1, 10, 10),
+        NoteOffEvent(40, 10, 20, 30),
+        NoteOnEvent(100, 3, 20, 20),
+    ]
+    test_path = os.path.join("data", "test_event_parsing", "copyright_event.mid")
+    reader = midi_reader.MidiParser(test_path)
     output = reader.combine_tracks(meta_track, note_track)
     assert isinstance(output[0], NoteOnEvent)
     assert output[0].time == 10
@@ -228,10 +270,21 @@ def test_combine_tracks():
     assert isinstance(output[5], NoteOnEvent)
     assert output[5].time == 35
 
+
 def test_combine_tracks_2():
-    meta_track = [TempoEvent(30, 10), TempoEvent(50, 40), TempoEvent(35, 20), TempoEvent(100, 30)]
-    note_track = [NoteOnEvent(10, 1, 10, 10), NoteOffEvent(40, 10, 20, 30), NoteOnEvent(100, 3, 20, 20)]
-    reader = midi_reader.MidiParser("data\\test_event_parsing\\copyright_event.mid")
+    meta_track = [
+        TempoEvent(30, 10),
+        TempoEvent(50, 40),
+        TempoEvent(35, 20),
+        TempoEvent(100, 30),
+    ]
+    note_track = [
+        NoteOnEvent(10, 1, 10, 10),
+        NoteOffEvent(40, 10, 20, 30),
+        NoteOnEvent(100, 3, 20, 20),
+    ]
+    test_path = os.path.join("data", "test_event_parsing", "copyright_event.mid")
+    reader = midi_reader.MidiParser(test_path)
     output = reader.combine_tracks(meta_track, note_track)
     assert isinstance(output[0], NoteOnEvent)
     assert output[0].time == 10
@@ -248,42 +301,52 @@ def test_combine_tracks_2():
     assert isinstance(output[6], TempoEvent)
     assert output[6].time == 65
 
+
 def test_invalid_header():
-    '''
+    """
     File with contents 20 30 40 50
-    '''
-    with midi_reader.MidiParser("data\\test_parsing\\invalid_header.mid") as reader:
+    """
+    test_path = os.path.join("data", "test_parsing", "invalid_header.mid")
+    with midi_reader.MidiParser(test_path) as reader:
         out = reader.parse_midi()
-        assert(out == -1)
+        assert out == -1
         out = reader.parse_midi_event()
-        assert(out == -1)
+        assert out == -1
         out = reader.parse_track()
-        assert(out == -1)
+        assert out == -1
+
 
 def test_invalid_header_2():
-    '''
+    """
     File with contents 4D 54 68 64 00 00 00 01
     Checks that the header_size field is correct
-    '''
-    reader = midi_reader.MidiParser("data\\test_parsing\\invalid_header_2.mid")
+    """
+    test_path = os.path.join("data", "test_parsing", "invalid_header_2.mid")
+    reader = midi_reader.MidiParser(test_path)
     out = reader.parse_midi()
     assert out == -1
 
+
 def test_three_track_midi():
-    '''
+    """
     Verify a midi file with more than 2 tracks fails
-    '''
-    reader = midi_reader.MidiParser("data\\test_parsing\\Three Track MIDI.mid")
+    """
+    test_path = os.path.join("data", "test_parsing", "Three Track MIDI.mid")
+    reader = midi_reader.MidiParser(test_path)
     out = reader.parse_midi()
-    assert(out == -1)
+    assert out == -1
+
 
 def test_general_error():
-    '''
+    """
     Verify an unknown error allows further processing
-    '''
-    with midi_reader.MidiParser("data\\test_parsing\\3 Quarter Notes and Rest with Final C1 Whole Note.mid") as parser:
+    """
+    test_path = os.path.join(
+        "data", "test_parsing", "3 Quarter Notes and Rest with Final C1 Whole Note.mid"
+    )
+    with midi_reader.MidiParser(test_path) as parser:
         raise ValueError("This is an error")
-    with midi_reader.MidiParser("data\\test_parsing\\3 Quarter Notes and Rest with Final C1 Whole Note.mid") as parser:
+    with midi_reader.MidiParser(test_path) as parser:
         code = parser.parse_midi()
         assert code == 0
         notes = parser.get_notes()
