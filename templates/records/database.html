@@ -14,6 +14,7 @@
             <legend>General</legend>
             <div class="search-grid-3">
                 {{ search_form.title.label_tag }} {{ search_form.title }}
+                {{ search_form.larger_work.label_tag}} {{ search_form.larger_work }}
                 {{ search_form.composer.label_tag }} {{ search_form.composer }}
                 {{ search_form.author.label_tag }} {{ search_form.author }}
                 {{ search_form.submitter.label_tag }} {{ search_form.submitter }}
@@ -106,6 +107,7 @@
             <legend>Choose columns to export</legend>
             <div class="export-columns">
                 <label><input type="checkbox" name="columns" value="title" checked> Title</label>
+                <label><input type="checkbox" name="columns" value="larger_work" checked> Larger work</label>
                 <label><input type="checkbox" name="columns" value="composer" checked> Composer</label>
                 <label><input type="checkbox" name="columns" value="author" checked> Author</label>
                 <label><input type="checkbox" name="columns" value="style" checked> Style</label>
@@ -145,9 +147,9 @@
         <summary>Customize columns</summary>
         <form method="get" class="search-form">
             {% for key, value in active_filters %}
-                {% if key != "cols" %}
-                <input type="hidden" name="{{ key }}" value="{{ value }}">
-                {% endif %}
+            {% if key != "cols" %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
             {% endfor %}
 
             <fieldset>
@@ -155,7 +157,7 @@
                 <div class="export-columns">
                     {% for key, label, sort_field, accessor in all_columns %}
                     <label>
-                        <input type="checkbox" name="cols" value="{{ key }}" {% if key in selected_columns %}checked{% endif %}>
+                        <input type="checkbox" name="cols" value="{{ key }}" {% if key in selected_columns%}checked{%endif %}>
                         {{ label }}
                     </label>
                     {% endfor %}
@@ -172,25 +174,31 @@
                 <tr>
                     <th>
                         {% if current_sort == 'title' %}
-                            <a href="?sort=-title&{{ search_querystring }}" class="sortable-header">
-                                Title
-                                <svg class="sort-icon active" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 15l-6-6-6 6"/></svg>
-                            </a>
+                        <a href="?sort=-title&{{ search_querystring }}" class="sortable-header">
+                            Title
+                            <svg class="sort-icon active" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <path d="M18 15l-6-6-6 6" />
+                            </svg>
+                        </a>
                         {% elif current_sort == '-title' %}
-                            <a href="?{{ search_querystring }}" class="sortable-header">
-                                Title
-                                <svg class="sort-icon active" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
-                            </a>
+                        <a href="?{{ search_querystring }}" class="sortable-header">
+                            Title
+                            <svg class="sort-icon active" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <path d="M6 9l6 6 6-6" />
+                            </svg>
+                        </a>
                         {% else %}
-                            <a href="?sort=title&{{ search_querystring }}" class="sortable-header">
-                                Title
-                                <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>
-                            </a>
+                        <a href="?sort=title&{{ search_querystring }}" class="sortable-header">
+                            Title
+                            <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M8 9l4-4 4 4M8 15l4 4 4-4" />
+                            </svg>
+                        </a>
                         {% endif %}
                     </th>
 
                     {% for key, label, sort_field in display_columns %}
-                        {% include "records/_column_header.html" %}
+                    {% include "records/_column_header.html" %}
                     {% endfor %}
 
                     <th>PDF</th>
@@ -203,16 +211,20 @@
                     {% for key, label, sort_field in display_columns %}
                     <td>
                         {% if key == "status" %}
-                            <span class="status-badge status-{{ record.status }}">{{ record.get_status_display }}</span>
+                        <span class="status-badge status-{{ record.status }}">{{ record.get_status_display }}</span>
                         {% else %}
-                            {{ record|column_value:key }}
+                        {{ record|column_value:key }}
                         {% endif %}
                     </td>
                     {% endfor %}
-                    <td>{% if record.pdf_file %}<a href="{{ record.pdf_file.url }}" target="_blank">View</a>{% endif %}</td>
+                    <td>{% if record.pdf_file %}<a href="{{ record.pdf_file.url }}" target="_blank">View</a>{% endif %}
+                    </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="{{ display_columns|length|add:2 }}" class="empty-state">No records match your search.</td></tr>
+                <tr>
+                    <td colspan="{{ display_columns|length|add:2 }}" class="empty-state">No records match your search.
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -221,15 +233,15 @@
     {% if page_obj.has_other_pages %}
     <div class="pagination">
         {% if page_obj.has_previous %}
-            <a href="?page=1&{{ querystring }}">First</a>
-            <a href="?page={{ page_obj.previous_page_number }}&{{ querystring }}">Previous</a>
+        <a href="?page=1&{{ querystring }}">First</a>
+        <a href="?page={{ page_obj.previous_page_number }}&{{ querystring }}">Previous</a>
         {% endif %}
 
         <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
 
         {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}&{{ querystring }}">Next</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}&{{ querystring }}">Last</a>
+        <a href="?page={{ page_obj.next_page_number }}&{{ querystring }}">Next</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}&{{ querystring }}">Last</a>
         {% endif %}
     </div>
 </div>

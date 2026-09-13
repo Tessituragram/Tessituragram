@@ -45,9 +45,10 @@ class Record(models.Model):
 
     filename = models.CharField(max_length=255)
     title = models.CharField(max_length=255)
+    larger_work = models.CharField(max_length=255, blank=True)
     clef_range = models.CharField(max_length=6, null=True)
     composer = models.CharField(max_length=200)
-    author = models.CharField(max_length=200, blank=True)
+    author = models.CharField(max_length=200)
 
     STYLE_CHOICES = [
         ("western_classical", "Western Classical"),

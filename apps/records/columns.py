@@ -1,6 +1,7 @@
 TITLE_SORT = "title"
 
 AVAILABLE_COLUMNS = [
+    ("larger_work", "Larger work", "larger_work", lambda r: r.larger_work),
     ("composer", "Composer", "composer", lambda r: r.composer),
     ("author", "Author", "author", lambda r: r.author),
     ("style", "Style", "style", lambda r: r.get_style_display()),
@@ -97,9 +98,17 @@ AVAILABLE_COLUMNS = [
     ("status", "Status", "status", lambda r: r.get_status_display()),
 ]
 
-DEFAULT_TABLE_COLUMNS = ["composer", "author", "style", "clef_range", "tessitura_range"]
+DEFAULT_TABLE_COLUMNS = [
+    "composer",
+    "larger_work",
+    "author",
+    "style",
+    "clef_range",
+    "tessitura_range",
+]
 DEFAULT_PROFILE_COLUMNS = [
     "composer",
+    "larger_work",
     "author",
     "style",
     "clef_range",
@@ -108,6 +117,7 @@ DEFAULT_PROFILE_COLUMNS = [
 ]
 DEFAULT_REVIEW_COLUMNS = [
     "composer",
+    "larger_work",
     "author",
     "style",
     "clef_range",

@@ -6,6 +6,7 @@ from .filtering import get_filtered_records
 
 COLUMN_DEFINITIONS = [
     ("title", "Title", lambda r: r.title),
+    ("larger_work", "Larger work", "larger_work", lambda r: r.larger_work),
     ("composer", "Composer", lambda r: r.composer),
     ("author", "Author", lambda r: r.author),
     ("style", "Style", lambda r: r.get_style_display()),

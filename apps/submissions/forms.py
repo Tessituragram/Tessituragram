@@ -6,6 +6,7 @@ MAX_MIDI_SIZE = 5 * 1024 * 1024
 
 class SubmissionForm(forms.Form):
     title = forms.CharField(max_length=255, label="Title of the piece")
+    larger_work = forms.CharField(max_length=255, label="Larger work")
     composer = forms.CharField(max_length=200)
     author = forms.CharField(max_length=200, required=False)
     style = forms.ChoiceField(choices=[("", "Select a style")] + Record.STYLE_CHOICES)
@@ -20,6 +21,7 @@ class SubmissionForm(forms.Form):
     )
 
     def clean_midi_file(self):
+        midi_file = self.cleaned_data["midi_file"]
         if midi_file.size > MAX_MIDI_SIZE:
             raise forms.ValidationError("File is too large. Maximum size is 5MB.")
         midi_file = self.cleaned_data["midi_file"]
@@ -30,6 +32,7 @@ class SubmissionForm(forms.Form):
 
 class ReviewerEditForm(forms.Form):
     midi_file = forms.FileField(required=False, label="Replace MIDI file (optional)")
+    larger_work = forms.CharField(max_length=255, label="Larger work")
     title = forms.CharField(max_length=255)
     composer = forms.CharField(max_length=200)
     author = forms.CharField(max_length=200, required=False)

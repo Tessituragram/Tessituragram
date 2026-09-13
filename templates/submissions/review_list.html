@@ -10,16 +10,16 @@
         <summary>Customize columns</summary>
         <form method="get" class="search-form">
             {% for key, value in active_filters %}
-                {% if key != "cols" %}
-                <input type="hidden" name="{{ key }}" value="{{ value }}">
-                {% endif %}
+            {% if key != "cols" %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
             {% endfor %}
             <fieldset>
                 <legend>Choose columns to display</legend>
                 <div class="export-columns">
                     {% for key, label, sort_field, accessor in all_columns %}
                     <label>
-                        <input type="checkbox" name="cols" value="{{ key }}" {% if key in selected_columns %}checked{% endif %}>
+                        <input type="checkbox" name="cols" value="{{ key }}" {% if key in selected_columns %}checked{%endif %}>
                         {{ label }}
                     </label>
                     {% endfor %}
@@ -35,25 +35,31 @@
                 <tr>
                     <th>
                         {% if current_sort == 'title' %}
-                            <a href="?sort=-title" class="sortable-header">
-                                Title
-                                <svg class="sort-icon active" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 15l-6-6-6 6"/></svg>
-                            </a>
+                        <a href="?sort=-title" class="sortable-header">
+                            Title
+                            <svg class="sort-icon active" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <path d="M18 15l-6-6-6 6" />
+                            </svg>
+                        </a>
                         {% elif current_sort == '-title' %}
-                            <a href="?" class="sortable-header">
-                                Title
-                                <svg class="sort-icon active" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
-                            </a>
+                        <a href="?" class="sortable-header">
+                            Title
+                            <svg class="sort-icon active" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <path d="M6 9l6 6 6-6" />
+                            </svg>
+                        </a>
                         {% else %}
-                            <a href="?sort=title" class="sortable-header">
-                                Title
-                                <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>
-                            </a>
+                        <a href="?sort=title" class="sortable-header">
+                            Title
+                            <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M8 9l4-4 4 4M8 15l4 4 4-4" />
+                            </svg>
+                        </a>
                         {% endif %}
                     </th>
 
                     {% for key, label, sort_field in display_columns %}
-                        {% include "records/_column_header.html" with search_querystring="" %}
+                    {% include "records/_column_header.html" with search_querystring="" %}
                     {% endfor %}
                 </tr>
             </thead>
@@ -64,15 +70,17 @@
                     {% for key, label, sort_field in display_columns %}
                     <td>
                         {% if key == "status" %}
-                            <span class="status-badge status-{{ record.status }}">{{ record.get_status_display }}</span>
+                        <span class="status-badge status-{{ record.status }}">{{ record.get_status_display }}</span>
                         {% else %}
-                            {{ record|column_value:key }}
+                        {{ record|column_value:key }}
                         {% endif %}
                     </td>
                     {% endfor %}
                 </tr>
                 {% empty %}
-                <tr><td colspan="{{ display_columns|length|add:1 }}" class="empty-state">Nothing pending review.</td></tr>
+                <tr>
+                    <td colspan="{{ display_columns|length|add:1 }}" class="empty-state">Nothing pending review.</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>

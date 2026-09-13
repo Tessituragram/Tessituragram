@@ -47,6 +47,7 @@ def submit_form(request):
         form = SubmissionForm(request.POST, request.FILES)
         if form.is_valid():
             title = form.cleaned_data["title"]
+            larger_work = form.cleaned_data["larger_work"]
             uploaded_file = form.cleaned_data["midi_file"]
             filename = os.path.splitext(uploaded_file.name)[0]
             composer = form.cleaned_data["composer"]
@@ -95,6 +96,7 @@ def submit_form(request):
                         submitted_by=request.user,
                         filename=filename,
                         title=title,
+                        larger_work=larger_work,
                         composer=composer,
                         author=author,
                         style=style,
@@ -351,8 +353,9 @@ def edit_resubmit(request, pk):
                 tess, passaggio = match
 
                 record.title = form.cleaned_data["title"]
+                record.larger_work = form.cleaned_data.get("larger_work", "")
                 record.composer = form.cleaned_data["composer"]
-                record.author = form.cleaned_data.get("author", "")
+                record.author = form.cleaned_data["author"]
                 record.style = form.cleaned_data["style"]
                 record.clef_range = tess.clef_range
                 record.status = "pending"
@@ -457,6 +460,7 @@ def edit_resubmit(request, pk):
         form = ReviewerEditForm(
             initial={
                 "title": record.title,
+                "larger_work": record.larger_work,
                 "composer": record.composer,
                 "author": record.author,
                 "style": record.style,

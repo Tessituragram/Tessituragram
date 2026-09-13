@@ -4,6 +4,8 @@ from .models import Record
 
 class AdvancedSearchForm(forms.Form):
     title = forms.CharField(max_length=200, required=False)
+    larger_work = forms.CharField(max_length=200, required=False)
+
     composer = forms.CharField(max_length=200, required=False)
     author = forms.CharField(max_length=200, required=False)
     style = forms.ChoiceField(
