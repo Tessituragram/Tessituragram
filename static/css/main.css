@@ -9,7 +9,9 @@
 }
 
 /* ===== Reset / Base ===== */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
@@ -39,30 +41,68 @@ a:hover {
 }
 
 /* ===== Headings ===== */
-h1, h2, h3, h4, h5 {
+h1,
+h2,
+h3,
+h4,
+h5 {
     font-family: 'Cormorant Garamond', serif;
     font-weight: 500;
     color: var(--black);
     margin: 0 0 0.5em;
 }
 
-h1 { font-size: 45px; }
-h2 { font-size: 35px; }
-h3 { font-size: 27px; }
-h4 { font-size: 21px; }
-h5 { font-size: 16px; }
+h1 {
+    font-size: 45px;
+}
 
-h1, h2, h3, h4, h5 {
+h2 {
+    font-size: 35px;
+}
+
+h3 {
+    font-size: 27px;
+}
+
+h4 {
+    font-size: 21px;
+}
+
+h5 {
+    font-size: 16px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
     line-height: 1.15;
     letter-spacing: -0.01em;
 }
 
 /* ===== Body text ===== */
-.b1 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 20px; }
-.b2 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 17px; }
-.b3 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 15px; }
+.b1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 20px;
+}
 
-.b1, .b2, .b3 {
+.b2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 17px;
+}
+
+.b3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.b1,
+.b2,
+.b3 {
     line-height: 1.6;
 }
 
@@ -184,7 +224,8 @@ nav a:hover {
 }
 
 /* ===== Buttons ===== */
-button, input[type="submit"] {
+button,
+input[type="submit"] {
     font-family: 'Cormorant Garamond', serif;
     font-size: 17px;
     background-color: var(--deep-forest);
@@ -196,10 +237,11 @@ button, input[type="submit"] {
     transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-button:hover, input[type="submit"]:hover {
+button:hover,
+input[type="submit"]:hover {
     background-color: var(--dark-spruce);
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* ===== Forms ===== */
@@ -223,8 +265,12 @@ form p textarea {
     display: block;
 }
 
-input[type="text"], input[type="email"], input[type="password"],
-input[type="number"], textarea, select {
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
     font-family: 'Cormorant Garamond', serif;
     font-size: 16px;
     padding: 6px 10px;
@@ -234,7 +280,10 @@ input[type="number"], textarea, select {
     transition: border-color 0.15s ease;
 }
 
-input:focus, select:focus, textarea:focus, button:focus-visible {
+input:focus,
+select:focus,
+textarea:focus,
+button:focus-visible {
     outline: 2px solid var(--muted-teal);
     outline-offset: 2px;
 }
@@ -271,7 +320,9 @@ input:focus, select:focus, textarea:focus, button:focus-visible {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ===== Advanced search ===== */
@@ -307,11 +358,14 @@ details form {
     padding: 0 8px;
 }
 
-.search-grid-2, .search-grid-3 {
-    grid-template-columns: 1fr 1fr 1fr 1fr; /* just inputs */
+.search-grid-2,
+.search-grid-3 {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    /* just inputs */
 }
 
-.search-grid-2 label, .search-grid-3 label {
+.search-grid-2 label,
+.search-grid-3 label {
     display: block;
     font-size: 12px;
     text-transform: uppercase;
@@ -384,10 +438,25 @@ details form {
     text-align: center;
 }
 
-.status-pending { background: #fff3cd; color: #856404; }
-.status-public { background: #d4edda; color: #155724; }
-.status-rejected { background: #f8d7da; color: #721c24; }
-.status-private { background: #e2e3e5; color: #383d41; }
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-public {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-private {
+    background: #e2e3e5;
+    color: #383d41;
+}
 
 .content-card {
     background: #faf9f7;
@@ -417,10 +486,11 @@ table {
     border-collapse: collapse;
     margin-top: 1rem;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-th, td {
+th,
+td {
     text-align: left;
     padding: 8px 12px;
     border-bottom: 1px solid var(--muted-teal);
@@ -499,6 +569,14 @@ tbody tr:hover {
     min-width: 100%;
 }
 
-.table-scroll th, .table-scroll td {
+.table-scroll th,
+.table-scroll td {
     white-space: nowrap;
+}
+
+.content {
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+    margin-left: 7rem;
+    margin-right: 7rem;
 }
