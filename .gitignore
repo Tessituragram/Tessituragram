@@ -6,3 +6,4 @@ build
 results
 .env
 media
+tessituragram_web/settings.py
