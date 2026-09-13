@@ -1,10 +1,10 @@
 TITLE_SORT = "title"
 
 AVAILABLE_COLUMNS = [
-    ("larger_work", "Larger work", "larger_work", lambda r: r.larger_work),
-    ("composer", "Composer", "composer", lambda r: r.composer),
-    ("author", "Author", "author", lambda r: r.author),
-    ("style", "Style", "style", lambda r: r.get_style_display()),
+    ("larger_work", "Larger Work", "larger_work", lambda r: r.larger_work),
+    ("composer", "Musical Composer", "composer", lambda r: r.composer),
+    ("author", "Text Author", "author", lambda r: r.author),
+    ("style", "Performance Style", "style", lambda r: r.get_style_display()),
     ("clef_range", "Clef Range", "clef_range", lambda r: r.clef_range),
     (
         "submitter",
