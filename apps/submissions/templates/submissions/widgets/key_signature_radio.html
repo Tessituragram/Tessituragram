@@ -1,16 +1,19 @@
 {% load static %}
 
+{% load static %}
+
 <div class="key-signatures-container">
 
   <!-- ROW 1: No Flats or Sharps -->
   <div class="key-row">
+    <strong>Natural / No Accidentals</strong>
     <div class="key-signatures">
       {% for group_name, group_options, index in widget.optgroups %}
         {% for option in group_options %}
           {% if option.value == "0 flats or sharps" %}
             <label class="key-option" for="{{ option.attrs.id }}">
               <input type="{{ option.type }}" name="{{ option.name }}" value="{{ option.value }}" id="{{ option.attrs.id }}" {% if option.selected %}checked{% endif %}>
-              <img src="{% static 'images/key_signatures/' %}{{ option.value|urlencode }}.jpg" alt="{{ option.label }}">
+              <img src="{% static 'images/key_signatures/' %}{{ option.label|urlencode }}.jpg" alt="{{ option.label }}">
               <span class="option-label">{{ option.label }}</span>
             </label>
           {% endif %}
@@ -19,15 +22,16 @@
     </div>
   </div>
 
-  <!-- ROW 2: Sharps (Excludes 0) -->
+  <!-- ROW 2: Sharps -->
   <div class="key-row">
+    <strong>Sharp Keys</strong>
     <div class="key-signatures">
       {% for group_name, group_options, index in widget.optgroups %}
         {% for option in group_options %}
           {% if "sharp" in option.value and "0" not in option.value %}
             <label class="key-option" for="{{ option.attrs.id }}">
               <input type="{{ option.type }}" name="{{ option.name }}" value="{{ option.value }}" id="{{ option.attrs.id }}" {% if option.selected %}checked{% endif %}>
-              <img src="{% static 'images/key_signatures/' %}{{ option.value|urlencode }}.jpg" alt="{{ option.label }}">
+              <img src="{% static 'images/key_signatures/' %}{{ option.label|urlencode }}.jpg" alt="{{ option.label }}">
               <span class="option-label">{{ option.label }}</span>
             </label>
           {% endif %}
@@ -36,15 +40,16 @@
     </div>
   </div>
 
-  <!-- ROW 3: Flats (Excludes 0) -->
+  <!-- ROW 3: Flats -->
   <div class="key-row">
+    <strong>Flat Keys</strong>
     <div class="key-signatures">
       {% for group_name, group_options, index in widget.optgroups %}
         {% for option in group_options %}
           {% if "flat" in option.value and "0" not in option.value %}
             <label class="key-option" for="{{ option.attrs.id }}">
               <input type="{{ option.type }}" name="{{ option.name }}" value="{{ option.value }}" id="{{ option.attrs.id }}" {% if option.selected %}checked{% endif %}>
-              <img src="{% static 'images/key_signatures/' %}{{ option.value|urlencode }}.jpg" alt="{{ option.label }}">
+              <img src="{% static 'images/key_signatures/' %}{{ option.label|urlencode }}.jpg" alt="{{ option.label }}">
               <span class="option-label">{{ option.label }}</span>
             </label>
           {% endif %}
@@ -52,4 +57,5 @@
       {% endfor %}
     </div>
   </div>
+
 </div>
