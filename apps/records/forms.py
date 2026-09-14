@@ -17,6 +17,7 @@ class AdvancedSearchForm(forms.Form):
         choices=[("", "Any")] + Record.STYLE_CHOICES,
         required=False,
     )
+    style_other = forms.CharField(max_length=100, required=False)
     submitter = forms.CharField(required=False, label="Submitted by")
 
     clef_range = forms.ChoiceField(

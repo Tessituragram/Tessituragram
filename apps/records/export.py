@@ -11,9 +11,10 @@ COLUMN_DEFINITIONS = [
     ("author", "Author", lambda r: r.author),
     ("initial_key", "Initial Musical Key", "initial_key", lambda r: r.get_initial_key_display()),
     ("style", "Style", lambda r: r.get_style_display()),
+    ("style_other", "Performance Style - Other", "style_other", lambda r: r.style_other),
     ("clef_range", "Clef", lambda r: r.clef_range),
     ("performing_forces", "Performing Forces", "performing_forces", lambda r: r.get_performing_forces_display()),
-    ("voice_part", "Voice Part", "voice_part", lambda r: r.voice_part),
+    ("voice_part", "Voice Part", "voice_part", lambda r: r.get_voice_part_display()),
     (
         "submitter",
         "Submitted By",

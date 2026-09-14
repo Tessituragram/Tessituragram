@@ -20,6 +20,18 @@ class SubmissionForm(forms.Form):
         choices=[("", "Select a style")] + Record.STYLE_CHOICES,
         label="Performance Style",
     )
+    
+    style_other = forms.CharField(
+        required=False,
+        label="Specify Other Style",
+        widget=forms.TextInput(
+            attrs={
+                "id": "style_other",
+                "placeholder": "Enter performance style...",
+            }
+        ),
+    )
+
     clef_range = forms.ChoiceField(
         choices=[("", "Not specified"), ("treble", "Treble"), ("bass", "Bass")],
         required=False,
@@ -69,12 +81,33 @@ class SubmissionForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        performing_forces = cleaned_data.get('performing_forces')
-        voice_part = cleaned_data.get('voice_part')
+        performing_forces = cleaned_data.get("performing_forces")
+        voice_part = cleaned_data.get("voice_part")
 
-        if performing_forces == 'ensemble' and not voice_part:
-            self.add_error(
-                'voice_part', 'Please select a voice part for ensemble pieces.')
+        if performing_forces == "ensemble":
+            if not voice_part:
+                self.add_error(
+                    "voice_part", "Please select a voice part for ensemble pieces."
+                )
+        else:
+            # Clear voice_part if the piece is NOT an ensemble piece
+            cleaned_data["voice_part"] = ""
+
+        style = cleaned_data.get("style")
+        style_other = (cleaned_data.get("style_other") or "").strip()
+
+        if style == "other":
+            if not style_other:
+                self.add_error(
+                    "style_other",
+                    "You must specify the performance style when 'Other' is selected.",
+                )
+            else:
+                cleaned_data["style_other"] = style_other
+        else:
+            # Clear out style_other if 'Other' is not selected
+            cleaned_data["style_other"] = ""
+
         return cleaned_data
     
 
@@ -94,6 +127,18 @@ class ReviewerEditForm(forms.ModelForm):
         choices=[("", "Select a style")] + list(Record.STYLE_CHOICES),
         required=False,
     )
+
+    style_other = forms.CharField(
+            required=False,
+            label="Specify Other Style",
+            widget=forms.TextInput(
+                attrs={
+                    "id": "style_other",
+                    "placeholder": "Enter performance style...",
+                }
+            ),
+        )
+    
     clef_range = forms.ChoiceField(
         choices=[("", "Not specified"), ("treble", "Treble"), ("bass", "Bass")],
         required=False,
@@ -119,6 +164,7 @@ class ReviewerEditForm(forms.ModelForm):
             'author',
             'initial_key',
             'style',
+            'style_other',
             'clef_range',
             'performing_forces',
             'voice_part',
@@ -138,8 +184,28 @@ class ReviewerEditForm(forms.ModelForm):
         performing_forces = cleaned_data.get("performing_forces")
         voice_part = cleaned_data.get("voice_part")
 
-        if performing_forces == "ensemble" and not voice_part:
-            self.add_error(
-                "voice_part", "Please select a voice part for ensemble pieces."
-            )
+        if performing_forces == "ensemble":
+            if not voice_part:
+                self.add_error(
+                    "voice_part", "Please select a voice part for ensemble pieces."
+                )
+        else:
+            # Clear voice_part if the piece is NOT an ensemble piece
+            cleaned_data["voice_part"] = ""
+
+        style = cleaned_data.get("style")
+        style_other = (cleaned_data.get("style_other") or "").strip()
+
+        if style == "other":
+            if not style_other:
+                self.add_error(
+                    "style_other",
+                    "You must specify the performance style when 'Other' is selected.",
+                )
+            else:
+                cleaned_data["style_other"] = style_other
+        else:
+            # Clear out style_other if 'Other' is not selected
+            cleaned_data["style_other"] = ""
+
         return cleaned_data

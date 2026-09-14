@@ -17,6 +17,7 @@
         {% endif %}
         <li><strong>Initial Key:</strong> {{ record.get_initial_key_display|default:record.initial_key }}</li>
         <li><strong>Performance Style:</strong> {{ record.get_style_display|default:record.style }}</li>
+        <li><strong>Performance Style:</strong> {{ record.get_style_other_display|default:record.style_other }}</li>
         <li><strong>Clef Range:</strong> {{ record.clef_range|title }}</li>
         <li><strong>Performing Forces:</strong> {{ record.get_performing_forces_display|default:record.performing_forces|title }}</li>
         {% if record.voice_part %}

@@ -18,6 +18,14 @@
                         {{ field.errors }}
                     </p>
                 </div>
+            {% elif field.name == 'style_other' %}
+                <div id="style-other-container" style="display: none;">
+                    <p>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {{ field.errors }}
+                    </p>
+                </div>
             {% else %}
                 <p>
                     {{ field.label_tag }}
@@ -62,6 +70,7 @@ document.getElementById("submission-form").addEventListener("submit", function (
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Performing Forces / Voice Part Toggle
     const performingForcesRadios = document.querySelectorAll('input[name="performing_forces"]');
     const voicePartContainer = document.getElementById('voice-part-container');
 
@@ -74,13 +83,29 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Attach event listeners to radios
     performingForcesRadios.forEach(radio => {
         radio.addEventListener('change', toggleVoicePart);
     });
-
-    // Run on initial page load (handles validation redisplays)
     toggleVoicePart();
+
+    // Style / Style Other Toggle
+    const styleSelect = document.querySelector('select[name="style"]');
+    const styleOtherContainer = document.getElementById('style-other-container');
+
+    function toggleStyleOther() {
+        if (styleSelect && styleOtherContainer) {
+            if (styleSelect.value === 'other') {
+                styleOtherContainer.style.display = 'block';
+            } else {
+                styleOtherContainer.style.display = 'none';
+            }
+        }
+    }
+
+    if (styleSelect) {
+        styleSelect.addEventListener('change', toggleStyleOther);
+        toggleStyleOther(); // Handles initial state & validation re-renders
+    }
 });
 </script>
 {% endblock %}

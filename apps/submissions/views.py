@@ -52,6 +52,7 @@ def submit_form(request):
             filename = os.path.splitext(uploaded_file.name)[0]
             composer = form.cleaned_data["composer"]
             style = form.cleaned_data["style"]
+            style_other = form.cleaned_data["style_other"]
             author = form.cleaned_data.get("author", "")
             initial_key = form.cleaned_data["initial_key"]
             clef_range = form.cleaned_data.get("clef_range") or None
@@ -104,6 +105,7 @@ def submit_form(request):
                         author=author,
                         initial_key=initial_key,
                         style=style,
+                        style_other=style_other,
                         clef_range=tess.clef_range,
                         performing_forces=performing_forces,
                         voice_part=voice_part,
@@ -378,6 +380,7 @@ def edit_resubmit(request, pk):
                 record.author = form.cleaned_data.get("author", "")
                 record.initial_key = form.cleaned_data["initial_key"]
                 record.style = form.cleaned_data["style"]
+                record.style_other = form.cleaned_data["style_other"]
                 record.clef_range = tess.clef_range
                 record.performing_forces = form.cleaned_data["performing_forces"]
                 record.voice_part = form.cleaned_data["voice_part"]

@@ -9,17 +9,33 @@
     <form method="post" enctype="multipart/form-data" id="submission-form">
         {% csrf_token %}
         
-        <!-- Render form errors if any exist -->
-        {% if form.errors %}
-            <div class="error-summary">
-                <p>Please correct the errors below:</p>
-                {{ form.errors }}
-            </div>
-        {% endif %}
+        {% for field in form %}
+            {% if field.name == 'voice_part' %}
+                <div id="voice-part-container" style="display: none;">
+                    <p>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {{ field.errors }}
+                    </p>
+                </div>
+            {% elif field.name == 'style_other' %}
+                <div id="style-other-container" style="display: none;">
+                    <p>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {{ field.errors }}
+                    </p>
+                </div>
+            {% else %}
+                <p>
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </p>
+            {% endif %}
+        {% endfor %}
 
-        {{ form.as_p }}
-        
-        <button type="submit" id="submit-button">Save &amp; Resubmit for Review</button>
+        <button type="submit" id="submit-button">Submit</button>
     </form>
 </div>
 
@@ -37,33 +53,48 @@ window.addEventListener("pageshow", function () {
 
     const button = document.getElementById("submit-button");
     button.disabled = false;
-    button.textContent = "Submit";
+    button.textContent = "Save & Resubmit for Review";
 });
 
 document.getElementById("submission-form").addEventListener("submit", function () {
-    const fileInput = document.querySelector('input[type="file"]');
-    if (fileInput && fileInput.files.length === 0) {
-        return;
-    }
-
     document.getElementById("submit-button").disabled = true;
     document.getElementById("submit-button").textContent = "Processing...";
     document.getElementById("processing-overlay").hidden = false;
 });
 
 document.addEventListener("DOMContentLoaded", function () {
+    // Performing Forces / Voice Part Toggle
     const performingForcesRadios = document.querySelectorAll('input[name="performing_forces"]');
-    const voicePartParagraph = document.querySelector('#id_voice_part')?.closest('p');
+    const voicePartContainer = document.getElementById('voice-part-container');
 
     function toggleVoicePart() {
         const selected = document.querySelector('input[name="performing_forces"]:checked')?.value;
-        if (voicePartParagraph) {
-            voicePartParagraph.style.display = (selected === 'ensemble') ? 'block' : 'none';
+        if (voicePartContainer) {
+            voicePartContainer.style.display = (selected === 'ensemble') ? 'block' : 'none';
         }
     }
 
     performingForcesRadios.forEach(radio => radio.addEventListener('change', toggleVoicePart));
     toggleVoicePart(); // Run on initial load
+
+    // Style / Style Other Toggle
+    const styleSelect = document.querySelector('select[name="style"]');
+    const styleOtherContainer = document.getElementById('style-other-container');
+
+    function toggleStyleOther() {
+        if (styleSelect && styleOtherContainer) {
+            if (styleSelect.value === 'other') {
+                styleOtherContainer.style.display = 'block';
+            } else {
+                styleOtherContainer.style.display = 'none';
+            }
+        }
+    }
+
+    if (styleSelect) {
+        styleSelect.addEventListener('change', toggleStyleOther);
+        toggleStyleOther(); // Handles pre-populated form state on load
+    }
 });
 </script>
 {% endblock %}

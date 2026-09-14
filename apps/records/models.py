@@ -105,12 +105,13 @@ class Record(models.Model):
     STYLE_CHOICES = [
         ("western_classical", "Western Classical"),
         ("musical_theatre", "Musical Theatre"),
-        ("commercial_music", "Commercial Music"),
+        ("contemporary_commerical", "Contemporary Commercial"),
         ("choral", "Choral"),
         ("other", "Other"),
     ]
 
-    style = models.CharField(max_length=20, choices=STYLE_CHOICES)
+    style = models.CharField(max_length=25, choices=STYLE_CHOICES)
+    style_other = models.CharField(max_length=100, choices=STYLE_CHOICES)
 
     pdf_file = models.FileField(upload_to="pdfs/", null=True, blank=True)
     midi_file = models.FileField(upload_to="midi/", null=True, blank=True)
