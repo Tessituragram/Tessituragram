@@ -585,67 +585,80 @@ tbody tr:hover {
 
 /* ===== Time Signature Widgets =====*/
 
-/* Container spacing for key signature rows */
+/* Container holding all 3 sections */
 .key-signatures-container {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-    margin: 1rem 0;
+    gap: 16px;
 }
 
+/* Individual section row wrapper */
 .key-row {
-    background: #f8f9fa;
-    padding: 1rem;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Vertical spacing between section title and cards */
 }
 
-/* Flexbox layout for key signature choices */
+/* Card flex grid */
 .key-signatures {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
-    align-items: flex-end;
+    row-gap: 20px;    /* Vertical space between cards */
+    column-gap: 16px; /* Horizontal space between cards */
+    align-items: stretch;
 }
 
-/* Individual radio item wrapper */
 .key-option {
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    width: 110px;
+    padding: 12px 8px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
     cursor: pointer;
-    padding: 0.5rem;
-    border: 2px solid transparent;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-    max-width: 110px; /* Limits the overall box size */
-}
-
-.key-option:hover {
-    background-color: #e9ecef;
-}
-
-/* Highlight selected key signature */
-.key-option input[type="radio"]:checked + img {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
-}
-
-/* Constrain the actual key signature images */
-.key-option img {
-    width: 100%;
-    max-width: 90px;  /* Adjust width as needed for your staff images */
-    height: auto;
-    object-fit: contain;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    margin: 0.4rem 0;
     background-color: #ffffff;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
 }
 
-/* Label text under image */
+/* Visually hidden radio input */
+.key-option input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.key-option img {
+    width: 80px;
+    height: auto;
+    display: block;
+    margin: 0 auto 8px auto;
+}
+
+/* Label text */
 .key-option .option-label {
-    font-size: 0.85rem;
+    display: block;
+    width: 100%;
     text-align: center;
-    color: #495057;
+    font-size: 13px;
+    font-weight: 500;
+    color: #000000;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+/* Hover & Selected States */
+.key-option:hover {
+    border-color: #771A1E;
+    transform: translateY(-2px);
+}
+
+.key-option:has(input:checked) {
+    border-color: #295135;
+    background-color: #f0fdf4;
+    box-shadow: 0 0 0 2px #295135;
 }
