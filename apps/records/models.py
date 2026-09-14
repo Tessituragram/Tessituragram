@@ -101,6 +101,11 @@ class Record(models.Model):
         blank=True,
         null=True,
     )
+    additional_comments = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Notes provided by the user during submission.",
+    )
 
     STYLE_CHOICES = [
         ("western_classical", "Western Classical"),

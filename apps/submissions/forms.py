@@ -56,6 +56,17 @@ class SubmissionForm(forms.Form):
         label="Keep this submission private (skip public review)",
     )
 
+    additional_comments = forms.CharField(
+        required=False,
+        widget=forms.Textarea(
+            attrs={
+                "rows": 3,
+                "placeholder": "Add any notes or context for the reviewer (optional)...",
+            }
+        ),
+        label="Additional Comments (these will only be viewable by website admin)",
+    )
+
     def clean_midi_file(self):
         midi_file = self.cleaned_data["midi_file"]
         if midi_file.size > MAX_MIDI_SIZE:
@@ -77,6 +88,7 @@ class SubmissionForm(forms.Form):
             'clef_range',
             'performing_forces',
             'voice_part',
+            'additional_comments'
         ]
 
     def clean(self):
@@ -155,6 +167,17 @@ class ReviewerEditForm(forms.ModelForm):
         label="Voice Part",
     )
 
+    additional_comments = forms.CharField(
+            required=False,
+            widget=forms.Textarea(
+                attrs={
+                    "rows": 3,
+                    "placeholder": "Add any notes or context for the reviewer (optional)...",
+                }
+            ),
+            label="Additional Comments (these will only be viewable by website admin)",
+        )
+
     class Meta:
         model = Record
         fields = [
@@ -168,6 +191,7 @@ class ReviewerEditForm(forms.ModelForm):
             'clef_range',
             'performing_forces',
             'voice_part',
+            'additional_comments'
         ]
 
     def clean_midi_file(self):

@@ -35,6 +35,11 @@
         <button type="submit">Update status</button>
     </form>
 
+    {% if record.additional_comments %}
+        <h2>Submitter Notes (Staff Only):</h2>
+        <p class="b1">{{ record.additional_comments|linebreaksbr }}</p>
+    {% endif %}
+
     {% if record.midi_file %}
     <p class="b2"><a href="{% url 'records:midi_download' record.id %}">Download original MIDI file</a></p>
     {% endif %}

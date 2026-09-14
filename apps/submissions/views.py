@@ -58,6 +58,7 @@ def submit_form(request):
             clef_range = form.cleaned_data.get("clef_range") or None
             performing_forces = form.cleaned_data["performing_forces"]
             voice_part= form.cleaned_data["voice_part"]
+            additional_comments = form.cleaned_data.get("additional_comments", "")
 
             work_dir = tempfile.mkdtemp(prefix="tessitura_")
             output_dir = os.path.join(work_dir, "results")
@@ -109,6 +110,7 @@ def submit_form(request):
                         clef_range=tess.clef_range,
                         performing_forces=performing_forces,
                         voice_part=voice_part,
+                        additional_comments=additional_comments,
                         status=initial_status,
                         q1_freq=tess.lowFreq,
                         q1_pitch=tess.lowNote,
@@ -384,6 +386,7 @@ def edit_resubmit(request, pk):
                 record.clef_range = tess.clef_range
                 record.performing_forces = form.cleaned_data["performing_forces"]
                 record.voice_part = form.cleaned_data["voice_part"]
+                record.additional_comments = form.cleaned_data.get("additional_comments","")
                 record.status = "pending"
                 record.approval_at = None
                 record.approval_by = None
