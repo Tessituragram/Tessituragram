@@ -17,6 +17,7 @@
                 {{ search_form.larger_work.label_tag}} {{ search_form.larger_work }}
                 {{ search_form.composer.label_tag }} {{ search_form.composer }}
                 {{ search_form.author.label_tag }} {{ search_form.author }}
+                {{ search_form.initial_key.label_tag}} {{ search_form.initial_key }}
                 {{ search_form.submitter.label_tag }} {{ search_form.submitter }}
                 {{ search_form.style.label_tag }} {{ search_form.style }}
                 {{ search_form.clef_range.label_tag }} {{ search_form.clef_range }}
@@ -108,10 +109,11 @@
             <div class="export-columns">
                 <label><input type="checkbox" name="columns" value="title" checked> Title</label>
                 <label><input type="checkbox" name="columns" value="larger_work" checked> Larger work</label>
-                <label><input type="checkbox" name="columns" value="composer" checked> Composer</label>
-                <label><input type="checkbox" name="columns" value="author" checked> Author</label>
-                <label><input type="checkbox" name="columns" value="style" checked> Style</label>
-                <label><input type="checkbox" name="columns" value="clef_range" checked> Clef</label>
+                <label><input type="checkbox" name="columns" value="composer" checked> Musical Composer</label>
+                <label><input type="checkbox" name="columns" value="author" checked> Text Author</label>
+                <label><input type="checkbox" name="columns" value="initial_key" checked> Initial Musical Key</label>
+                <label><input type="checkbox" name="columns" value="style" checked> Performance Style</label>
+                <label><input type="checkbox" name="columns" value="clef_range" checked> Clef Range</label>
                 <label><input type="checkbox" name="columns" value="submitter"> Submitted By</label>
                 <label><input type="checkbox" name="columns" value="created_at"> Submitted On</label>
                 <label><input type="checkbox" name="columns" value="q1_range" checked> Tessitura Range</label>

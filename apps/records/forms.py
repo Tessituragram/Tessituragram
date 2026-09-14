@@ -8,6 +8,11 @@ class AdvancedSearchForm(forms.Form):
 
     composer = forms.CharField(max_length=200, required=False)
     author = forms.CharField(max_length=200, required=False)
+    initial_key = forms.ChoiceField(
+            choices=[("", "Any")] + Record.INITIAL_KEY_CHOICES,
+                    required=False,
+        )
+    
     style = forms.ChoiceField(
         choices=[("", "Any")] + Record.STYLE_CHOICES,
         required=False,

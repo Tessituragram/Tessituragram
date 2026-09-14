@@ -1,20 +1,30 @@
 from django import forms
 from apps.records.models import Record
 
+from apps.submissions.widgets import KeySignatureWidget
+
 MAX_MIDI_SIZE = 5 * 1024 * 1024
 
 
 class SubmissionForm(forms.Form):
-    title = forms.CharField(max_length=255, label="Title of the piece")
-    larger_work = forms.CharField(max_length=255, label="Larger work")
-    composer = forms.CharField(max_length=200)
-    author = forms.CharField(max_length=200, required=False)
-    style = forms.ChoiceField(choices=[("", "Select a style")] + Record.STYLE_CHOICES)
+    title = forms.CharField(max_length=255, label="Title")
+    larger_work = forms.CharField(max_length=255, label="Larger Work")
+    composer = forms.CharField(max_length=200, label="Musical Composer")
+    author = forms.CharField(max_length=200, label="Text Author")
+    initial_key = forms.ChoiceField(
+        choices=Record.INITIAL_KEY_CHOICES,
+        widget=KeySignatureWidget(),
+        label="Initial Musical Key",
+    )
+    style = forms.ChoiceField(
+        choices=[("", "Select a style")] + Record.STYLE_CHOICES,
+        label="Performance Style",
+    )
     clef_range = forms.ChoiceField(
         choices=[("", "Not specified"), ("treble", "Treble"), ("bass", "Bass")],
         required=False,
     )
-    midi_file = forms.FileField(label="MIDI file")
+    midi_file = forms.FileField(label="MIDI File")
     keep_private = forms.BooleanField(
         required=False,
         label="Keep this submission private (skip public review)",

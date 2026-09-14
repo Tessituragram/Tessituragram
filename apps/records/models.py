@@ -10,6 +10,24 @@ class Record(models.Model):
         ("rejected", "Rejected"),
     ]
 
+    INITIAL_KEY_CHOICES = [
+    ("0 flats or sharps", "0 Flats or Sharps"),
+    ("1 flat", "1 Flat"),
+    ("2 flats", "2 Flats"),
+    ("3 flats", "3 Flats"),
+    ("4 flats", "4 Flats"),
+    ("5 flats", "5 Flats"),
+    ("6 flats", "6 Flats"),
+    ("7 flats", "7 Flats"),
+    ("1 sharp", "1 Sharp"),
+    ("2 sharps", "2 Sharps"),
+    ("3 sharps", "3 Sharps"),
+    ("4 sharps", "4 Sharps"),
+    ("5 sharps", "5 Sharps"),
+    ("6 sharps", "6 Sharps"),
+    ("7 sharps", "7 Sharps"),
+]
+
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
     submitted_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
@@ -49,6 +67,12 @@ class Record(models.Model):
     clef_range = models.CharField(max_length=6, null=True)
     composer = models.CharField(max_length=200)
     author = models.CharField(max_length=200)
+    initial_key = models.CharField(
+        max_length=20,
+        choices=INITIAL_KEY_CHOICES,
+        blank=True,
+        null=True,
+    )
 
     STYLE_CHOICES = [
         ("western_classical", "Western Classical"),

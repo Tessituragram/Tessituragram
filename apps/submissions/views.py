@@ -53,6 +53,7 @@ def submit_form(request):
             composer = form.cleaned_data["composer"]
             style = form.cleaned_data["style"]
             author = form.cleaned_data.get("author", "")
+            initial_key = form.cleaned_data["initial_key"]
             clef_range = form.cleaned_data.get("clef_range") or None
 
             work_dir = tempfile.mkdtemp(prefix="tessitura_")
@@ -99,6 +100,7 @@ def submit_form(request):
                         larger_work=larger_work,
                         composer=composer,
                         author=author,
+                        initial_key=initial_key,
                         style=style,
                         clef_range=tess.clef_range,
                         status=initial_status,
@@ -356,6 +358,7 @@ def edit_resubmit(request, pk):
                 record.larger_work = form.cleaned_data.get("larger_work", "")
                 record.composer = form.cleaned_data["composer"]
                 record.author = form.cleaned_data["author"]
+                initial_key = form.cleaned_data["initial_key"]
                 record.style = form.cleaned_data["style"]
                 record.clef_range = tess.clef_range
                 record.status = "pending"
@@ -463,6 +466,7 @@ def edit_resubmit(request, pk):
                 "larger_work": record.larger_work,
                 "composer": record.composer,
                 "author": record.author,
+                "initial_key": record.initial_key,
                 "style": record.style,
                 "clef_range": record.clef_range,
             }

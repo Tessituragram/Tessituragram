@@ -9,6 +9,7 @@ COLUMN_DEFINITIONS = [
     ("larger_work", "Larger work", "larger_work", lambda r: r.larger_work),
     ("composer", "Composer", lambda r: r.composer),
     ("author", "Author", lambda r: r.author),
+    ("initial_key", "Initial Musical Key", "initial_key", lambda r: r.initial_key),
     ("style", "Style", lambda r: r.get_style_display()),
     ("clef_range", "Clef", lambda r: r.clef_range),
     (
