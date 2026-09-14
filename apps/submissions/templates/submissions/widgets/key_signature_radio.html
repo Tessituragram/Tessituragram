@@ -10,7 +10,7 @@
           {% if option.value == "0 flats or sharps" %}
             <label class="key-option" for="{{ option.attrs.id }}">
               <input type="{{ option.type }}" name="{{ option.name }}" value="{{ option.value }}" id="{{ option.attrs.id }}" {% if option.selected %}checked{% endif %}>
-              <img src="{% static 'images/key_signatures/' %}{{ option.value }}.jpg" alt="{{ option.label }}">
+              <img src="{% static 'images/key_signatures/' %}{{ option.value|urlencode }}.jpg" alt="{{ option.label }}">
               <span class="option-label">{{ option.label }}</span>
             </label>
           {% endif %}
@@ -27,7 +27,7 @@
           {% if "sharp" in option.value and "0" not in option.value %}
             <label class="key-option" for="{{ option.attrs.id }}">
               <input type="{{ option.type }}" name="{{ option.name }}" value="{{ option.value }}" id="{{ option.attrs.id }}" {% if option.selected %}checked{% endif %}>
-              <img src="{% static 'images/key_signatures/' %}{{ option.value }}.jpg" alt="{{ option.label }}">
+              <img src="{% static 'images/key_signatures/' %}{{ option.value|urlencode }}.jpg" alt="{{ option.label }}">
               <span class="option-label">{{ option.label }}</span>
             </label>
           {% endif %}
@@ -44,7 +44,7 @@
           {% if "flat" in option.value and "0" not in option.value %}
             <label class="key-option" for="{{ option.attrs.id }}">
               <input type="{{ option.type }}" name="{{ option.name }}" value="{{ option.value }}" id="{{ option.attrs.id }}" {% if option.selected %}checked{% endif %}>
-              <img src="{% static 'images/key_signatures/' %}{{ option.value }}.jpg" alt="{{ option.label }}">
+              <img src="{% static 'images/key_signatures/' %}{{ option.value|urlencode }}.jpg" alt="{{ option.label }}">
               <span class="option-label">{{ option.label }}</span>
             </label>
           {% endif %}

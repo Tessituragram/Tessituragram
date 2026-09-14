@@ -111,7 +111,6 @@ class Record(models.Model):
         ("western_classical", "Western Classical"),
         ("musical_theatre", "Musical Theatre"),
         ("contemporary_commerical", "Contemporary Commercial"),
-        ("choral", "Choral"),
         ("other", "Other"),
     ]
 
