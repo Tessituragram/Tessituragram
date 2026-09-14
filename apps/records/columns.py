@@ -4,9 +4,11 @@ AVAILABLE_COLUMNS = [
     ("larger_work", "Larger Work", "larger_work", lambda r: r.larger_work),
     ("composer", "Musical Composer", "composer", lambda r: r.composer),
     ("author", "Text Author", "author", lambda r: r.author),
-    ("initial_key", "Initial Musical Key", "initial_key", lambda r: r.initial_key),
+    ("initial_key", "Initial Musical Key", "initial_key", lambda r: r.get_initial_key_display()),
     ("style", "Performance Style", "style", lambda r: r.get_style_display()),
     ("clef_range", "Clef Range", "clef_range", lambda r: r.clef_range),
+    ("performing_forces", "Performing Forces", "performing_forces", lambda r: r.get_performing_forces_display()),
+    ("voice_part", "Voice Part", "voice_part", lambda r: r.voice_part),
     (
         "submitter",
         "Submitted By",

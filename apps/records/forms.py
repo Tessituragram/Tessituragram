@@ -24,6 +24,16 @@ class AdvancedSearchForm(forms.Form):
         required=False,
     )
 
+    performing_forces = forms.ChoiceField(
+        choices=[("", "Any")] + Record.PERFORMING_FORCES_CHOICES,
+        required=False,
+    )
+
+    voice_part = forms.ChoiceField(
+            choices=[("", "Any")] + Record.VOICE_PART_CHOICES,
+            required=False,
+        )
+
     q1_freq_min = forms.FloatField(required=False, label="Low freq (min)")
     q1_freq_max = forms.FloatField(required=False, label="Low freq (max)")
 

@@ -8,7 +8,25 @@
 
     <form method="post" enctype="multipart/form-data" id="submission-form">
         {% csrf_token %}
-        {{ form.as_p }}
+        
+        {% for field in form %}
+            {% if field.name == 'voice_part' %}
+                <div id="voice-part-container" style="display: none;">
+                    <p>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {{ field.errors }}
+                    </p>
+                </div>
+            {% else %}
+                <p>
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </p>
+            {% endif %}
+        {% endfor %}
+
         <button type="submit" id="submit-button">Submit</button>
     </form>
 </div>
@@ -39,6 +57,30 @@ document.getElementById("submission-form").addEventListener("submit", function (
     document.getElementById("submit-button").disabled = true;
     document.getElementById("submit-button").textContent = "Processing...";
     document.getElementById("processing-overlay").hidden = false;
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const performingForcesRadios = document.querySelectorAll('input[name="performing_forces"]');
+    const voicePartContainer = document.getElementById('voice-part-container');
+
+    function toggleVoicePart() {
+        const selectedValue = document.querySelector('input[name="performing_forces"]:checked')?.value;
+        if (selectedValue === 'ensemble') {
+            voicePartContainer.style.display = 'block';
+        } else {
+            voicePartContainer.style.display = 'none';
+        }
+    }
+
+    // Attach event listeners to radios
+    performingForcesRadios.forEach(radio => {
+        radio.addEventListener('change', toggleVoicePart);
+    });
+
+    // Run on initial page load (handles validation redisplays)
+    toggleVoicePart();
 });
 </script>
 {% endblock %}

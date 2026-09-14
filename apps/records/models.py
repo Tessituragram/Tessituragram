@@ -25,8 +25,34 @@ class Record(models.Model):
     ("4 sharps", "4 Sharps"),
     ("5 sharps", "5 Sharps"),
     ("6 sharps", "6 Sharps"),
-    ("7 sharps", "7 Sharps"),
+    ("7 sharps", "7 Sharps")
 ]
+
+    VOICE_PART_CHOICES = [
+    ('unspecified_bass', 'Unspecified Bass'),
+    ('unspecified_treble', 'Unspecified Treble'),
+    ('part_1', 'Part 1'),
+    ('part_2', 'Part 2'),
+    ('part_3', 'Part 3'),
+    ('part_4', 'Part 4'),
+    ('soprano_1', 'Soprano 1'),
+    ('soprano_2', 'Soprano 2'),
+    ('soprano_3', 'Soprano 3'),
+    ('alto_1', 'Alto 1'),
+    ('alto_2', 'Alto 2'),
+    ('alto_3', 'Alto 3'),
+    ('tenor_1', 'Tenor 1'),
+    ('tenor_2', 'Tenor 2'),
+    ('tenor_3', 'Tenor 3'),
+    ('bass_1', 'Bass 1'),
+    ('bass_2', 'Bass 2'),
+    ('bass_3', 'Bass 3'),
+]
+
+    PERFORMING_FORCES_CHOICES = [
+      ('solo', 'Soloistic Piece'),
+      ('ensemble', 'Ensemble Piece'),
+  ]
 
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
     submitted_by = models.ForeignKey(
@@ -65,6 +91,8 @@ class Record(models.Model):
     title = models.CharField(max_length=255)
     larger_work = models.CharField(max_length=255, blank=True)
     clef_range = models.CharField(max_length=6, null=True)
+    performing_forces = models.CharField(max_length=10, choices=PERFORMING_FORCES_CHOICES)
+    voice_part = models.CharField(max_length=20, choices=VOICE_PART_CHOICES)
     composer = models.CharField(max_length=200)
     author = models.CharField(max_length=200)
     initial_key = models.CharField(

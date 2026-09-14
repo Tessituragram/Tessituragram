@@ -6,10 +6,20 @@
 <div class="content-card">
     <p class="b1">Editing will reprocess this submission and set its status back to Pending Review. This updates the existing record — it will not create a new one.</p>
 
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" id="submission-form">
         {% csrf_token %}
+        
+        <!-- Render form errors if any exist -->
+        {% if form.errors %}
+            <div class="error-summary">
+                <p>Please correct the errors below:</p>
+                {{ form.errors }}
+            </div>
+        {% endif %}
+
         {{ form.as_p }}
-        <button type="submit" id="submit-button">Save &amp; resubmit for review</button>
+        
+        <button type="submit" id="submit-button">Save &amp; Resubmit for Review</button>
     </form>
 </div>
 
@@ -39,6 +49,21 @@ document.getElementById("submission-form").addEventListener("submit", function (
     document.getElementById("submit-button").disabled = true;
     document.getElementById("submit-button").textContent = "Processing...";
     document.getElementById("processing-overlay").hidden = false;
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const performingForcesRadios = document.querySelectorAll('input[name="performing_forces"]');
+    const voicePartParagraph = document.querySelector('#id_voice_part')?.closest('p');
+
+    function toggleVoicePart() {
+        const selected = document.querySelector('input[name="performing_forces"]:checked')?.value;
+        if (voicePartParagraph) {
+            voicePartParagraph.style.display = (selected === 'ensemble') ? 'block' : 'none';
+        }
+    }
+
+    performingForcesRadios.forEach(radio => radio.addEventListener('change', toggleVoicePart));
+    toggleVoicePart(); // Run on initial load
 });
 </script>
 {% endblock %}
