@@ -10,7 +10,7 @@
     <form method="post">
         {% csrf_token %}
         <button type="submit">Yes, delete this record</button>
-        <a href="{% url 'records:record_detail' record.id %}">Cancel</a>
+        <a href="{% url 'records:record_detail' record.submission_group %}">Cancel</a>
     </form>
 </div>
 {% endblock %}

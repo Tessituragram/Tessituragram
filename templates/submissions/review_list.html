@@ -66,7 +66,7 @@
             <tbody>
                 {% for record in records %}
                 <tr>
-                    <td><a href="{% url 'submissions:review_detail' record.id %}">{{ record.title }}</a></td>
+                    <td><a href="{% url 'submissions:review_detail' record.submission_group %}">{{ record.title }}</a></td>
                     {% for key, label, sort_field in display_columns %}
                     <td>
                         {% if key == "status" %}

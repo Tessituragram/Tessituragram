@@ -1,49 +1,209 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block title %}{{ record.title }}{% endblock %}
 
 {% block content %}
-<h1>{{ record.title }}</h1>
-<div class="content-card">
-    <p class="b1">Composer: {{ record.composer }} &mdash; Clef Range: {{ record.clef_range }}</p>
 
-    <h2>Tessitura</h2>
-    <p class="b1">Range: {{ record.q1_pitch }}{{ record.q1_octave }}&ndash;{{ record.q3_pitch }}{{ record.q3_octave }} ({{ record.q1_freq }}&ndash;{{ record.q3_freq }} Hz)</p>
-    <p class="b1">Full range: {{ record.min_freq }}&ndash;{{ record.max_freq }} Hz</p>
-    <p class="b1">Median: {{ record.median_freq }} Hz</p>
+<div class="record-detail">
 
-    {% if record.pdf_file %}
-    <h2>Musical demand profile</h2>
-    <iframe src="{{ record.pdf_file.url }}" width="100%" height="800px" style="border: 1px solid var(--muted-teal);"></iframe>
-    <p class="b2"><a href="{{ record.pdf_file.url }}" target="_blank">Open in new tab</a></p>
-    {% endif %}
+    <!-- Header -->
+    <header class="record-header">
+        <div class="header-text">
+            <h1>“{{ record.title }}”</h1>
 
+            {% if record.larger_work %}
+            <p class="larger-work">from <em>{{ record.larger_work }}</em></p>
+            {% endif %}
+
+            <p class="composer">Music by {{ record.composer }}</p>
+
+            {% if record.author %}
+            <p class="author">Text by {{ record.author }}</p>
+            {% endif %}
+        </div>
+
+        <div class="initial-key">
+            {% with "images/key_signatures/"|add:record.initial_key|add:".jpg" as key_image %}
+                <img
+                    src="{% static key_image %}"
+                    alt="{{ record.initial_key }}"
+                    class="key-signature-image"
+                >
+            {% endwith %}
+            <p class="key-caption">Key Signature</p>
+        </div>
+    </header>
+
+
+    <!-- Clef columns -->
+    <div class="clef-panels">
+
+        <!-- Bass — left -->
+        {% if bass_record %}
+        <section class="clef-panel">
+            <h2 class="clef-panel-title">Bass Clef</h2>
+
+            {% if bass_record.pdf_file %}
+            <a class="pdf-link" href="{{ bass_record.pdf_file.url }}" target="_blank">
+                Full Musical Demand Profile (PDF)
+            </a>
+            {% endif %}
+
+            <div class="metrics-row">
+
+                <div class="metric">
+                    <div class="metric-label">Compositional Range</div>
+                    <div class="metric-graphic">
+                        <img
+                            src="{% url 'records:record_graphic' bass_record.submission_group bass_record.clef_range 'range' %}"
+                            alt="Compositional range for {{ bass_record.title }}"
+                        >
+                    </div>
+                    <div class="metric-pitches">
+                        {{ bass_record.min_freq_note }}{{ bass_record.min_freq_octave }}
+                        &ndash;
+                        {{ bass_record.max_freq_note }}{{ bass_record.max_freq_octave }}
+                    </div>
+                </div>
+
+                <div class="metric">
+                    <div class="metric-label">Musical <em>Tessitura</em></div>
+                    <div class="metric-graphic">
+                        <img
+                            src="{% url 'records:record_graphic' bass_record.submission_group bass_record.clef_range 'tessitura' %}"
+                            alt="Musical tessitura for {{ bass_record.title }}"
+                        >
+                    </div>
+                    <div class="metric-pitches">
+                        {{ bass_record.q1_pitch }}{{ bass_record.q1_octave }}
+                        &ndash;
+                        {{ bass_record.q3_pitch }}{{ bass_record.q3_octave }}
+                    </div>
+                </div>
+
+                <div class="metric">
+                    <div class="metric-label">Median Pitch</div>
+                    <div class="metric-graphic">
+                        <img
+                            src="{% url 'records:record_graphic' bass_record.submission_group bass_record.clef_range 'median' %}"
+                            alt="Median pitch for {{ bass_record.title }}"
+                        >
+                    </div>
+                    <div class="metric-pitches">
+                        {{ bass_record.median_pitch }}{{ bass_record.median_octave }}
+                    </div>
+                </div>
+
+            </div>
+        </section>
+        {% endif %}
+
+
+        <!-- Treble — right -->
+        {% if treble_record %}
+        <section class="clef-panel">
+            <h2 class="clef-panel-title">Treble Clef</h2>
+
+            {% if treble_record.pdf_file %}
+            <a class="pdf-link" href="{{ treble_record.pdf_file.url }}" target="_blank">
+                Full Musical Demand Profile (PDF)
+            </a>
+            {% endif %}
+
+            <div class="metrics-row">
+
+                <div class="metric">
+                    <div class="metric-label">Compositional Range</div>
+                    <div class="metric-graphic">
+                        <img
+                            src="{% url 'records:record_graphic' treble_record.submission_group treble_record.clef_range 'range' %}"
+                            alt="Compositional range for {{ treble_record.title }}"
+                        >
+                    </div>
+                    <div class="metric-pitches">
+                        {{ treble_record.min_freq_note }}{{ treble_record.min_freq_octave }}
+                        &ndash;
+                        {{ treble_record.max_freq_note }}{{ treble_record.max_freq_octave }}
+                    </div>
+                </div>
+
+                <div class="metric">
+                    <div class="metric-label">Musical <em>Tessitura</em></div>
+                    <div class="metric-graphic">
+                        <img
+                            src="{% url 'records:record_graphic' treble_record.submission_group treble_record.clef_range 'tessitura' %}"
+                            alt="Musical tessitura for {{ treble_record.title }}"
+                        >
+                    </div>
+                    <div class="metric-pitches">
+                        {{ treble_record.q1_pitch }}{{ treble_record.q1_octave }}
+                        &ndash;
+                        {{ treble_record.q3_pitch }}{{ treble_record.q3_octave }}
+                    </div>
+                </div>
+
+                <div class="metric">
+                    <div class="metric-label">Median Pitch</div>
+                    <div class="metric-graphic">
+                        <img
+                            src="{% url 'records:record_graphic' treble_record.submission_group treble_record.clef_range 'median' %}"
+                            alt="Median pitch for {{ treble_record.title }}"
+                        >
+                    </div>
+                    <div class="metric-pitches">
+                        {{ treble_record.median_pitch }}{{ treble_record.median_octave }}
+                    </div>
+                </div>
+
+            </div>
+        </section>
+        {% endif %}
+
+    </div>
+
+
+    <!-- Admin controls -->
     {% if user.is_staff %}
-    <hr style="margin: 24px 0; border: none; border-top: 1px solid rgba(148, 161, 135, 0.3);">
-    <h2>Admin actions</h2>
+    <details class="admin-section">
+        <summary>Admin actions</summary>
 
-    <p class="b2"><a href="{% url 'submissions:edit_resubmit' record.id %}">Edit &amp; resubmit on submitter's behalf</a></p>
+        <p class="b2">
+            <a href="{% url 'submissions:edit_resubmit' record.id %}">
+                Edit &amp; resubmit on submitter's behalf
+            </a>
+        </p>
 
-    <form method="post" style="margin-bottom: 16px;">
-        {% csrf_token %}
-        <label for="status">Status:</label>
-        <select name="status" id="status">
-            <option value="pending" {% if record.status == "pending" %}selected{% endif %}>Pending Review</option>
-            <option value="public" {% if record.status == "public" %}selected{% endif %}>Public</option>
-            <option value="private" {% if record.status == "private" %}selected{% endif %}>Private</option>
-            <option value="rejected" {% if record.status == "rejected" %}selected{% endif %}>Rejected</option>
-        </select>
-        <button type="submit">Update status</button>
-    </form>
+        <form method="post">
+            {% csrf_token %}
 
-    {% if record.additional_comments %}
-        <h2>Submitter Notes (Staff Only):</h2>
-        <p class="b1">{{ record.additional_comments|linebreaksbr }}</p>
+            <label for="status">Status:</label>
+
+            <select name="status" id="status">
+                <option value="pending" {% if record.status == "pending" %}selected{% endif %}>Pending Review</option>
+                <option value="public" {% if record.status == "public" %}selected{% endif %}>Public</option>
+                <option value="rejected" {% if record.status == "rejected" %}selected{% endif %}>Rejected</option>
+            </select>
+
+            <button type="submit">Update status</button>
+        </form>
+
+        {% if record.midi_file %}
+        <p class="b2">
+            <a href="{% url 'records:midi_download' record.id %}">
+                Download original MIDI file
+            </a>
+        </p>
+        {% endif %}
+
+        <p class="b2">
+            <a href="{% url 'records:delete_record' record.id %}" style="color: var(--night-bordeaux);">
+                Delete this record
+            </a>
+        </p>
+    </details>
     {% endif %}
 
-    {% if record.midi_file %}
-    <p class="b2"><a href="{% url 'records:midi_download' record.id %}">Download original MIDI file</a></p>
-    {% endif %}
-    <p class="b2"><a href="{% url 'records:delete_record' record.id %}" style="color: var(--night-bordeaux);">Delete this record</a></p>
-    {% endif %}
 </div>
+
 {% endblock %}

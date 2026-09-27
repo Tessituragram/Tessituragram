@@ -10,7 +10,7 @@
         <thead>
             <tr>
                 <th>Title</th>
-                <th>Composer</th>
+                <th>Musical Composer</th>
                 <th>Submitted by</th>
                 <th>Deleted by</th>
                 <th>Deleted on</th>
@@ -20,12 +20,12 @@
         <tbody>
             {% for record in records %}
             <tr>
-                <td><a href="{% url 'records:record_detail' record.id %}">{{ record.title }}</a></td>
+                <td><a href="{% url 'records:record_detail' record.submission_group %}">{{ record.title }}</a></td>
                 <td>{{ record.composer }}</td>
                 <td>{{ record.submitted_by }}</td>
                 <td>{{ record.deleted_by }}</td>
                 <td>{{ record.deleted_at|date:"M j, Y" }}</td>
-                <td><a href="{% url 'records:reinstate_record' record.id %}">Reinstate</a></td>
+                <td><a href="{% url 'records:reinstate_record' record.submission_group %}">Reinstate</a></td>
             </tr>
             {% empty %}
             <tr><td colspan="6">No deleted records.</td></tr>

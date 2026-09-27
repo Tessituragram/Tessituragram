@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             name='Record',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.CharField(choices=[('pending', 'Pending Review'), ('public', 'Public'), ('private', 'Private'), ('rejected', 'Rejected')], default='pending', max_length=10)),
+                ('status', models.CharField(choices=[('pending', 'Pending Review'), ('public', 'Public'), ('rejected', 'Rejected')], default='pending', max_length=10)),
                 ('is_deleted', models.BooleanField(default=False)),
                 ('deleted_at', models.DateTimeField(blank=True, null=True)),
                 ('approval_at', models.DateTimeField(blank=True, null=True)),

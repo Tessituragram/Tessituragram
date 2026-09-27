@@ -7,11 +7,13 @@ from .models import PendingSignup
 
 class SignUpForm(UserCreationForm):
     first_name = forms.CharField(max_length=150, required=True)
-    last_name = forms.CharField(max_length=150, required=True)
+    # The label="Surname" below is ALL you need:
+    last_name = forms.CharField(label="Surname", max_length=150, required=True)
     email = forms.EmailField(required=True)
 
     class Meta:
         model = User
+        # REMOVE labels = {"last_name": "Surname"} from here!
         fields = ("first_name", "last_name", "email", "password1", "password2")
 
     def clean_email(self):
@@ -37,6 +39,9 @@ class ProfileEditForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ["first_name", "last_name"]
+        labels = {
+            "last_name": "Surname"
+        }
 
 
 class EmailChangeForm(forms.Form):

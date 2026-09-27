@@ -1,12 +1,13 @@
 from django.conf import settings
 from django.db import models
+import uuid
+import math
 
 
 class Record(models.Model):
     STATUS_CHOICES = [
         ("pending", "Pending Review"),
         ("public", "Public"),
-        ("private", "Private"),
         ("rejected", "Rejected"),
     ]
 
@@ -54,6 +55,7 @@ class Record(models.Model):
       ('ensemble', 'Ensemble Piece'),
   ]
 
+    submission_group = models.UUIDField(default=uuid.uuid4, editable=False)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
     submitted_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
@@ -90,7 +92,24 @@ class Record(models.Model):
     filename = models.CharField(max_length=255)
     title = models.CharField(max_length=255)
     larger_work = models.CharField(max_length=255, blank=True)
-    clef_range = models.CharField(max_length=6, null=True)
+    clef_range = models.CharField(max_length=6,
+        choices=[
+                    ("Treble", "Treble"),
+                    ("Bass", "Bass"),
+                    ("None", "Not specified"),
+                ],
+        null=True,
+        blank=True)
+    written_clef_range = models.CharField(
+        max_length=10,
+        choices=[
+            ("Treble", "Treble"),
+            ("Bass", "Bass"),
+            ("None", "Not specified"),
+        ],
+        null=True,
+        blank=True,
+    )
     performing_forces = models.CharField(max_length=10, choices=PERFORMING_FORCES_CHOICES)
     voice_part = models.CharField(max_length=20, choices=VOICE_PART_CHOICES)
     composer = models.CharField(max_length=200)
@@ -110,7 +129,7 @@ class Record(models.Model):
     STYLE_CHOICES = [
         ("western_classical", "Western Classical"),
         ("musical_theatre", "Musical Theatre"),
-        ("contemporary_commerical", "Contemporary Commercial"),
+        ("contemporary_commercial", "Contemporary Commercial"),
         ("other", "Other"),
     ]
 
@@ -185,3 +204,44 @@ class Record(models.Model):
     @property
     def lvlp_percentage(self):
         return (self.lvlp_time_dose / self.time_dose) * 100 if self.time_dose else 0
+
+    @property
+    def min_freq_note(self):
+        midi = round(69 + 12 * math.log2(self.min_freq / 440))
+        notes = ["C", "C#", "D", "D#", "E", "F",
+                "F#", "G", "G#", "A", "A#", "B"]
+        return notes[midi % 12]
+
+
+    @property
+    def min_freq_octave(self):
+        midi = round(69 + 12 * math.log2(self.min_freq / 440))
+        return (midi // 12) - 1
+
+
+    @property
+    def max_freq_note(self):
+        midi = round(69 + 12 * math.log2(self.max_freq / 440))
+        notes = ["C", "C#", "D", "D#", "E", "F",
+                "F#", "G", "G#", "A", "A#", "B"]
+        return notes[midi % 12]
+
+
+    @property
+    def max_freq_octave(self):
+        midi = round(69 + 12 * math.log2(self.max_freq / 440))
+        return (midi // 12) - 1
+
+
+    @property
+    def median_pitch(self):
+        midi = round(69 + 12 * math.log2(self.median_freq / 440))
+        notes = ["C", "C#", "D", "D#", "E", "F",
+                "F#", "G", "G#", "A", "A#", "B"]
+        return notes[midi % 12]
+
+
+    @property
+    def median_octave(self):
+        midi = round(69 + 12 * math.log2(self.median_freq / 440))
+        return (midi // 12) - 1

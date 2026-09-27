@@ -1,2 +1,29 @@
-  {% extends "base.html" %}
-  {% block content %}<h1>Welcome to Tessituragram</h1>{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}Welcome | Tessituragram{% endblock %}
+
+{% block content %}
+
+<div class="homepage">
+    <h1 class="homepage-title">Welcome!</h1>
+
+    <div class="homepage-grid">
+        <a href="{% url 'background' %}" class="homepage-card">
+            <span>Background</span>
+        </a>
+
+        <a href="{% url 'submissions:submit_form' %}" class="homepage-card">
+          <span>Submit</span>
+        </a>
+
+        <a href="{% url 'records:soloistic_search' %}" class="homepage-card">
+            <span>Soloistic<br>Database</span>
+        </a>
+
+        <a href="{% url 'contact' %}" class="homepage-card">
+            <span>Contact</span>
+        </a>
+    </div>
+</div>
+
+{% endblock %}

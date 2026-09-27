@@ -5,7 +5,7 @@
 <h1>{{ page_title }}</h1>
 <div class="content-card">
     {% for paragraph in content %}
-    <p class="b1">{{ paragraph }}</p>
+    <p>{{ paragraph|safe }}</p>
     {% endfor %}
 </div>
 {% endblock %}

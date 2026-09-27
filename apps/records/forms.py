@@ -1,6 +1,62 @@
 from django import forms
 from .models import Record
 
+class SimpleSearchForm(forms.Form):
+    title = forms.CharField(max_length=200, required=False)
+    larger_work = forms.CharField(max_length=200, required=False)
+    composer = forms.CharField(max_length=200, required=False, label="Musical Composer")
+    author = forms.CharField(max_length=200, required=False)
+    submitter = forms.CharField(required=False, label="Submitted by")
+
+    style = forms.ChoiceField(
+        choices=[("", "Any")] + Record.STYLE_CHOICES,
+        required=False,
+    )
+
+    q1_freq_min = forms.FloatField(
+        required=False,
+        label="Low freq (min)",
+    )
+    q1_freq_max = forms.FloatField(
+        required=False,
+        label="Low freq (max)",
+    )
+
+    q3_freq_min = forms.FloatField(
+        required=False,
+        label="High freq (min)",
+    )
+    q3_freq_max = forms.FloatField(
+        required=False,
+        label="High freq (max)",
+    )
+
+    median_freq_min = forms.FloatField(
+        required=False,
+        label="Median freq (min)",
+    )
+    median_freq_max = forms.FloatField(
+        required=False,
+        label="Median freq (max)",
+    )
+
+    min_freq_min = forms.FloatField(
+        required=False,
+        label="Min freq — lower bound",
+    )
+    min_freq_max = forms.FloatField(
+        required=False,
+        label="Min freq — upper bound",
+    )
+
+    max_freq_min = forms.FloatField(
+        required=False,
+        label="Max freq — lower bound",
+    )
+    max_freq_max = forms.FloatField(
+        required=False,
+        label="Max freq — upper bound",
+    )
 
 class AdvancedSearchForm(forms.Form):
     title = forms.CharField(max_length=200, required=False)
@@ -25,11 +81,6 @@ class AdvancedSearchForm(forms.Form):
         required=False,
     )
 
-    performing_forces = forms.ChoiceField(
-        choices=[("", "Any")] + Record.PERFORMING_FORCES_CHOICES,
-        required=False,
-    )
-
     voice_part = forms.ChoiceField(
             choices=[("", "Any")] + Record.VOICE_PART_CHOICES,
             required=False,
@@ -41,8 +92,8 @@ class AdvancedSearchForm(forms.Form):
     q3_freq_min = forms.FloatField(required=False, label="High freq (min)")
     q3_freq_max = forms.FloatField(required=False, label="High freq (max)")
 
-    median_freq_min = forms.FloatField(required=False, label="median_freq freq (min)")
-    median_freq_max = forms.FloatField(required=False, label="median_freq freq (max)")
+    median_freq_min = forms.FloatField(required=False, label="Median freq (min)")
+    median_freq_max = forms.FloatField(required=False, label="Median freq (max)")
 
     min_freq_min = forms.FloatField(required=False, label="Min freq — lower bound")
     min_freq_max = forms.FloatField(required=False, label="Min freq — upper bound")
@@ -62,65 +113,65 @@ class AdvancedSearchForm(forms.Form):
     total_time_min = forms.FloatField(required=False, label="Total time (min)")
     total_time_max = forms.FloatField(required=False, label="Total time (max)")
 
-    hvhp_time_dose_min = forms.FloatField(
-        required=False, label="HV High passaggio (min)"
-    )
-    hvhp_time_dose_max = forms.FloatField(
-        required=False, label="HV High passaggio (max)"
-    )
+    # hvhp_time_dose_min = forms.FloatField(
+    #     required=False, label="HV High passaggio (min)"
+    # )
+    # hvhp_time_dose_max = forms.FloatField(
+    #     required=False, label="HV High passaggio (max)"
+    # )
 
-    hvmp_time_dose_min = forms.FloatField(
-        required=False, label="HV Middle passaggio (min)"
-    )
-    hvmp_time_dose_max = forms.FloatField(
-        required=False, label="HV Middle passaggio (max)"
-    )
+    # hvmp_time_dose_min = forms.FloatField(
+    #     required=False, label="HV Middle passaggio (min)"
+    # )
+    # hvmp_time_dose_max = forms.FloatField(
+    #     required=False, label="HV Middle passaggio (max)"
+    # )
 
-    hvlp_time_dose_min = forms.FloatField(
-        required=False, label="HV Low passaggio (min)"
-    )
-    hvlp_time_dose_max = forms.FloatField(
-        required=False, label="HV Low passaggio (max)"
-    )
+    # hvlp_time_dose_min = forms.FloatField(
+    #     required=False, label="HV Low passaggio (min)"
+    # )
+    # hvlp_time_dose_max = forms.FloatField(
+    #     required=False, label="HV Low passaggio (max)"
+    # )
 
-    mvhp_time_dose_min = forms.FloatField(
-        required=False, label="MV High passaggio (min)"
-    )
-    mvhp_time_dose_max = forms.FloatField(
-        required=False, label="MV High passaggio (max)"
-    )
+    # mvhp_time_dose_min = forms.FloatField(
+    #     required=False, label="MV High passaggio (min)"
+    # )
+    # mvhp_time_dose_max = forms.FloatField(
+    #     required=False, label="MV High passaggio (max)"
+    # )
 
-    mvmp_time_dose_min = forms.FloatField(
-        required=False, label="MV Middle passaggio (min)"
-    )
-    mvmp_time_dose_max = forms.FloatField(
-        required=False, label="MV Middle passaggio (max)"
-    )
+    # mvmp_time_dose_min = forms.FloatField(
+    #     required=False, label="MV Middle passaggio (min)"
+    # )
+    # mvmp_time_dose_max = forms.FloatField(
+    #     required=False, label="MV Middle passaggio (max)"
+    # )
 
-    mvlp_time_dose_min = forms.FloatField(
-        required=False, label="MV Low passaggio (min)"
-    )
-    mvlp_time_dose_max = forms.FloatField(
-        required=False, label="MV Low passaggio (max)"
-    )
+    # mvlp_time_dose_min = forms.FloatField(
+    #     required=False, label="MV Low passaggio (min)"
+    # )
+    # mvlp_time_dose_max = forms.FloatField(
+    #     required=False, label="MV Low passaggio (max)"
+    # )
 
-    lvhp_time_dose_min = forms.FloatField(
-        required=False, label="LV High passaggio (min)"
-    )
-    lvhp_time_dose_max = forms.FloatField(
-        required=False, label="LV High passaggio (max)"
-    )
+    # lvhp_time_dose_min = forms.FloatField(
+    #     required=False, label="LV High passaggio (min)"
+    # )
+    # lvhp_time_dose_max = forms.FloatField(
+    #     required=False, label="LV High passaggio (max)"
+    # )
 
-    lvmp_time_dose_min = forms.FloatField(
-        required=False, label="LV Middle passaggio (min)"
-    )
-    lvmp_time_dose_max = forms.FloatField(
-        required=False, label="LV Middle passaggio (max)"
-    )
+    # lvmp_time_dose_min = forms.FloatField(
+    #     required=False, label="LV Middle passaggio (min)"
+    # )
+    # lvmp_time_dose_max = forms.FloatField(
+    #     required=False, label="LV Middle passaggio (max)"
+    # )
 
-    lvlp_time_dose_min = forms.FloatField(
-        required=False, label="LV Low passaggio (min)"
-    )
-    lvlp_time_dose_max = forms.FloatField(
-        required=False, label="LV Low passaggio (max)"
-    )
+    # lvlp_time_dose_min = forms.FloatField(
+    #     required=False, label="LV Low passaggio (min)"
+    # )
+    # lvlp_time_dose_max = forms.FloatField(
+    #     required=False, label="LV Low passaggio (max)"
+    # )

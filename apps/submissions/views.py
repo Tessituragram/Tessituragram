@@ -5,6 +5,7 @@ import uuid
 
 from django.core.files import File
 from django.core.mail import send_mail
+from django.http import Http404
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -27,7 +28,7 @@ NOTIFICATION_EMAIL = "tessituragram@tessituragram.com"
 
 def notify_admins_of_submission(request, record):
     review_url = request.build_absolute_uri(
-        reverse("submissions:review_detail", args=[record.pk])
+        reverse("submissions:review_detail", args=[record.submission_group])
     )
     send_mail(
         subject=f"New submission for review: {record.filename}",
@@ -45,6 +46,7 @@ def notify_admins_of_submission(request, record):
 def submit_form(request):
     if request.method == "POST":
         form = SubmissionForm(request.POST, request.FILES)
+
         if form.is_valid():
             title = form.cleaned_data["title"]
             larger_work = form.cleaned_data["larger_work"]
@@ -55,82 +57,131 @@ def submit_form(request):
             style_other = form.cleaned_data["style_other"]
             author = form.cleaned_data.get("author", "")
             initial_key = form.cleaned_data["initial_key"]
-            clef_range = form.cleaned_data.get("clef_range") or None
+
+            # This is the clef the submitted MIDI is written in.
+            written_clef_range = form.cleaned_data.get("written_clef_range") or None
+
             performing_forces = form.cleaned_data["performing_forces"]
-            voice_part= form.cleaned_data["voice_part"]
-            additional_comments = form.cleaned_data.get("additional_comments", "")
+            voice_part = form.cleaned_data["voice_part"]
+            additional_comments = form.cleaned_data.get(
+                "additional_comments",
+                "",
+            )
 
             work_dir = tempfile.mkdtemp(prefix="tessitura_")
             output_dir = os.path.join(work_dir, "results")
             os.makedirs(output_dir, exist_ok=True)
 
+            group_id = uuid.uuid4()
+
             try:
                 midi_path = os.path.join(work_dir, uploaded_file.name)
+
                 with open(midi_path, "wb") as f:
                     for chunk in uploaded_file.chunks():
                         f.write(chunk)
 
                 with midi_reader.MidiParser(midi_path) as parser:
                     status = parser.parse_midi()
+
                     if status == -1:
-                        error_msg = parser.error_message or "Could not parse MIDI file."
-                        form.add_error(None, error_msg)
-                        return render(
-                            request, "submissions/submit_form.html", {"form": form}
+                        error_msg = (
+                            parser.error_message
+                            or "Could not parse MIDI file."
                         )
+                        form.add_error(None, error_msg)
+
+                        return render(
+                            request,
+                            "submissions/submit_form.html",
+                            {"form": form},
+                        )
+
                     notes = parser.get_notes()
+
                     if notes == -1:
                         error_msg = (
                             parser.error_message
                             or "Could not extract notes from MIDI file."
                         )
                         form.add_error(None, error_msg)
+
                         return render(
-                            request, "submissions/submit_form.html", {"form": form}
+                            request,
+                            "submissions/submit_form.html",
+                            {"form": form},
                         )
 
-                tesses, passaggios, _ = tessitura.get_tessitura_and_passaggio(
-                    notes, clef_range
+                notes = parser.post_process(notes)
+
+                tesses, passaggios, _ = (
+                    tessitura.get_tessitura_and_passaggio(
+                        notes,
+                        written_clef_range,
+                    )
                 )
 
-                keep_private = form.cleaned_data.get("keep_private", False)
-                initial_status = "private" if keep_private else "pending"
+                keep_private = form.cleaned_data.get(
+                    "keep_private",
+                    False,
+                )
+
+                initial_status = "pending"
 
                 for tess, passaggio in zip(tesses, passaggios):
                     record = Record.objects.create(
                         submitted_by=request.user,
+                        submission_group=group_id,
+
                         filename=filename,
                         title=title,
                         larger_work=larger_work,
                         composer=composer,
                         author=author,
+
                         initial_key=initial_key,
                         style=style,
                         style_other=style_other,
+
+                        # Clef used as the starting interpretation
+                        # for this submission.
+                        written_clef_range=written_clef_range,
+
+                        # Clef represented by this particular record.
                         clef_range=tess.clef_range,
+
                         performing_forces=performing_forces,
                         voice_part=voice_part,
                         additional_comments=additional_comments,
+
                         status=initial_status,
+
                         q1_freq=tess.lowFreq,
                         q1_pitch=tess.lowNote,
                         q1_octave=tess.lowOctave,
+
                         q3_freq=tess.highFreq,
                         q3_pitch=tess.highNote,
                         q3_octave=tess.highOctave,
+
                         cycle_dose=tess.cycle_dose,
                         time_dose=tess.time_dose,
                         rest_time=tess.rest_time,
                         total_time=tess.total_time,
+
                         median_freq=tess.median_freq,
+
                         min_freq=tess.min_pitch,
                         max_freq=tess.max_pitch,
+
                         hvhp_time_dose=passaggio.hvhp.time_dose,
                         hvmp_time_dose=passaggio.hvmp.time_dose,
                         hvlp_time_dose=passaggio.hvlp.time_dose,
+
                         mvhp_time_dose=passaggio.mvhp.time_dose,
                         mvmp_time_dose=passaggio.mvmp.time_dose,
                         mvlp_time_dose=passaggio.mvlp.time_dose,
+
                         lvhp_time_dose=passaggio.lvhp.time_dose,
                         lvmp_time_dose=passaggio.lvmp.time_dose,
                         lvlp_time_dose=passaggio.lvlp.time_dose,
@@ -138,38 +189,57 @@ def submit_form(request):
 
                     with open(midi_path, "rb") as midi_f:
                         record.midi_file.save(
-                            uploaded_file.name, File(midi_f), save=True
+                            uploaded_file.name,
+                            File(midi_f),
+                            save=True,
                         )
 
                     pdf = FPDF()
+
                     pdf.add_font(
                         "times_new",
                         "",
                         utils.resource_path(
-                            os.path.join("data", "Times New Roman.ttf")
+                            os.path.join(
+                                "data",
+                                "Times New Roman.ttf",
+                            )
                         ),
                     )
+
                     pdf.add_font(
                         "times_new",
                         "B",
                         utils.resource_path(
-                            os.path.join("data", "Times New Roman Bold.ttf")
+                            os.path.join(
+                                "data",
+                                "Times New Roman Bold.ttf",
+                            )
                         ),
                     )
+
                     pdf.add_font(
                         "times_new",
                         "I",
                         utils.resource_path(
-                            os.path.join("data", "Times New Roman Italic.ttf")
+                            os.path.join(
+                                "data",
+                                "Times New Roman Italic.ttf",
+                            )
                         ),
                     )
+
                     pdf.add_font(
                         "times_new",
                         "BI",
                         utils.resource_path(
-                            os.path.join("data", "Times New Roman Bold Italic.ttf")
+                            os.path.join(
+                                "data",
+                                "Times New Roman Bold Italic.ttf",
+                            )
                         ),
                     )
+
                     pdf.add_page()
 
                     container = TessPassContainer(
@@ -178,31 +248,57 @@ def submit_form(request):
                         title,
                         pdf,
                         output_dir=output_dir,
-                        submitted_by=f"{request.user.first_name} {request.user.last_name}",
+                        submitted_by=(
+                            f"{request.user.first_name} "
+                            f"{request.user.last_name}"
+                        ),
                     )
+
                     container.ensure_musescore_configured()
                     container.write_to_pdf()
 
                     pdf_filename = (
-                        f"{record.pk}-{tess.clef_range}-{uuid.uuid4().hex[:8]}.pdf"
+                        f"{record.title or 'new'}-"
+                        f"{record.clef_range}-Tessituragram-"
+                        f"{uuid.uuid4().hex[:8]}.pdf"
                     )
-                    pdf_path = os.path.join(work_dir, pdf_filename)
+
+                    pdf_path = os.path.join(
+                        work_dir,
+                        pdf_filename,
+                    )
+
                     pdf.output(pdf_path)
 
                     with open(pdf_path, "rb") as pdf_f:
-                        record.pdf_file.save(pdf_filename, File(pdf_f), save=True)
+                        record.pdf_file.save(
+                            pdf_filename,
+                            File(pdf_f),
+                            save=True,
+                        )
 
                     if not keep_private:
-                        notify_admins_of_submission(request, record)
+                        notify_admins_of_submission(
+                            request,
+                            record,
+                        )
 
                 return redirect("submissions:submission_success")
 
             finally:
-                shutil.rmtree(work_dir, ignore_errors=True)
+                shutil.rmtree(
+                    work_dir,
+                    ignore_errors=True,
+                )
+
     else:
         form = SubmissionForm()
 
-    return render(request, "submissions/submit_form.html", {"form": form})
+    return render(
+        request,
+        "submissions/submit_form.html",
+        {"form": form},
+    )
 
 
 @login_required
@@ -212,7 +308,23 @@ def submission_success(request):
 
 @staff_member_required
 def review_list(request):
-    records = Record.objects.filter(status="pending", is_deleted=False)
+    records = Record.objects.filter(
+    status="pending",
+    is_deleted=False,
+    )
+
+    representative_ids = list(
+        records
+        .order_by("submission_group", "-created_at")
+        .distinct("submission_group")
+        .values_list("id", flat=True)
+    )
+
+    records = (
+        Record.objects
+        .filter(id__in=representative_ids)
+        .select_related("submitted_by")
+    )
 
     sort = request.GET.get("sort", "created_at")
     if sort == "submitter":
@@ -251,222 +363,502 @@ def review_list(request):
 
 @staff_member_required
 def review_detail(request, pk):
-    record = get_object_or_404(Record, pk=pk, status="pending")
+    group_records = Record.objects.filter(
+        submission_group=pk,
+        status="pending",
+        is_deleted=False,
+    )
+
+    if not group_records.exists():
+        raise Http404
+
+    record = group_records.first()
 
     if request.method == "POST":
         action = request.POST.get("action")
+
+    if request.method == "POST" and request.user.is_staff:
+        action = request.POST.get("action")
+
         if action == "approve":
-            record.status = "public"
-            record.approval_at = timezone.now()
-            record.approval_by = request.user
-            record.save()
+            approval_at = timezone.now()
+
+            for item in group_records:
+                item.status = "public"
+                item.approval_at = approval_at
+                item.approval_by = request.user
+                item.save()
+
             return redirect("submissions:review_list")
+
         elif action == "reject":
-            record.status = "rejected"
-            record.save()
+            for item in group_records:
+                item.status = "rejected"
+                item.save()
+
             return redirect("submissions:review_list")
 
-    return render(request, "submissions/review_detail.html", {"record": record})
+        elif "status" in request.POST:
+            new_status = request.POST.get("status")
 
+            if new_status in dict(Record.STATUS_CHOICES):
+                for item in group_records:
+                    item.status = new_status
+
+                    if new_status == "public":
+                        item.approval_at = timezone.now()
+                        item.approval_by = request.user
+
+                    item.save()
+
+            return redirect("submissions:review_detail", pk=pk)
+
+    return render(
+        request,
+        "submissions/review_detail.html",
+        {
+            "record": record,
+            "group_records": group_records,
+            "bass_record": group_records.filter(clef_range="Bass").first(),
+            "treble_record": group_records.filter(clef_range="Treble").first(),
+        },
+    )
 
 @staff_member_required
 def edit_resubmit(request, pk):
-    record = get_object_or_404(Record, pk=pk, is_deleted=False)
+    record = get_object_or_404(
+        Record,
+        pk=pk,
+        is_deleted=False,
+    )
+
+    group_records = list(
+        Record.objects.filter(
+            submission_group=record.submission_group,
+            is_deleted=False,
+        )
+    )
 
     if request.method == "POST":
-        form = ReviewerEditForm(request.POST, request.FILES, instance=record)
-        
+        form = ReviewerEditForm(
+            request.POST,
+            request.FILES,
+        )
+
         if form.is_valid():
             uploaded_file = form.cleaned_data.get("midi_file")
 
             if not uploaded_file and not record.midi_file:
                 form.add_error(
                     None,
-                    "No MIDI file is on record. Please upload one to reprocess this submission.",
+                    "No MIDI file is on record. Please upload one "
+                    "to reprocess this submission.",
                 )
                 return render(
                     request,
                     "submissions/edit_resubmit.html",
-                    {"form": form, "record": record},
+                    {
+                        "form": form,
+                        "record": record,
+                    },
                 )
 
-            work_dir = tempfile.mkdtemp(prefix="tessitura_edit_")
-            output_dir = os.path.join(work_dir, "results")
-            os.makedirs(output_dir, exist_ok=True)
+            work_dir = tempfile.mkdtemp(
+                prefix="tessitura_edit_"
+            )
+            output_dir = os.path.join(
+                work_dir,
+                "results",
+            )
+            os.makedirs(
+                output_dir,
+                exist_ok=True,
+            )
 
             try:
+                # ---------------------------------------------------------
+                # Get MIDI file
+                # ---------------------------------------------------------
                 if uploaded_file:
-                    record.filename = os.path.splitext(uploaded_file.name)[0]
-                    midi_path = os.path.join(work_dir, uploaded_file.name)
+                    midi_path = os.path.join(
+                        work_dir,
+                        uploaded_file.name,
+                    )
+
                     with open(midi_path, "wb") as f:
                         for chunk in uploaded_file.chunks():
                             f.write(chunk)
+
                 else:
                     midi_path = os.path.join(
-                        work_dir, os.path.basename(record.midi_file.name)
+                        work_dir,
+                        os.path.basename(record.midi_file.name),
                     )
-                    with record.midi_file.open("rb") as source, open(
-                        midi_path, "wb"
-                    ) as dest:
-                        shutil.copyfileobj(source, dest)
 
+                    with record.midi_file.open("rb") as source:
+                        with open(midi_path, "wb") as dest:
+                            shutil.copyfileobj(source, dest)
+
+                # ---------------------------------------------------------
+                # Parse MIDI
+                # ---------------------------------------------------------
                 with midi_reader.MidiParser(midi_path) as parser:
                     status = parser.parse_midi()
+
                     if status == -1:
-                        form.add_error(None, "Could not parse MIDI file.")
+                        form.add_error(
+                            None,
+                            parser.error_message
+                            or "Could not parse MIDI file.",
+                        )
                         return render(
                             request,
                             "submissions/edit_resubmit.html",
-                            {"form": form, "record": record},
+                            {
+                                "form": form,
+                                "record": record,
+                            },
                         )
-                    
+
                     notes = parser.get_notes()
+
                     if notes == -1:
-                        form.add_error(None, "Could not extract notes from MIDI file.")
+                        form.add_error(
+                            None,
+                            parser.error_message
+                            or "Could not extract notes from MIDI file.",
+                        )
                         return render(
                             request,
                             "submissions/edit_resubmit.html",
-                            {"form": form, "record": record},
-                        )
-                    
-                    notes = parser.post_process(notes)
-                    if notes == -1:
-                        form.add_error(None, "File does not end with C1 note.")
-                        return render(
-                            request, 
-                            "submissions/edit_resubmit.html", 
-                            {"form": form, "record": record}
+                            {
+                                "form": form,
+                                "record": record,
+                            },
                         )
 
-                selected_clef_range = form.cleaned_data.get("clef_range", "")
-                clef_range_param = (
-                    None
-                    if selected_clef_range.lower() in ["none", ""]
-                    else selected_clef_range.lower()
-                )
+                # Same post-processing as normal submissions.
+                notes = parser.post_process(notes)
 
-                tesses, passaggios, _ = tessitura.get_tessitura_and_passaggio(
-                    notes, clef_range_param
-                )
+                # ---------------------------------------------------------
+                # Get written/original clef
+                # ---------------------------------------------------------
+                written_clef_range = form.cleaned_data[
+                    "written_clef_range"
+                ]
 
-                # Select the matching tessitura calculation
-                match = None
-
-                if clef_range_param is None:
-                    # If no clef range was specified, pick the default (first) result
-                    if tesses and passaggios:
-                        match = (tesses[0], passaggios[0])
-                else:
-                    # Otherwise, match on the explicitly requested clef_range
-                    for tess, passaggio in zip(tesses, passaggios):
-                        if str(tess.clef_range or "").lower() == selected_clef_range.lower():
-                            match = (tess, passaggio)
-                            break
-
-                if match is None:
-                    form.add_error(
-                        None, "Could not compute results for the selected clef_range."
+                tesses, passaggios, _ = (
+                    tessitura.get_tessitura_and_passaggio(
+                        notes,
+                        written_clef_range.lower(),
                     )
-                    return render(
-                        request,
-                        "submissions/edit_resubmit.html",
-                        {"form": form, "record": record},
-                    )
-
-                tess, passaggio = match
-
-                # Save updated fields to model
-                record.title = form.cleaned_data["title"]
-                record.larger_work = form.cleaned_data.get("larger_work", "")
-                record.composer = form.cleaned_data["composer"]
-                record.author = form.cleaned_data.get("author", "")
-                record.initial_key = form.cleaned_data["initial_key"]
-                record.style = form.cleaned_data["style"]
-                record.style_other = form.cleaned_data["style_other"]
-                record.clef_range = tess.clef_range
-                record.performing_forces = form.cleaned_data["performing_forces"]
-                record.voice_part = form.cleaned_data["voice_part"]
-                record.additional_comments = form.cleaned_data.get("additional_comments","")
-                record.status = "pending"
-                record.approval_at = None
-                record.approval_by = None
-                record.edited_at = timezone.now()
-                record.edited_by = request.user
-
-                # Tessitura metrics updates...
-                record.q1_freq = tess.lowFreq
-                record.q1_pitch = tess.lowNote
-                record.q1_octave = tess.lowOctave
-                record.q3_freq = tess.highFreq
-                record.q3_pitch = tess.highNote
-                record.q3_octave = tess.highOctave
-                record.median_freq = tess.median_freq
-                record.cycle_dose = tess.cycle_dose
-                record.time_dose = tess.time_dose
-                record.rest_time = tess.rest_time
-                record.total_time = tess.total_time
-                record.min_freq = tess.min_pitch
-                record.max_freq = tess.max_pitch
-                record.hvhp_time_dose = passaggio.hvhp.time_dose
-                record.hvmp_time_dose = passaggio.hvmp.time_dose
-                record.hvlp_time_dose = passaggio.hvlp.time_dose
-                record.mvhp_time_dose = passaggio.mvhp.time_dose
-                record.mvmp_time_dose = passaggio.mvmp.time_dose
-                record.mvlp_time_dose = passaggio.mvlp.time_dose
-                record.lvhp_time_dose = passaggio.lvhp.time_dose
-                record.lvmp_time_dose = passaggio.lvmp.time_dose
-                record.lvlp_time_dose = passaggio.lvlp.time_dose
-
-                # Generate PDF
-                pdf = FPDF()
-                pdf.add_font("times_new", "", utils.resource_path(os.path.join("data", "Times New Roman.ttf")))
-                pdf.add_font("times_new", "B", utils.resource_path(os.path.join("data", "Times New Roman Bold.ttf")))
-                pdf.add_font("times_new", "I", utils.resource_path(os.path.join("data", "Times New Roman Italic.ttf")))
-                pdf.add_font("times_new", "BI", utils.resource_path(os.path.join("data", "Times New Roman Bold Italic.ttf")))
-                pdf.add_page()
-
-                container = TessPassContainer(
-                    tess,
-                    passaggio,
-                    record.title,
-                    pdf,
-                    output_dir=output_dir,
-                    submitted_by=(
-                        f"{record.submitted_by.first_name} {record.submitted_by.last_name}"
-                        if record.submitted_by
-                        else None
-                    ),
                 )
-                container.ensure_musescore_configured()
-                container.write_to_pdf()
 
-                pdf_filename = f"{record.pk}-{tess.clef_range}-{uuid.uuid4().hex[:8]}.pdf"
-                pdf_path = os.path.join(work_dir, pdf_filename)
-                pdf.output(pdf_path)
-
-                if record.pdf_file:
-                    record.pdf_file.delete(save=False)
-                with open(pdf_path, "rb") as pdf_f:
-                    record.pdf_file.save(pdf_filename, File(pdf_f), save=False)
-
+                # ---------------------------------------------------------
+                # Filename
+                # ---------------------------------------------------------
                 if uploaded_file:
-                    if record.midi_file:
-                        record.midi_file.delete(save=False)
-                    with open(midi_path, "rb") as midi_f:
-                        record.midi_file.save(
-                            uploaded_file.name, File(midi_f), save=False
+                    new_filename = os.path.splitext(
+                        uploaded_file.name
+                    )[0]
+                else:
+                    new_filename = record.filename
+
+                # ---------------------------------------------------------
+                # Update both records in the submission group
+                # ---------------------------------------------------------
+                for tess, passaggio in zip(
+                    tesses,
+                    passaggios,
+                ):
+                    target = next(
+                        (
+                            r
+                            for r in group_records
+                            if r.clef_range == tess.clef_range
+                        ),
+                        None,
+                    )
+
+                    if target is None:
+                        target = Record(
+                            submitted_by=record.submitted_by,
+                            submission_group=record.submission_group,
                         )
 
-                record.save()
+                    # -----------------------------------------------------
+                    # General submission information
+                    # -----------------------------------------------------
+                    target.title = form.cleaned_data["title"]
 
-                return redirect("records:record_detail", pk=record.pk)
+                    target.larger_work = form.cleaned_data[
+                        "larger_work"
+                    ]
+
+                    target.composer = form.cleaned_data[
+                        "composer"
+                    ]
+
+                    target.author = form.cleaned_data[
+                        "author"
+                    ]
+
+                    target.initial_key = form.cleaned_data[
+                        "initial_key"
+                    ]
+
+                    target.style = form.cleaned_data[
+                        "style"
+                    ]
+
+                    target.style_other = form.cleaned_data.get(
+                        "style_other",
+                        "",
+                    )
+
+                    target.performing_forces = form.cleaned_data[
+                        "performing_forces"
+                    ]
+
+                    target.voice_part = form.cleaned_data.get(
+                        "voice_part",
+                        "",
+                    )
+
+                    target.additional_comments = (
+                        form.cleaned_data.get(
+                            "additional_comments",
+                            "",
+                        )
+                    )
+
+                    # -----------------------------------------------------
+                    # Clef information
+                    # -----------------------------------------------------
+                    target.written_clef_range = (
+                        written_clef_range
+                    )
+
+                    target.clef_range = tess.clef_range
+
+                    target.filename = new_filename
+
+                    # -----------------------------------------------------
+                    # Reset review status
+                    # -----------------------------------------------------
+                    target.status = "pending"
+                    target.approval_at = None
+                    target.approval_by = None
+                    target.edited_at = timezone.now()
+                    target.edited_by = request.user
+
+                    # -----------------------------------------------------
+                    # Tessitura
+                    # -----------------------------------------------------
+                    target.q1_freq = tess.lowFreq
+                    target.q1_pitch = tess.lowNote
+                    target.q1_octave = tess.lowOctave
+
+                    target.q3_freq = tess.highFreq
+                    target.q3_pitch = tess.highNote
+                    target.q3_octave = tess.highOctave
+
+                    target.median_freq = tess.median_freq
+
+                    target.min_freq = tess.min_pitch
+                    target.max_freq = tess.max_pitch
+
+                    # -----------------------------------------------------
+                    # Timing
+                    # -----------------------------------------------------
+                    target.cycle_dose = tess.cycle_dose
+                    target.time_dose = tess.time_dose
+                    target.rest_time = tess.rest_time
+                    target.total_time = tess.total_time
+
+                    # -----------------------------------------------------
+                    # Passaggio values
+                    # -----------------------------------------------------
+                    target.hvhp_time_dose = (
+                        passaggio.hvhp.time_dose
+                    )
+                    target.hvmp_time_dose = (
+                        passaggio.hvmp.time_dose
+                    )
+                    target.hvlp_time_dose = (
+                        passaggio.hvlp.time_dose
+                    )
+
+                    target.mvhp_time_dose = (
+                        passaggio.mvhp.time_dose
+                    )
+                    target.mvmp_time_dose = (
+                        passaggio.mvmp.time_dose
+                    )
+                    target.mvlp_time_dose = (
+                        passaggio.mvlp.time_dose
+                    )
+
+                    target.lvhp_time_dose = (
+                        passaggio.lvhp.time_dose
+                    )
+                    target.lvmp_time_dose = (
+                        passaggio.lvmp.time_dose
+                    )
+                    target.lvlp_time_dose = (
+                        passaggio.lvlp.time_dose
+                    )
+
+                    # -----------------------------------------------------
+                    # Save MIDI
+                    # -----------------------------------------------------
+                    if uploaded_file:
+                        if target.midi_file:
+                            target.midi_file.delete(
+                                save=False
+                            )
+
+                        with open(midi_path, "rb") as midi_f:
+                            target.midi_file.save(
+                                uploaded_file.name,
+                                File(midi_f),
+                                save=False,
+                            )
+
+                    # -----------------------------------------------------
+                    # Generate PDF
+                    # -----------------------------------------------------
+                    pdf = FPDF()
+
+                    pdf.add_font(
+                        "times_new",
+                        "",
+                        utils.resource_path(
+                            os.path.join(
+                                "data",
+                                "Times New Roman.ttf",
+                            )
+                        ),
+                    )
+
+                    pdf.add_font(
+                        "times_new",
+                        "B",
+                        utils.resource_path(
+                            os.path.join(
+                                "data",
+                                "Times New Roman Bold.ttf",
+                            )
+                        ),
+                    )
+
+                    pdf.add_font(
+                        "times_new",
+                        "I",
+                        utils.resource_path(
+                            os.path.join(
+                                "data",
+                                "Times New Roman Italic.ttf",
+                            )
+                        ),
+                    )
+
+                    pdf.add_font(
+                        "times_new",
+                        "BI",
+                        utils.resource_path(
+                            os.path.join(
+                                "data",
+                                "Times New Roman Bold Italic.ttf",
+                            )
+                        ),
+                    )
+
+                    pdf.add_page()
+
+                    container = TessPassContainer(
+                        tess,
+                        passaggio,
+                        target.title,
+                        pdf,
+                        output_dir=output_dir,
+                        submitted_by=(
+                            f"{record.submitted_by.first_name} "
+                            f"{record.submitted_by.last_name}"
+                            if record.submitted_by
+                            else ""
+                        ),
+                    )
+
+                    container.ensure_musescore_configured()
+                    container.write_to_pdf()
+
+                    pdf_filename = (
+                        f"{target.title or 'new'}-"
+                        f"{tess.clef_range}-Tessituragram-"
+                        f"{uuid.uuid4().hex[:8]}.pdf"
+                    )
+
+                    pdf_path = os.path.join(
+                        work_dir,
+                        pdf_filename,
+                    )
+
+                    pdf.output(pdf_path)
+
+                    if target.pdf_file:
+                        target.pdf_file.delete(
+                            save=False
+                        )
+
+                    with open(pdf_path, "rb") as pdf_f:
+                        target.pdf_file.save(
+                            pdf_filename,
+                            File(pdf_f),
+                            save=False,
+                        )
+
+                    # -----------------------------------------------------
+                    # Save record
+                    # -----------------------------------------------------
+                    target.save()
+
+                return redirect(
+                    "records:record_detail",
+                    group_id=record.submission_group,
+                )
 
             finally:
-                shutil.rmtree(work_dir, ignore_errors=True)
+                shutil.rmtree(
+                    work_dir,
+                    ignore_errors=True,
+                )
+
     else:
-        initial_clef = (record.clef_range or "none").lower()
-        form = ReviewerEditForm(instance=record, initial={"clef_range": initial_clef})
+        # -------------------------------------------------------------
+        # Populate form with the existing record's values
+        # -------------------------------------------------------------
+        form = ReviewerEditForm(
+            initial={
+                "title": record.title,
+                "larger_work": record.larger_work,
+                "composer": record.composer,
+                "author": record.author,
+                "initial_key": record.initial_key,
+                "style": record.style,
+                "style_other": record.style_other,
+                "written_clef_range": record.written_clef_range,
+                "performing_forces": record.performing_forces,
+                "voice_part": record.voice_part,
+                "additional_comments": record.additional_comments,
+            }
+        )
 
     return render(
-        request, "submissions/edit_resubmit.html", {"form": form, "record": record}
+        request,
+        "submissions/edit_resubmit.html",
+        {
+            "form": form,
+            "record": record,
+        },
     )

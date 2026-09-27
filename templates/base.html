@@ -40,22 +40,41 @@
             </a>
 
             <div class="dropdown">
-                <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Info</button>
+                <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">About</button>
                 <div class="dropdown-menu">
-                    <a href="{% url 'instructions' %}">Instructions</a>
-                    <a href="{% url 'about' %}">About</a>
-                    <a href="{% url 'methodology' %}">Methodology</a>
-                    <a href="{% url 'contact' %}">Contact</a>
+                    <a href="{% url 'mission' %}">Mission</a>
+                    <a href="{% url 'people' %}">People</a>
                 </div>
             </div>
 
+            <div class="dropdown">
+                <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Research</button>
+                <div class="dropdown-menu">
+                    <a href="{% url 'background' %}">Background</a>
+                    <a href="{% url 'future' %}">Future Projects and Data Sharing</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Tessituragram Database</button>
+                <div class="dropdown-menu">
+                    <a href="{% url 'instructions' %}">Instructions & Terminology</a>
+                    <a href="{% url 'submissions:submit_form' %}">Submit</a>
+                    <a href="{% url 'records:soloistic_search' %}">Soloistic Database</a>
+                </div>
+            </div>
+
+            <a href="{% url 'contact' %}">Contact</a>
+
             {% if user.is_authenticated %}
-            <a href="{% url 'records:database' %}">Database</a>
-            <a href="{% url 'submissions:submit_form' %}">Submit</a>
-            {% if user.is_staff %}
-            <a href="{% url 'submissions:review_list' %}">Review</a>
-            <a href="{% url 'records:deleted_list' %}">Deleted</a>
-            {% endif %}
+            <div class="dropdown">
+                <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Member</button>
+                <div class="dropdown-menu">
+                    <a href="{% url 'submissions:submit_form' %}">Submit</a>
+                    <a href="{% url 'submissions:review_list' %}">Review</a>
+                    <a href="{% url 'records:deleted_list' %}">Deleted</a>
+                </div>
+            </div>
             {% else %}
             <a href="{% url 'login' %}">Log In</a>
             <a href="{% url 'signup' %}">Sign Up</a>
