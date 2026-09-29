@@ -11,7 +11,6 @@ from django.shortcuts import get_list_or_404
 
 from .columns import AVAILABLE_COLUMNS, DEFAULT_TABLE_COLUMNS, SIMPLE_SEARCH_COLUMNS
 from .models import Record
-from .forms import AdvancedSearchForm, SimpleSearchForm
 from .filtering import get_filtered_records
 from urllib.parse import urlencode
 from .music_graphics import (
@@ -95,22 +94,33 @@ def soloistic_search(request):
     # =========================================================
 
     querydict = request.GET.copy()
-
     querydict.pop("page", None)
 
-    active_filters = [
+    # Parameters used to preserve the current search state.
+    preserved_params = [
         (key, value)
         for key, values in querydict.lists()
         for value in values
         if value
     ]
 
-    querystring = urlencode(active_filters)
+    # Parameters shown as active filters.
+    active_filters = [
+        (key, value)
+        for key, value in preserved_params
+        if key not in {"columns_submitted", "cols", "sort"}
+    ]
 
+    # Used for pagination.
+    querystring = urlencode(preserved_params)
+
+    # Used for sorting links.
+    # Keep the selected columns and columns_submitted flag,
+    # but replace the current sort.
     search_querystring = urlencode(
         [
             (key, value)
-            for key, value in active_filters
+            for key, value in preserved_params
             if key != "sort"
         ]
     )
@@ -121,10 +131,10 @@ def soloistic_search(request):
 
     if mode == "simple":
 
-        selected_columns = (
-            request.GET.getlist("cols")
-            or SIMPLE_SEARCH_COLUMNS
-        )
+        if "columns_submitted" in request.GET:
+            selected_columns = request.GET.getlist("cols")
+        else:
+            selected_columns = SIMPLE_SEARCH_COLUMNS
 
         all_columns = [
             column
@@ -134,10 +144,10 @@ def soloistic_search(request):
 
     else:
 
-        selected_columns = (
-            request.GET.getlist("cols")
-            or DEFAULT_TABLE_COLUMNS
-        )
+        if "columns_submitted" in request.GET:
+            selected_columns = request.GET.getlist("cols")
+        else:
+            selected_columns = DEFAULT_TABLE_COLUMNS
 
         all_columns = AVAILABLE_COLUMNS
 
@@ -193,10 +203,11 @@ def record_detail(request, group_id):
             return redirect("records:record_detail", group_id=group_id)
 
     return render(request, "records/record_detail.html", {
-        "record": primary,
-        "clef_panels": clef_panels,
-        "bass_record": clef_panels.get("Bass"),
-        "treble_record": clef_panels.get("Treble"),
+    "record": primary,
+    "clef_panels": clef_panels,
+    "bass_record": clef_panels.get("Bass"),
+    "treble_record": clef_panels.get("Treble"),
+    "none_record": clef_panels.get("None"),
     })
 
 

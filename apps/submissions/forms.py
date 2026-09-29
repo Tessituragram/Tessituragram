@@ -3,10 +3,54 @@ from apps.records.models import Record
 
 from apps.submissions.widgets import KeySignatureWidget
 
+
 MAX_MIDI_SIZE = 5 * 1024 * 1024
 
+UNKNOWN = "unknown"
+NA = "n/a"
+EXTRA_CHOICES = [(UNKNOWN, "Unknown"), (NA, "N/A")]
+UNKNOWN_CHOICES = [(UNKNOWN, "Unknown")]
 
-class SubmissionForm(forms.Form):
+UNKNOWN_NA_FIELDS = [
+    "title", "larger_work", "composer", "author",
+    "initial_key", "style", "voice_part",
+]
+
+UNKNOWN_FIELDS = [
+    "written_clef_range"
+]
+
+
+class UnknownNAMixin:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for name in UNKNOWN_NA_FIELDS:
+            field = self.fields[name]
+
+            if isinstance(field, forms.ChoiceField):
+                existing = {str(v) for v, _ in field.choices}
+                field.choices = list(field.choices) + [
+                    c for c in EXTRA_CHOICES
+                    if c[0] not in existing
+                ]
+
+            field.widget.attrs["data-unknown-na"] = "1"
+
+        for name in UNKNOWN_FIELDS:
+            field = self.fields[name]
+
+            if isinstance(field, forms.ChoiceField):
+                existing = {str(v) for v, _ in field.choices}
+                field.choices = list(field.choices) + [
+                    c for c in UNKNOWN_CHOICES
+                    if c[0] not in existing
+                ]
+
+            field.widget.attrs["data-unknown"] = "1"
+
+
+class SubmissionForm(UnknownNAMixin, forms.Form):
     title = forms.CharField(
         max_length=255,
         label="Title",
@@ -51,11 +95,11 @@ class SubmissionForm(forms.Form):
 
     written_clef_range = forms.ChoiceField(
         choices=[
-            ("", "Not specified"),
             ("treble", "Treble"),
             ("bass", "Bass"),
+            ("unknown", "Unknown"),
         ],
-        required=False,
+        required=True,
         label="Original Clef",
     )
 
@@ -139,7 +183,7 @@ class SubmissionForm(forms.Form):
         return cleaned_data
     
 
-class ReviewerEditForm(forms.Form):
+class ReviewerEditForm(UnknownNAMixin, forms.Form):
     title = forms.CharField(max_length=255, label="Title")
     larger_work = forms.CharField(max_length=255, label="Larger Work")
     composer = forms.CharField(max_length=200, label="Musical Composer")
@@ -169,11 +213,11 @@ class ReviewerEditForm(forms.Form):
 
     written_clef_range = forms.ChoiceField(
             choices=[
-                ("", "Not specified"),
                 ("treble", "Treble"),
                 ("bass", "Bass"),
+                ("unknown", "Unknown"),
             ],
-            required=False,
+            required=True,
             label="Original Clef",
     )
 

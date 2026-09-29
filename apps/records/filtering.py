@@ -1,6 +1,7 @@
 from django.db.models import Q
 from .models import Record
 from .forms import AdvancedSearchForm, SimpleSearchForm
+from .columns import AVAILABLE_COLUMNS
 
 NUMERIC_RANGE_FIELDS = [
     # Musical metrics
@@ -12,9 +13,6 @@ NUMERIC_RANGE_FIELDS = [
 
     # Timing
     "cycle_dose",
-    "time_dose",
-    "rest_time",
-    "total_time",
 
     # High voice passaggio
     "hvhp_time_dose",
@@ -30,6 +28,15 @@ NUMERIC_RANGE_FIELDS = [
     "lvhp_time_dose",
     "lvmp_time_dose",
     "lvlp_time_dose",
+]
+
+# time_dose, rest_time, total_time are now built from minutes+seconds
+# pairs on the Advanced Search form, so they're handled separately
+# below instead of through the generic float min/max loop.
+TIME_RANGE_FIELDS = [
+    "time_dose",
+    "rest_time",
+    "total_time",
 ]
 
 ALLOWED_SORTS = {
@@ -48,6 +55,76 @@ ALLOWED_SORTS = {
     "submitter",
     "-submitter",
 }
+
+NOTE_INDEX = {
+    "C": 0, "C#": 1, "D": 2, "D#": 3, "E": 4, "F": 5,
+    "F#": 6, "G": 7, "G#": 8, "A": 9, "A#": 10, "B": 11,
+}
+
+import math
+
+INDEX_TO_NOTE = {v: k for k, v in NOTE_INDEX.items()}
+
+
+def freq_to_note_octave(freq):
+    """
+    Converts a stored Hz value to the nearest (note, octave) pair,
+    using the same equal-temperament tuning as _pitch_to_freq_band.
+    Returns None if freq is None.
+    """
+    if freq is None:
+        return None
+    midi = round(69 + 12 * math.log2(freq / 440.0))
+    return INDEX_TO_NOTE[midi % 12], midi // 12 - 1
+
+
+def _midi_number(note, octave):
+    return 12 * (int(octave) + 1) + NOTE_INDEX[note]
+
+
+def _freq_from_midi(midi_number):
+    return 440.0 * (2 ** ((midi_number - 69) / 12))
+
+
+def _pitch_to_freq_band(note, octave):
+    midi = _midi_number(note, octave)
+    low_hz = round(_freq_from_midi(midi), 1)
+    high_hz = round(_freq_from_midi(midi + 1), 1)
+    return low_hz, high_hz
+
+
+def _minutes_seconds_to_total(minutes, seconds):
+    if minutes is None and seconds is None:
+        return None
+    return (minutes or 0) * 60 + (seconds or 0)
+
+
+def apply_record_sort(records, sort):
+    allowed_sort_fields = {
+        sort_field
+        for _, _, sort_field, _ in AVAILABLE_COLUMNS
+        if sort_field
+    }
+
+    if sort == "submitter":
+
+        return records.order_by(
+            "submitted_by__first_name",
+            "submitted_by__last_name",
+        )
+
+    elif sort == "-submitter":
+
+        return records.order_by(
+            "-submitted_by__first_name",
+            "-submitted_by__last_name",
+        )
+
+    elif sort.lstrip("-") in allowed_sort_fields:
+
+        return records.order_by(sort)
+
+    return records
 
 
 def get_filtered_records(request, mode="advanced"):
@@ -138,12 +215,36 @@ def get_filtered_records(request, mode="advanced"):
                     voice_part=data["voice_part"]
                 )
 
+            # =================================================
+            # Tessitura pitch fields (note + octave -> Hz band)
+            #
+            # Each is a single pitch pick, not a min/max range,
+            # so we match records whose stored frequency falls
+            # within that semitone's band.
+            # =================================================
+
+            pitch_field_map = {
+                "tessitura_bottom": "q1_freq",
+                "median_pitch": "median_freq",
+                "tessitura_top": "q3_freq",
+            }
+
+            for form_prefix, model_field in pitch_field_map.items():
+                note = data.get(f"{form_prefix}_note")
+                octave = data.get(f"{form_prefix}_octave")
+
+                if note and octave:
+                    low_hz, high_hz = _pitch_to_freq_band(note, octave)
+                    records = records.filter(**{
+                        f"{model_field}__gte": low_hz,
+                        f"{model_field}__lt": high_hz,
+                    })
+
         # =====================================================
-        # Numeric fields
+        # Numeric fields (plain float min/max ranges)
         #
         # Simple Search has the five pitch metrics.
-        # Advanced Search has those plus timing/passaggio.
-        # NUMERIC_RANGE_FIELDS can therefore be used for both.
+        # Advanced Search has those plus cycle dose/passaggio.
         # =====================================================
 
         for field in NUMERIC_RANGE_FIELDS:
@@ -161,13 +262,36 @@ def get_filtered_records(request, mode="advanced"):
                     **{f"{field}__lte": max_val}
                 )
 
+        # =====================================================
+        # Timing fields built from minutes + seconds pairs
+        # (Advanced Search only)
+        # =====================================================
+
+        if mode == "advanced":
+
+            for field in TIME_RANGE_FIELDS:
+
+                min_val = _minutes_seconds_to_total(
+                    data.get(f"{field}_min_minutes"),
+                    data.get(f"{field}_min_seconds"),
+                )
+                max_val = _minutes_seconds_to_total(
+                    data.get(f"{field}_max_minutes"),
+                    data.get(f"{field}_max_seconds"),
+                )
+
+                if min_val is not None:
+                    records = records.filter(
+                        **{f"{field}__gte": min_val}
+                    )
+
+                if max_val is not None:
+                    records = records.filter(
+                        **{f"{field}__lte": max_val}
+                    )
+
     # =========================================================
-    # Simple Search:
-    #
-    # Filter first, THEN collapse the matching Bass/Treble
-    # records into one result per submission.
-    #
-    # This means either clef can satisfy the search.
+    # Simple Search: collapse Bass/Treble into one result
     # =========================================================
 
     if mode == "simple":
@@ -191,22 +315,6 @@ def get_filtered_records(request, mode="advanced"):
 
     sort = request.GET.get("sort", "-created_at")
 
-    if sort == "submitter":
-
-        records = records.order_by(
-            "submitted_by__first_name",
-            "submitted_by__last_name",
-        )
-
-    elif sort == "-submitter":
-
-        records = records.order_by(
-            "-submitted_by__first_name",
-            "-submitted_by__last_name",
-        )
-
-    elif sort in ALLOWED_SORTS:
-
-        records = records.order_by(sort)
+    records = apply_record_sort(records, sort)
 
     return records, search_form, sort

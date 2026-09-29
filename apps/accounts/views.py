@@ -1,9 +1,11 @@
+from django.db.models import Case, CharField, IntegerField, Value, When
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
+from apps.records.filtering import apply_record_sort
 from apps.records.models import Record
 from urllib.parse import urlencode
 from .forms import ProfileEditForm, SignUpForm, EmailChangeForm
@@ -142,53 +144,7 @@ def profile(request):
 
     sort = request.GET.get("sort", "-created_at")
 
-    ALLOWED_SORTS = {
-        "title",
-        "-title",
-        "composer",
-        "-composer",
-        "author",
-        "-author",
-        "clef_range",
-        "-clef_range",
-        "q1_freq",
-        "-q1_freq",
-        "created_at",
-        "-created_at",
-        "submitter",
-        "-submitter",
-    }
-
-    if sort == "submitter":
-        records = records.order_by(
-            "submitted_by__first_name",
-            "submitted_by__last_name",
-        )
-
-    elif sort == "-submitter":
-        records = records.order_by(
-            "-submitted_by__first_name",
-            "-submitted_by__last_name",
-        )
-
-    elif sort in {"style", "-style"}:
-        style_order = Case(
-            When(style="western_classical", then=Value("Western Classical")),
-            When(style="musical_theatre", then=Value("Musical Theatre")),
-            When(style="contemporary_commerical", then=Value("Contemporary Commercial")),
-            When(style="other", then=Value("Other")),
-            default=Value(""),
-            output_field=CharField(),
-        )
-
-        records = records.annotate(
-            style_display=style_order
-        ).order_by(
-            "-style_display" if sort == "-style" else "style_display"
-        )
-
-    elif sort in ALLOWED_SORTS:
-        records = records.order_by(sort)
+    records = apply_record_sort(records, sort)
 
     # --------------------------------------------------
     # Display columns
@@ -203,11 +159,25 @@ def profile(request):
     # Query parameters
     # --------------------------------------------------
 
+    querydict = request.GET.copy()
+    querydict.pop("sort", None)
+
+    search_querystring = urlencode(
+        [
+            (key, value)
+            for key, values in querydict.lists()
+            for value in values
+            if value
+        ]
+    )
+
     active_filters = [
         (key, value)
         for key, values in request.GET.lists()
         for value in values
         if value
+        and key != "sort"
+        and key != "columns_submitted"
     ]
 
     pending_email = PendingEmailChange.objects.filter(
@@ -224,9 +194,12 @@ def profile(request):
             "pending_email": pending_email,
             "current_sort": sort,
             "active_filters": active_filters,
+            "search_querystring": search_querystring,
             "all_columns": [
-                column for column in AVAILABLE_COLUMNS
-                if column[0] in SIMPLE_SEARCH_COLUMNS or column[0] == "status"
+                column
+                for column in AVAILABLE_COLUMNS
+                if column[0] in SIMPLE_SEARCH_COLUMNS
+                or column[0] == "status"
             ],
             "selected_columns": selected_columns,
             "display_columns": display_columns,
@@ -246,6 +219,7 @@ def verify_email_change(request, token):
 
     user = pending.user
     user.email = pending.new_email
+    user.username = pending.new_email
     user.save()
     pending.delete()
 

@@ -11,6 +11,15 @@ class Record(models.Model):
         ("rejected", "Rejected"),
     ]
 
+    STYLE_CHOICES = [
+    ("western_classical", "Western Classical"),
+    ("musical_theatre", "Musical Theatre"),
+    ("contemporary_commercial", "Contemporary Commercial"),
+    ("other", "Other"),
+    ("unknown", "Unknown"),
+    ("n/a", "N/A"),
+    ]
+
     INITIAL_KEY_CHOICES = [
     ("0 flats or sharps", "0 Flats or Sharps"),
     ("1 flat", "1 Flat"),
@@ -26,7 +35,9 @@ class Record(models.Model):
     ("4 sharps", "4 Sharps"),
     ("5 sharps", "5 Sharps"),
     ("6 sharps", "6 Sharps"),
-    ("7 sharps", "7 Sharps")
+    ("7 sharps", "7 Sharps"),
+    ("unknown", "Unknown"),
+    ("n/a", "N/A"),
 ]
 
     VOICE_PART_CHOICES = [
@@ -52,7 +63,7 @@ class Record(models.Model):
 
     PERFORMING_FORCES_CHOICES = [
       ('solo', 'Soloistic Piece'),
-      ('ensemble', 'Ensemble Piece'),
+    #   ('ensemble', 'Ensemble Piece'),
   ]
 
     submission_group = models.UUIDField(default=uuid.uuid4, editable=False)
@@ -92,11 +103,11 @@ class Record(models.Model):
     filename = models.CharField(max_length=255)
     title = models.CharField(max_length=255)
     larger_work = models.CharField(max_length=255, blank=True)
-    clef_range = models.CharField(max_length=6,
+    clef_range = models.CharField(max_length=10,
         choices=[
                     ("Treble", "Treble"),
                     ("Bass", "Bass"),
-                    ("None", "Not specified"),
+                    ("unknown", "Unknown"),
                 ],
         null=True,
         blank=True)
@@ -105,7 +116,7 @@ class Record(models.Model):
         choices=[
             ("Treble", "Treble"),
             ("Bass", "Bass"),
-            ("None", "Not specified"),
+            ("unknown", "Unknown"),
         ],
         null=True,
         blank=True,
@@ -125,13 +136,6 @@ class Record(models.Model):
         null=True,
         help_text="Notes provided by the user during submission.",
     )
-
-    STYLE_CHOICES = [
-        ("western_classical", "Western Classical"),
-        ("musical_theatre", "Musical Theatre"),
-        ("contemporary_commercial", "Contemporary Commercial"),
-        ("other", "Other"),
-    ]
 
     style = models.CharField(max_length=25, choices=STYLE_CHOICES)
     style_other = models.CharField(max_length=100, choices=STYLE_CHOICES)

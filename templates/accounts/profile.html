@@ -41,15 +41,21 @@
     <details>
         <summary>Customize columns</summary>
 
-        <form method="get" class="search-form">
+        <form method="get" class="search-form" id="columns-form">
             {% for key, value in active_filters %}
                 {% if key != "cols" and key != "sort" %}
                 <input type="hidden" name="{{ key }}" value="{{ value }}">
                 {% endif %}
             {% endfor %}
 
+            <input type="hidden" name="columns_submitted" value="1">
+
             <fieldset>
                 <legend>Choose columns to display</legend>
+
+                <button type="button" class="select-all-button" id="toggle-columns"> 
+                    Select all 
+                </button>
 
                 <div class="export-columns">
                     {% for key, label, sort_field, accessor in all_columns %}
@@ -77,7 +83,7 @@
                 <tr>
                     <th>
                         {% if current_sort == 'title' %}
-                        <a href="?sort=-title" class="sortable-header">
+                        <a href="?sort=-title&{{ search_querystring }}" class="sortable-header">
                             Title
                             <svg class="sort-icon active"
                                  width="12"
@@ -91,7 +97,7 @@
                         </a>
 
                         {% elif current_sort == '-title' %}
-                        <a href="?" class="sortable-header">
+                        <a href="?{{ search_querystring }}"class="sortable-header">
                             Title
                             <svg class="sort-icon active"
                                  width="12"
@@ -105,7 +111,7 @@
                         </a>
 
                         {% else %}
-                        <a href="?sort=title" class="sortable-header">
+                        <a href="?sort=title&{{ search_querystring }}" class="sortable-header">
                             Title
                             <svg class="sort-icon"
                                  width="12"
@@ -121,7 +127,7 @@
                     </th>
 
                     {% for key, label, sort_field in display_columns %}
-                    {% include "records/_column_header.html" with search_querystring="" %}
+                    {% include "records/_column_header.html" %}
                     {% endfor %}
                 </tr>
             </thead>
@@ -159,4 +165,100 @@
         </table>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleButton = document.getElementById('toggle-columns');
+    const checkboxes = document.querySelectorAll(
+        '.export-columns input[type="checkbox"]'
+    );
+
+    function updateToggleButton() {
+        const allSelected = [...checkboxes].every(checkbox => checkbox.checked);
+
+        toggleButton.textContent = allSelected
+            ? 'Deselect all'
+            : 'Select all';
+    }
+
+    toggleButton.addEventListener('click', function () {
+        const allSelected = [...checkboxes].every(checkbox => checkbox.checked);
+
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = !allSelected;
+        });
+
+        updateToggleButton();
+    });
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateToggleButton);
+    });
+
+    updateToggleButton();
+});
+</script>
+
+<script>
+(function () {
+    const scrollKey = 'profile-database-scroll';
+
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+
+    function saveScrollPosition() {
+        const tableScroll = document.querySelector('.table-scroll');
+
+        sessionStorage.setItem(
+            scrollKey,
+            JSON.stringify({
+                windowY: Math.round(window.scrollY),
+                tableX: tableScroll ? Math.round(tableScroll.scrollLeft) : 0
+            })
+        );
+    }
+
+    function restoreScrollPosition() {
+        const savedPosition = sessionStorage.getItem(scrollKey);
+
+        if (!savedPosition) {
+            return;
+        }
+
+        const position = JSON.parse(savedPosition);
+
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+
+                window.scrollTo(0, position.windowY);
+
+                const tableScroll = document.querySelector('.table-scroll');
+
+                if (tableScroll) {
+                    tableScroll.scrollLeft = position.tableX;
+                }
+
+                sessionStorage.removeItem(scrollKey);
+            });
+        });
+    }
+
+    window.addEventListener('load', restoreScrollPosition);
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // Customize columns
+        document.querySelectorAll('#columns-form').forEach(function (form) {
+            form.addEventListener('submit', saveScrollPosition);
+        });
+
+        // Sort buttons
+        document.querySelectorAll('.sortable-header').forEach(function (link) {
+            link.addEventListener('click', saveScrollPosition);
+        });
+    });
+})();
+</script>
+
 {% endblock %}

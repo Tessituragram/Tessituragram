@@ -31,6 +31,10 @@ main {
     padding: 40px 24px;
 }
 
+.logout-form {
+    display: inline;
+}
+
 a {
     color: var(--night-bordeaux);
     transition: color 0.15s ease;
@@ -250,7 +254,6 @@ form p label {
     display: block;
     font-family: 'Cormorant Garamond', serif;
     font-size: 15px;
-    color: var(--dark-spruce);
     margin-bottom: 4px;
 }
 
@@ -353,7 +356,7 @@ details form {
 }
 
 .search-form legend {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Cormorant Garamond', serif;
     font-size: 16px;
     color: var(--night-bordeaux);
     padding: 0 8px;
@@ -534,12 +537,6 @@ tbody tr:hover {
 
 /* ===== Export ====== */
 
-.export-columns {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px 16px;
-}
-
 .export-columns label {
     display: flex;
     align-items: center;
@@ -568,15 +565,6 @@ tbody tr:hover {
 .table-scroll th,
 .table-scroll td {
     white-space: nowrap;
-}
-
-/* ===== Main Body Margins =====*/
-
-.content {
-    margin-top: 3rem;
-    margin-bottom: 3rem;
-    margin-left: 7rem;
-    margin-right: 7rem;
 }
 
 /* ===== Time Signature Widgets =====*/
@@ -633,6 +621,11 @@ tbody tr:hover {
     height: auto;
     display: block;
     margin: 0 auto 8px auto;
+}
+
+.key-option .key-text-label {
+    font-size: 16px;
+    font-weight: 600;
 }
 
 /* Label text */
@@ -727,6 +720,20 @@ tbody tr:hover {
     display: block;
 }
 
+.key-signature-text {
+    width: 96px;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: 600;
+    border: 1px solid rgba(148, 161, 135, 0.4);
+    border-radius: 8px;
+    background: #fff;
+}
+
 .key-caption {
     font-size: 0.65em;
     text-transform: uppercase;
@@ -741,8 +748,8 @@ tbody tr:hover {
 -------------------- */
 
 .clef-panels {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    justify-content: center;
     gap: 28px;
 }
 
@@ -753,6 +760,13 @@ tbody tr:hover {
     border-radius: 12px;
     padding: 28px 30px 32px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    flex: 0 1 100%;
+    max-width: 1100px;
+}
+
+.clef-panels:has(> .clef-panel + .clef-panel) .clef-panel {
+    flex: 1 1 0;
+    max-width: 550px;
 }
 
 .clef-panel-title {
@@ -967,13 +981,6 @@ Search Toggle
     border-bottom: 1px solid rgba(148, 161, 135, 0.3);
 }
 
-.export-columns {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px 16px;
-    margin-top: 1rem;
-}
-
 .export-select-all .select-all-columns {
     margin: 0;
 }
@@ -997,6 +1004,7 @@ Search Toggle
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px 16px;
+    margin-top: 1rem;
 }
 
 .content-card strong {
@@ -1100,7 +1108,7 @@ p {
 
 .homepage-card {
     aspect-ratio: 1 / 0.82;
-    border: 2px solid #45a82f;
+    border: 2px solid #295135;
     border-radius: 48px;
     display: flex;
     align-items: center;
@@ -1151,10 +1159,62 @@ footer ol li .upright {
     line-height: 1.5;
     margin-top: 4px;
 }
- 
-.left-section-title {
-    font-family: 'EB Garamond', serif;
-    font-size: 1.6em;
-    font-weight: 700;
-    color: var(--night-bordeaux);
+
+.errorlist {
+    list-style: none;
+    margin: 0 0 1.5rem 0;
+    padding: 0.9rem 1.1rem;
+    background-color: #fdecea;
+    border: 1px solid #d93025;
+    border-left: 5px solid #d93025;
+    border-radius: 4px;
+    color: #a50e0e;
+    font-weight: 600;
 }
+
+.errorlist li {
+    margin: 0;
+}
+
+.errorlist li::before {
+    content: "⚠ ";
+}
+
+.field-with-unknown-na,
+.field-with-unknown {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+form p .field-with-unknown-na input,
+form p .field-with-unknown-na select,
+form p .field-with-unknown input,
+form p .field-with-unknown select {
+    flex: 0 1 500px;
+    width: auto;
+    min-width: 0;
+}
+
+.unknown-na-buttons,
+.unknown-buttons {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.unknown-na-buttons button,
+.unknown-buttons button {
+    font-size: 14px;
+    padding: 4px 12px;
+    white-space: nowrap;
+}
+
+.required-asterisk {
+    margin-left: 3px;
+    color: #550c18;
+    font-weight: 600;
+}
+
+

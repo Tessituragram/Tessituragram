@@ -2,10 +2,10 @@
 {% block title %}Delete {{ record.title }}{% endblock %}
 
 {% block content %}
-<h1>Delete this record?</h1>
+<h1>Are you sure?</h1>
 <div class="content-card">
     <p class="b1">You're about to delete <strong>{{ record.title }}</strong> ({{ record.composer }}), submitted by {{ record.submitted_by }}.</p>
-    <p class="b1">This will remove it from the database and hide it from all users. This action cannot be undone from the site.</p>
+    <p class="b1">This will remove it from the database and hide it from all users. This action cannot be undone.</p>
 
     <form method="post">
         {% csrf_token %}

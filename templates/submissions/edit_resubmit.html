@@ -13,7 +13,12 @@
             {% if field.name == 'voice_part' %}
                 <div id="voice-part-container" style="display: none;">
                     <p>
-                        {{ field.label_tag }}
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                            {% if field.field.required %}
+                                <span class="required-asterisk" aria-hidden="true">*</span>
+                            {% endif %}
+                        </label>
                         {{ field }}
                         {{ field.errors }}
                     </p>
@@ -21,14 +26,23 @@
             {% elif field.name == 'style_other' %}
                 <div id="style-other-container" style="display: none;">
                     <p>
-                        {{ field.label_tag }}
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                            <span class="required-asterisk" id="style-other-required"
+                                aria-hidden="true">*</span>
+                        </label>
                         {{ field }}
                         {{ field.errors }}
                     </p>
                 </div>
             {% else %}
                 <p>
-                    {{ field.label_tag }}
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                            <span class="required-asterisk" aria-hidden="true">*</span>
+                        {% endif %}
+                    </label>
                     {{ field }}
                     {{ field.errors }}
                 </p>
@@ -95,6 +109,33 @@ document.addEventListener("DOMContentLoaded", function () {
         styleSelect.addEventListener('change', toggleStyleOther);
         toggleStyleOther(); // Handles pre-populated form state on load
     }
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-unknown]').forEach(el => {
+        const row = document.createElement('div');
+        row.className = 'field-with-unknown-na';
+        el.insertAdjacentElement('beforebegin', row);
+        row.appendChild(el);
+
+        const buttons = document.createElement('div');
+        buttons.className = 'unknown-na-buttons';
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = 'Unknown';
+
+        btn.addEventListener('click', () => {
+            el.value = el.tagName === 'SELECT' ? 'unknown' : 'Unknown';
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
+        buttons.appendChild(btn);
+        row.appendChild(buttons);
+    });
 });
 </script>
 {% endblock %}

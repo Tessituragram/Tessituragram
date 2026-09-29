@@ -12,7 +12,7 @@ AVAILABLE_COLUMNS = [
     ("voice_part", "Voice Part", "voice_part", lambda r: r.get_voice_part_display()),
     (
         "submitter",
-        "Submitted By",
+        "Submitter",
         "submitter",
         lambda r: (
             f"{r.submitted_by.first_name} {r.submitted_by.last_name}"
@@ -146,10 +146,15 @@ COLUMN_MAP = {
 def get_display_columns(request, default_columns):
     from .columns import AVAILABLE_COLUMNS
 
-    selected_columns = request.GET.getlist("cols") or default_columns
+    if "columns_submitted" in request.GET:
+        selected_columns = request.GET.getlist("cols")
+    else:
+        selected_columns = default_columns
+
     display_columns = [
         (key, label, sort_field)
         for key, label, sort_field, _ in AVAILABLE_COLUMNS
         if key in selected_columns
     ]
+
     return selected_columns, display_columns

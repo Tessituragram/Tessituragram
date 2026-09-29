@@ -17,9 +17,11 @@
         rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
 </head>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const searchForm = document.querySelector("details form");
+
         if (searchForm) {
             searchForm.addEventListener("submit", function () {
                 searchForm.querySelectorAll("input, select").forEach(function (field) {
@@ -36,11 +38,17 @@
     <nav>
         <div class="nav-left">
             <a href="{% url 'home' %}" class="nav-logo">
-                <img src="{% static 'images/logos/no-background-no-text.png' %}" alt="Tessituragram" height="60">
+                <img
+                    src="{% static 'images/logos/no-background-no-text.png' %}"
+                    alt="Tessituragram"
+                    height="60"
+                >
             </a>
 
             <div class="dropdown">
-                <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">About</button>
+                <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+                    About
+                </button>
                 <div class="dropdown-menu">
                     <a href="{% url 'mission' %}">Mission</a>
                     <a href="{% url 'people' %}">People</a>
@@ -48,7 +56,9 @@
             </div>
 
             <div class="dropdown">
-                <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Research</button>
+                <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+                    Research
+                </button>
                 <div class="dropdown-menu">
                     <a href="{% url 'background' %}">Background</a>
                     <a href="{% url 'future' %}">Future Projects and Data Sharing</a>
@@ -56,7 +66,9 @@
             </div>
 
             <div class="dropdown">
-                <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Tessituragram Database</button>
+                <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+                    Tessituragram Database
+                </button>
                 <div class="dropdown-menu">
                     <a href="{% url 'instructions' %}">Instructions & Terminology</a>
                     <a href="{% url 'submissions:submit_form' %}">Submit</a>
@@ -68,7 +80,9 @@
 
             {% if user.is_authenticated %}
             <div class="dropdown">
-                <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">Member</button>
+                <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+                    Member
+                </button>
                 <div class="dropdown-menu">
                     <a href="{% url 'submissions:submit_form' %}">Submit</a>
                     <a href="{% url 'submissions:review_list' %}">Review</a>
@@ -84,22 +98,33 @@
         <div class="nav-right">
             {% if user.is_authenticated %}
             <a href="{% url 'profile' %}" class="nav-user" title="{{ user.username }}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                     <circle cx="12" cy="7" r="4"></circle>
                 </svg>
             </a>
-            <form method="post" action="{% url 'logout' %}" style="display: inline;">
+
+            <form method="post" action="{% url 'logout' %}" class="logout-form">
                 {% csrf_token %}
                 <button type="submit" class="nav-link-button">Log Out</button>
             </form>
             {% endif %}
         </div>
     </nav>
-    <div class="content">
+
+    <main>
         {% block content %}{% endblock %}
-    </div>
+    </main>
 </body>
 
 </html>

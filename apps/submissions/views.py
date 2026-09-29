@@ -1,6 +1,7 @@
 import os
 import tempfile
 import shutil
+from urllib.parse import urlencode
 import uuid
 
 from django.core.files import File
@@ -12,7 +13,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils import timezone
 from fpdf import FPDF
+import re
 
+from apps.records.filtering import apply_record_sort
 from src import midi_reader, tessitura, utils
 from src.tessitura import TessPassContainer
 from apps.records.models import Record
@@ -25,6 +28,9 @@ from .forms import SubmissionForm, ReviewerEditForm
 
 NOTIFICATION_EMAIL = "tessituragram@tessituragram.com"
 
+def safe_filename_part(value):
+    value = re.sub(r'[\\/:*?"<>|]', "-", str(value)).strip()
+    return value or "new"
 
 def notify_admins_of_submission(request, record):
     review_url = request.build_absolute_uri(
@@ -114,11 +120,25 @@ def submit_form(request):
 
                 notes = parser.post_process(notes)
 
-                tesses, passaggios, _ = (
-                    tessitura.get_tessitura_and_passaggio(
-                        notes,
-                        written_clef_range,
+                if notes == -1:
+                    error_msg = (
+                        parser.error_message
+                        or "Could not process notes from MIDI file."
                     )
+                    form.add_error(None, error_msg)
+
+                    return render(
+                        request,
+                        "submissions/submit_form.html",
+                        {"form": form},
+                    )
+
+                written_clef_range = form.cleaned_data.get("written_clef_range") or None
+                tess_clef = None if written_clef_range in ("unknown", "n/a") else written_clef_range
+
+                tesses, passaggios, _ = tessitura.get_tessitura_and_passaggio(
+                    notes,
+                    tess_clef,
                 )
 
                 keep_private = form.cleaned_data.get(
@@ -258,7 +278,7 @@ def submit_form(request):
                     container.write_to_pdf()
 
                     pdf_filename = (
-                        f"{record.title or 'new'}-"
+                        f"{safe_filename_part(record.title)}-"
                         f"{record.clef_range}-Tessituragram-"
                         f"{uuid.uuid4().hex[:8]}.pdf"
                     )
@@ -309,8 +329,8 @@ def submission_success(request):
 @staff_member_required
 def review_list(request):
     records = Record.objects.filter(
-    status="pending",
-    is_deleted=False,
+        status="pending",
+        is_deleted=False,
     )
 
     representative_ids = list(
@@ -326,26 +346,42 @@ def review_list(request):
         .select_related("submitted_by")
     )
 
+    # --------------------------------------------------
+    # Sorting
+    # --------------------------------------------------
+
     sort = request.GET.get("sort", "created_at")
-    if sort == "submitter":
-        records = records.order_by(
-            "submitted_by__first_name", "submitted_by__last_name"
-        )
-    elif sort == "-submitter":
-        records = records.order_by(
-            "-submitted_by__first_name", "-submitted_by__last_name"
-        )
-    elif sort.lstrip("-") in {key for key, *_ in AVAILABLE_COLUMNS} | {
-        "title",
-        "created_at",
-    }:
-        records = records.order_by(sort)
+    records = apply_record_sort(records, sort)
+
+    # --------------------------------------------------
+    # Display columns
+    # --------------------------------------------------
 
     selected_columns, display_columns = get_display_columns(
-        request, DEFAULT_REVIEW_COLUMNS
+        request,
+        DEFAULT_REVIEW_COLUMNS,
     )
 
-    active_filters = [(k, v) for k, values in request.GET.lists() for v in values if v]
+    # --------------------------------------------------
+    # Query parameters
+    # --------------------------------------------------
+
+    active_filters = [
+        (key, value)
+        for key, values in request.GET.lists()
+        for value in values
+        if value
+    ]
+
+    search_querystring = urlencode(
+        [
+            (key, value)
+            for key, values in request.GET.lists()
+            if key != "sort"
+            for value in values
+            if value
+        ]
+    )
 
     return render(
         request,
@@ -354,12 +390,12 @@ def review_list(request):
             "records": records,
             "current_sort": sort,
             "active_filters": active_filters,
+            "search_querystring": search_querystring,
             "all_columns": AVAILABLE_COLUMNS,
             "selected_columns": selected_columns,
             "display_columns": display_columns,
         },
     )
-
 
 @staff_member_required
 def review_detail(request, pk):
@@ -421,6 +457,7 @@ def review_detail(request, pk):
             "group_records": group_records,
             "bass_record": group_records.filter(clef_range="Bass").first(),
             "treble_record": group_records.filter(clef_range="Treble").first(),
+            "none_record": group_records.filter(clef_range="None").first(),
         },
     )
 
@@ -540,18 +577,32 @@ def edit_resubmit(request, pk):
                 # Same post-processing as normal submissions.
                 notes = parser.post_process(notes)
 
+                if notes == -1:
+                    error_msg = (
+                        parser.error_message
+                        or "Could not process notes from MIDI file."
+                    )
+                    form.add_error(None, error_msg)
+
+                    return render(
+                        request,
+                        "submissions/submit_form.html",
+                        {"form": form},
+                    )
+
                 # ---------------------------------------------------------
                 # Get written/original clef
                 # ---------------------------------------------------------
-                written_clef_range = form.cleaned_data[
-                    "written_clef_range"
-                ]
+                written_clef_range = form.cleaned_data["written_clef_range"]
+                tess_clef = (
+                    None
+                    if written_clef_range in ("", "unknown", "n/a")
+                    else written_clef_range.lower()
+                )
 
-                tesses, passaggios, _ = (
-                    tessitura.get_tessitura_and_passaggio(
-                        notes,
-                        written_clef_range.lower(),
-                    )
+                tesses, passaggios, _ = tessitura.get_tessitura_and_passaggio(
+                    notes,
+                    tess_clef,
                 )
 
                 # ---------------------------------------------------------
@@ -564,9 +615,11 @@ def edit_resubmit(request, pk):
                 else:
                     new_filename = record.filename
 
-                # ---------------------------------------------------------
-                # Update both records in the submission group
-                # ---------------------------------------------------------
+                new_clefs = {tess.clef_range for tess in tesses}
+
+                for old_record in group_records:
+                    if old_record.clef_range not in new_clefs:
+                        old_record.delete()
                 for tess, passaggio in zip(
                     tesses,
                     passaggios,
@@ -794,8 +847,8 @@ def edit_resubmit(request, pk):
                     container.write_to_pdf()
 
                     pdf_filename = (
-                        f"{target.title or 'new'}-"
-                        f"{tess.clef_range}-Tessituragram-"
+                        f"{safe_filename_part(record.title)}-"
+                        f"{record.clef_range}-Tessituragram-"
                         f"{uuid.uuid4().hex[:8]}.pdf"
                     )
 

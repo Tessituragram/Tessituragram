@@ -4,27 +4,47 @@
 
 {% block content %}
 <h1>Review submissions</h1>
-<p class="b2"><a href="{% url 'records:deleted_list' %}">View deleted records</a></p>
+<p class="b2">
+    <a href="{% url 'records:deleted_list' %}">View deleted records</a>
+</p>
+
 <div class="content-card">
     <details>
         <summary>Customize columns</summary>
-        <form method="get" class="search-form">
+
+        <form method="get" class="search-form" id="columns-form">
             {% for key, value in active_filters %}
-            {% if key != "cols" %}
-            <input type="hidden" name="{{ key }}" value="{{ value }}">
-            {% endif %}
+                {% if key != "cols" and key != "sort" %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                {% endif %}
             {% endfor %}
+
+            <input type="hidden" name="columns_submitted" value="1">
+
             <fieldset>
                 <legend>Choose columns to display</legend>
+
+                <button type="button"
+                        class="select-all-button"
+                        id="toggle-columns">
+                    Select all
+                </button>
+
                 <div class="export-columns">
                     {% for key, label, sort_field, accessor in all_columns %}
                     <label>
-                        <input type="checkbox" name="cols" value="{{ key }}" {% if key in selected_columns %}checked{%endif %}>
+                        <input
+                            type="checkbox"
+                            name="cols"
+                            value="{{ key }}"
+                            {% if key in selected_columns %}checked{% endif %}
+                        >
                         {{ label }}
                     </label>
                     {% endfor %}
                 </div>
             </fieldset>
+
             <button type="submit">Apply</button>
         </form>
     </details>
@@ -35,23 +55,46 @@
                 <tr>
                     <th>
                         {% if current_sort == 'title' %}
-                        <a href="?sort=-title" class="sortable-header">
+                        <a href="?sort=-title&{{ search_querystring }}"
+                           class="sortable-header">
                             Title
-                            <svg class="sort-icon active" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <svg class="sort-icon active"
+                                 width="12"
+                                 height="12"
+                                 viewBox="0 0 24 24"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="3">
                                 <path d="M18 15l-6-6-6 6" />
                             </svg>
                         </a>
+
                         {% elif current_sort == '-title' %}
-                        <a href="?" class="sortable-header">
+                        <a href="?{{ search_querystring }}"
+                           class="sortable-header">
                             Title
-                            <svg class="sort-icon active" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <svg class="sort-icon active"
+                                 width="12"
+                                 height="12"
+                                 viewBox="0 0 24 24"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="3">
                                 <path d="M6 9l6 6 6-6" />
                             </svg>
                         </a>
+
                         {% else %}
-                        <a href="?sort=title" class="sortable-header">
+                        <a href="?sort=title&{{ search_querystring }}"
+                           class="sortable-header">
                             Title
-                            <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg class="sort-icon"
+                                 width="12"
+                                 height="12"
+                                 viewBox="0 0 24 24"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="2">
                                 <path d="M8 9l4-4 4 4M8 15l4 4 4-4" />
                             </svg>
                         </a>
@@ -59,31 +102,148 @@
                     </th>
 
                     {% for key, label, sort_field in display_columns %}
-                    {% include "records/_column_header.html" with search_querystring="" %}
+                    {% include "records/_column_header.html" %}
                     {% endfor %}
                 </tr>
             </thead>
+
             <tbody>
                 {% for record in records %}
                 <tr>
-                    <td><a href="{% url 'submissions:review_detail' record.submission_group %}">{{ record.title }}</a></td>
+                    <td>
+                        <a href="{% url 'submissions:review_detail' record.submission_group %}">
+                            {{ record.title }}
+                        </a>
+                    </td>
+
                     {% for key, label, sort_field in display_columns %}
                     <td>
                         {% if key == "status" %}
-                        <span class="status-badge status-{{ record.status }}">{{ record.get_status_display }}</span>
+                        <span class="status-badge status-{{ record.status }}">
+                            {{ record.get_status_display }}
+                        </span>
                         {% else %}
                         {{ record|column_value:key }}
                         {% endif %}
                     </td>
                     {% endfor %}
                 </tr>
+
                 {% empty %}
                 <tr>
-                    <td colspan="{{ display_columns|length|add:1 }}" class="empty-state">Nothing pending review.</td>
+                    <td colspan="{{ display_columns|length|add:1 }}"
+                        class="empty-state">
+                        Nothing pending review.
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleButton = document.getElementById('toggle-columns');
+    const checkboxes = document.querySelectorAll(
+        '.export-columns input[type="checkbox"]'
+    );
+
+    function updateToggleButton() {
+        const allSelected = [...checkboxes].every(
+            checkbox => checkbox.checked
+        );
+
+        toggleButton.textContent = allSelected
+            ? 'Deselect all'
+            : 'Select all';
+    }
+
+    toggleButton.addEventListener('click', function () {
+        const allSelected = [...checkboxes].every(
+            checkbox => checkbox.checked
+        );
+
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = !allSelected;
+        });
+
+        updateToggleButton();
+    });
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateToggleButton);
+    });
+
+    updateToggleButton();
+});
+</script>
+
+
+<script>
+(function () {
+    const scrollKey = 'review-list-scroll';
+
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+
+    function saveScrollPosition() {
+        const tableScroll = document.querySelector('.table-scroll');
+
+        sessionStorage.setItem(
+            scrollKey,
+            JSON.stringify({
+                windowY: Math.round(window.scrollY),
+                tableX: tableScroll
+                    ? Math.round(tableScroll.scrollLeft)
+                    : 0
+            })
+        );
+    }
+
+    function restoreScrollPosition() {
+        const savedPosition = sessionStorage.getItem(scrollKey);
+
+        if (!savedPosition) {
+            return;
+        }
+
+        const position = JSON.parse(savedPosition);
+
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+
+                window.scrollTo(0, position.windowY);
+
+                const tableScroll =
+                    document.querySelector('.table-scroll');
+
+                if (tableScroll) {
+                    tableScroll.scrollLeft = position.tableX;
+                }
+
+                sessionStorage.removeItem(scrollKey);
+            });
+        });
+    }
+
+    window.addEventListener('load', restoreScrollPosition);
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // Customize columns
+        document.querySelectorAll('#columns-form').forEach(function (form) {
+            form.addEventListener('submit', saveScrollPosition);
+        });
+
+        // Sort buttons
+        document.querySelectorAll('.sortable-header').forEach(function (link) {
+            link.addEventListener('click', saveScrollPosition);
+        });
+    });
+})();
+</script>
+
 {% endblock %}

@@ -24,13 +24,17 @@
         </div>
 
         <div class="initial-key">
-            {% with "images/key_signatures/"|add:record.initial_key|add:".jpg" as key_image %}
-                <img
-                    src="{% static key_image %}"
-                    alt="{{ record.initial_key }}"
-                    class="key-signature-image"
-                >
-            {% endwith %}
+            {% if record.initial_key == "unknown" or record.initial_key == "n/a" %}
+                <div class="key-signature-text">{{ record.get_initial_key_display }}</div>
+            {% elif record.initial_key %}
+                {% with "images/key_signatures/"|add:record.initial_key|add:".jpg" as key_image %}
+                    <img
+                        src="{% static key_image %}"
+                        alt="{{ record.initial_key }}"
+                        class="key-signature-image"
+                    >
+                {% endwith %}
+            {% endif %}
             <p class="key-caption">Key Signature</p>
         </div>
     </header>
@@ -160,7 +164,67 @@
         </section>
         {% endif %}
 
-    </div>
+        <!-- Clef not specified -->
+        {% if none_record %}
+        <section class="clef-panel">
+            <h2 class="clef-panel-title">Clef Not Specified</h2>
+
+            {% if none_record.pdf_file %}
+            <a class="pdf-link" href="{{ none_record.pdf_file.url }}" target="_blank">
+                Full Musical Demand Profile (PDF)
+            </a>
+            {% endif %}
+
+            <div class="metrics-row">
+
+                <div class="metric">
+                    <div class="metric-label">Compositional Range</div>
+                    <div class="metric-graphic">
+                        <img
+                            src="{% url 'records:record_graphic' none_record.submission_group none_record.clef_range 'range' %}"
+                            alt="Compositional range for {{ none_record.title }}"
+                        >
+                    </div>
+                    <div class="metric-pitches">
+                        {{ none_record.min_freq_note }}{{ none_record.min_freq_octave }}
+                        &ndash;
+                        {{ none_record.max_freq_note }}{{ none_record.max_freq_octave }}
+                    </div>
+                </div>
+
+                <div class="metric">
+                    <div class="metric-label">Musical <em>Tessitura</em></div>
+                    <div class="metric-graphic">
+                        <img
+                            src="{% url 'records:record_graphic' none_record.submission_group none_record.clef_range 'tessitura' %}"
+                            alt="Musical tessitura for {{ none_record.title }}"
+                        >
+                    </div>
+                    <div class="metric-pitches">
+                        {{ none_record.q1_pitch }}{{ none_record.q1_octave }}
+                        &ndash;
+                        {{ none_record.q3_pitch }}{{ none_record.q3_octave }}
+                    </div>
+                </div>
+
+                <div class="metric">
+                    <div class="metric-label">Median Pitch</div>
+                    <div class="metric-graphic">
+                        <img
+                            src="{% url 'records:record_graphic' none_record.submission_group none_record.clef_range 'median' %}"
+                            alt="Median pitch for {{ none_record.title }}"
+                        >
+                    </div>
+                    <div class="metric-pitches">
+                        {{ none_record.median_pitch }}{{ none_record.median_octave }}
+                    </div>
+                </div>
+
+            </div>
+        </section>
+        {% endif %}
+
+            </div>
 
 
     <!-- Admin controls -->
