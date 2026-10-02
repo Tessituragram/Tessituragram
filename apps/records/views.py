@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.shortcuts import get_list_or_404
 
+from .graphics import attach_graphics
 from .columns import AVAILABLE_COLUMNS, DEFAULT_TABLE_COLUMNS, SIMPLE_SEARCH_COLUMNS
 from .models import Record
 from .filtering import get_filtered_records
@@ -202,12 +203,14 @@ def record_detail(request, group_id):
                 r.save()
             return redirect("records:record_detail", group_id=group_id)
 
+    attach_graphics(group_records)
+
     return render(request, "records/record_detail.html", {
-    "record": primary,
-    "clef_panels": clef_panels,
-    "bass_record": clef_panels.get("Bass"),
-    "treble_record": clef_panels.get("Treble"),
-    "none_record": clef_panels.get("None"),
+        "record": primary,
+        "clef_panels": clef_panels,
+        "bass_record": clef_panels.get("Bass"),
+        "treble_record": clef_panels.get("Treble"),
+        "none_record": clef_panels.get("None"),
     })
 
 

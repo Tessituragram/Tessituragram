@@ -1,3 +1,4 @@
+from functools import lru_cache
 import tempfile
 from io import BytesIO
 
@@ -36,37 +37,20 @@ def _frequency_to_note(frequency):
 
 
 def _crop_to_notation(image):
-    """
-    Remove the whitespace surrounding the actual MuseScore notation.
-    """
-
     image = image.convert("RGBA")
-    pixels = image.load()
 
-    bbox = None
+    # Flatten onto white so transparent pixels count as background
+    background = Image.new("RGBA", image.size, (255, 255, 255, 255))
+    flattened = Image.alpha_composite(background, image).convert("L")
 
-    for y in range(image.height):
-        for x in range(image.width):
-            r, g, b, a = pixels[x, y]
-
-            # MuseScore notation is dark against a white background.
-            if a > 0 and min(r, g, b) < 245:
-                if bbox is None:
-                    bbox = [x, y, x, y]
-                else:
-                    bbox[0] = min(bbox[0], x)
-                    bbox[1] = min(bbox[1], y)
-                    bbox[2] = max(bbox[2], x)
-                    bbox[3] = max(bbox[3], y)
+    # Anything darker than 245 is notation
+    mask = flattened.point(lambda p: 255 if p < 245 else 0)
+    bbox = mask.getbbox()
 
     if bbox is None:
         raise RuntimeError("MuseScore produced an empty graphic.")
 
-    left, top, right, bottom = bbox
-
-    return image.crop(
-        (left, top, right + 1, bottom + 1)
-    )
+    return image.crop(bbox)
 
 
 def _render_with_musescore(measure):
@@ -149,21 +133,19 @@ def _render_with_musescore(measure):
 
             return output.getvalue()
 
+@lru_cache(maxsize=2048)
+def _render_chord(clef_name, note_names):
+    measure = _make_measure(clef_name)
+    chord = m21.chord.Chord([m21.pitch.Pitch(n) for n in note_names])
+    chord.quarterLength = 4.0
+    measure.append(chord)
+    return _render_with_musescore(measure)
 
 def _make_chord_graphic(record, pitches):
-    measure = _make_measure(record.clef_range)
-
-    notes = [
-        _frequency_to_note(frequency)
-        for frequency in pitches
-    ]
-
-    chord = m21.chord.Chord(notes)
-    chord.quarterLength = 4.0
-
-    measure.append(chord)
-
-    return _render_with_musescore(measure)
+    names = tuple(
+        _frequency_to_note(f).nameWithOctave for f in pitches
+    )
+    return _render_chord(record.clef_range, names)
 
 
 def generate_compositional_range(record):
