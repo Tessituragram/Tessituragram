@@ -1,3 +1,5 @@
+from venv import logger
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
@@ -8,8 +10,9 @@ from django.http import HttpResponse, Http404, FileResponse
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.shortcuts import get_list_or_404
+from django.http import FileResponse, Http404
+from .graphics import GENERATORS, get_graphic_path
 
-from .graphics import attach_graphics
 from .columns import AVAILABLE_COLUMNS, DEFAULT_TABLE_COLUMNS, SIMPLE_SEARCH_COLUMNS
 from .models import Record
 from .filtering import get_filtered_records
@@ -203,8 +206,6 @@ def record_detail(request, group_id):
                 r.save()
             return redirect("records:record_detail", group_id=group_id)
 
-    attach_graphics(group_records)
-
     return render(request, "records/record_detail.html", {
         "record": primary,
         "clef_panels": clef_panels,
@@ -212,6 +213,18 @@ def record_detail(request, group_id):
         "treble_record": clef_panels.get("Treble"),
         "none_record": clef_panels.get("None"),
     })
+
+@login_required
+def record_graphic(request, pk, kind):
+    if kind not in GENERATORS:
+        raise Http404
+    record = get_object_or_404(Record, pk=pk)
+    try:
+        path = get_graphic_path(record, kind)
+    except Exception:
+        logger.exception("Graphic %s failed for record %s", kind, pk)
+        raise Http404
+    return FileResponse(open(path, "rb"), content_type="image/png")
 
 
 @staff_member_required
