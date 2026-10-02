@@ -12,9 +12,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils import timezone
+from django.db import transaction
 from fpdf import FPDF
 import re
 
+from apps.records.graphics import queue_graphics
 from apps.records.filtering import apply_record_sort
 from src import midi_reader, tessitura, utils
 from src.tessitura import TessPassContainer
@@ -303,6 +305,7 @@ def submit_form(request):
                             record,
                         )
 
+                transaction.on_commit(queue_graphics)
                 return redirect("submissions:submission_success")
 
             finally:
