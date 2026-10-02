@@ -3,8 +3,8 @@
 
 {% block content %}
 <h1>Submit</h1>
+<b1>Check out the <a href="{% url 'instructions' %}">Instructions & Terminology</a> page for detailed information about each term and metric in the database.</b1>
 <div class="content-card">
-    <p>Check out the <a href="{% url 'instructions' %}">Instructions & Terminology</a> page for detailed information about each term and metric in the database.</p>
 
     <form method="post" enctype="multipart/form-data" id="submission-form">
         {% csrf_token %}

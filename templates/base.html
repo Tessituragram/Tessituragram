@@ -85,8 +85,10 @@
                 </button>
                 <div class="dropdown-menu">
                     <a href="{% url 'submissions:submit_form' %}">Submit</a>
+                    {% if user.is_staff %}
                     <a href="{% url 'submissions:review_list' %}">Review</a>
                     <a href="{% url 'records:deleted_list' %}">Deleted</a>
+                    {% endif %}
                 </div>
             </div>
             {% else %}

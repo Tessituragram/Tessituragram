@@ -6,7 +6,7 @@
 <h1>Profile</h1>
 
 <div class="content-card">
-    <h2>Your information</h2>
+    <h2>Your Information</h1>
 
     <form method="post">
         {% csrf_token %}
@@ -34,9 +34,8 @@
     </form>
 </div>
 
-
+<h1>Your Submissions</h1>
 <div class="content-card">
-    <h2>Your submissions</h2>
 
     <details>
         <summary>Customize columns</summary>
@@ -165,6 +164,19 @@
         </table>
     </div>
 </div>
+
+<h1>Account Settings</h1>
+    <div class="content-card">
+            <form method="post"
+                action="{% url 'delete_account' %}"
+                onsubmit="return confirm('Are you sure you want to permanently delete your account? This cannot be undone.');">
+                {% csrf_token %}
+                <button type="submit">
+                    Delete Account
+                </button>
+            </form>
+    </div>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

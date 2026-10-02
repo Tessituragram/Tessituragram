@@ -11,4 +11,5 @@ urlpatterns = [
         views.verify_email_change,
         name="verify_email_change",
     ),
+    path("delete-account/", views.delete_account, name="delete_account"),
 ]

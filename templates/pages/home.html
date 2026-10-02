@@ -5,23 +5,23 @@
 {% block content %}
 
 <div class="homepage">
-    <h1 class="homepage-title">Welcome!</h1>
+    <h1>Welcome!</h1>
 
     <div class="homepage-grid">
         <a href="{% url 'background' %}" class="homepage-card">
-            <span>Background</span>
+            <h3>Background</h3>
         </a>
 
         <a href="{% url 'submissions:submit_form' %}" class="homepage-card">
-          <span>Submit</span>
+          <h3>Submit</h3>
         </a>
 
         <a href="{% url 'records:soloistic_search' %}" class="homepage-card">
-            <span>Soloistic<br>Database</span>
+            <h3>Soloistic<br>Database</h3>
         </a>
 
         <a href="{% url 'contact' %}" class="homepage-card">
-            <span>Contact</span>
+            <h3>Contact</h3>
         </a>
     </div>
 </div>

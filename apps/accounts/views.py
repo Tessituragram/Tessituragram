@@ -1,5 +1,6 @@
 from django.db.models import Case, CharField, IntegerField, Value, When
 from django.shortcuts import render, redirect
+from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.urls import reverse
@@ -10,12 +11,25 @@ from apps.records.models import Record
 from urllib.parse import urlencode
 from .forms import ProfileEditForm, SignUpForm, EmailChangeForm
 from .models import PendingSignup, PendingEmailChange
+
 from apps.records.columns import (
     AVAILABLE_COLUMNS,
     DEFAULT_PROFILE_COLUMNS,
     SIMPLE_SEARCH_COLUMNS,
     get_display_columns,
 )
+
+@login_required
+def delete_account(request):
+    if request.method == "POST":
+        user = request.user
+
+        logout(request)
+        user.delete()
+
+        return redirect("home")
+
+    return redirect("profile")
 
 
 def signup(request):

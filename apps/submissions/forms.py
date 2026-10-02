@@ -95,6 +95,7 @@ class SubmissionForm(UnknownNAMixin, forms.Form):
 
     written_clef_range = forms.ChoiceField(
         choices=[
+            ("", "Select clef range"),
             ("treble", "Treble"),
             ("bass", "Bass"),
             ("unknown", "Unknown"),
@@ -106,8 +107,7 @@ class SubmissionForm(UnknownNAMixin, forms.Form):
     performing_forces = forms.ChoiceField(
         choices=Record.PERFORMING_FORCES_CHOICES,
         widget=forms.RadioSelect,
-        initial="",
-        label="Is this MIDI file from an ensemble piece, or a soloistic piece?",
+        initial="solo",
     )
 
     voice_part = forms.ChoiceField(
@@ -212,19 +212,19 @@ class ReviewerEditForm(UnknownNAMixin, forms.Form):
     )
 
     written_clef_range = forms.ChoiceField(
-            choices=[
-                ("treble", "Treble"),
-                ("bass", "Bass"),
-                ("unknown", "Unknown"),
-            ],
-            required=True,
-            label="Original Clef",
+        choices=[
+            ("", "Select clef range"),
+            ("treble", "Treble"),
+            ("bass", "Bass"),
+            ("unknown", "Unknown"),
+        ],
+        required=True,
+        label="Original Clef",
     )
 
     performing_forces = forms.ChoiceField(
         choices=Record.PERFORMING_FORCES_CHOICES,
         widget=forms.RadioSelect,
-        label="Is this MIDI file from an ensemble piece, or a soloistic piece?",
     )
 
     voice_part = forms.ChoiceField(
