@@ -27,7 +27,7 @@ body {
 main {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 40px 24px;
+    padding: 12px 20px;
 }
 
 .logout-form {
@@ -75,7 +75,7 @@ h3 {
 
 /* ===== Body text ===== */
 
-b1 {
+b1, form p label {
     font-weight: bold;
     font-size: 23px;
 }
@@ -1008,13 +1008,6 @@ form p .field-with-unknown select {
 
 #id_performing_forces {
     display: none;
-}
-
-form p label {
-    display: block;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 20px;
-    margin-bottom: 20px;
 }
 
 form p input[type="text"],

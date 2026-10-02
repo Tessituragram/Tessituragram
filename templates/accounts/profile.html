@@ -16,13 +16,13 @@
 
     <h2>Email</h2>
 
-    <p class="b1">Current: {{ user.email }}</p>
+    <p><b1>Current: {{ user.email }}</b1></p>
 
     {% if pending_email %}
-    <p class="b1">
+    <p><b1>
         A confirmation link was sent to {{ pending_email.new_email }}.
         Click it to finish updating your email.
-    </p>
+    </b1></p>
     {% endif %}
 
     <form method="post">

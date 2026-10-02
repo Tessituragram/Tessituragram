@@ -3,11 +3,13 @@
 
 {% block content %}
 <h1>Contact</h1>
-<b2>We would love to hear from you! Please use the form below to contact us.</b2>
+<h2>We would love to hear from you! Please use the form below to contact us.</h2>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Send message</button>
-</form>
+<div class="content-card">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Send message</button>
+    </form>
+</div>
 {% endblock %}
