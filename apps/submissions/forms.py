@@ -13,11 +13,11 @@ UNKNOWN_CHOICES = [(UNKNOWN, "Unknown")]
 
 UNKNOWN_NA_FIELDS = [
     "title", "larger_work", "composer", "author",
-    "initial_key", "style", "voice_part",
+    "style", "voice_part",
 ]
 
 UNKNOWN_FIELDS = [
-    "written_clef_range"
+    "written_clef_range", "initial_key"
 ]
 
 
@@ -104,11 +104,11 @@ class SubmissionForm(UnknownNAMixin, forms.Form):
         label="Original Clef",
     )
 
-    performing_forces = forms.ChoiceField(
-        choices=Record.PERFORMING_FORCES_CHOICES,
-        widget=forms.RadioSelect,
-        initial="solo",
-    )
+    # performing_forces = forms.ChoiceField(
+    #     choices=Record.PERFORMING_FORCES_CHOICES,
+    #     widget=forms.RadioSelect,
+    #     initial="solo",
+    # )
 
     voice_part = forms.ChoiceField(
         choices=Record.VOICE_PART_CHOICES,

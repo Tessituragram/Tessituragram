@@ -14,7 +14,7 @@ class PeopleView(TemplateView):
         "page_title": "People",
         "content": [
             """
-                <b1>Troy O. Conklin</b1> (he/him/Mr.)</b1><b2> is an associate developer at
+                <b1>Troy O. Conklin</b1> <b2>(he/him/Mr.) is an associate developer at
                 Thoughtworks and graduated summa cum laude from Brown University
                 with degrees in computer science and philosophy. He previously worked as a systems
                 engineer with General Dynamics Electric Boat
@@ -26,7 +26,7 @@ class PeopleView(TemplateView):
                 <a href="https://tessituragram.com" target="_blank" rel="noopener">tessituragram.com</a>.</b2>
             """,
             """
-                <b1>Paul M. Patinka</span> (they/them/Mx.)</b1><b2> is a PhD student in Music Education at Northwestern University.
+                <b1>Paul M. Patinka</span> </b1><b2>(they/them/Mx.) is a PhD student in Music Education at Northwestern University.
                 Paul’s collaborative and independent publications appear in the <i>College Music Symposium</i>,
                 <i>InterNos</i>, <i>Journal of Singing</i>, <i>Journal of Voice</i>, and
                 <i>Studies in Musical Theatre</i>.
@@ -391,7 +391,7 @@ class InstructionsView(TemplateView):
                 <p><b2>Remove all articulation, dynamic, expression, performance markings.</b2></p>
                 <p><b2>Include rests where there would be accompaniment forces.</b2></p>
                 <p><b2>If you use a MIDI keyboard to enter notes, quantize your score and double check rhythms.</b2></p>
-                <p><b2><b2>Be sure to include any tempo changes in your score before you export it to a MIDI format. If your score only uses descriptive markings (e.g. allegro) you can use the chart below to convert them to Beats Per Minute (PBM)</b2><p>
+                <p><b2><b2>Be sure to include any tempo changes in your score before you export it to a MIDI format. If your score only uses descriptive markings (e.g. allegro) you can use the chart below to convert them to Beats Per Minute (BPM).</b2><p>
                 <div class="table-scroll">
                     <table>
                         <thead>
@@ -493,9 +493,9 @@ class InstructionsView(TemplateView):
                 <p><b1>Step 1) Fill out the metadata form.</p>
                     <b2><p>&emsp;Include diacritical marks (ex. é, à, ç, ô, ö, ñ, æ, č) in all entries.</p>
                     <p>&emsp;&emsp;Ex: Björn Ulvaeus, instead of Bjorn Ulvaeus.</p>
-                    <p>&emsp;&emsp;Ex: Régine Wieniawski, instead of Regine Wieniawski</p>
-                    <p>&emsp;For missing information, select “Unknown”</p>
-                    <p>&emsp;For non-applicable information, select “N/A”</p>
+                    <p>&emsp;&emsp;Ex: Régine Wieniawski, instead of Regine Wieniawski.</p>
+                    <p>&emsp;For missing information, select “Unknown.”</p>
+                    <p>&emsp;For non-applicable information, select “N/A.”</p>
                     </b2>
                     <p><b1>Step 2) Upload your MIDI file.</b1></p>
                     <p><b2>&emsp;Results become public (after review) by default. Please click the tick box if you do not want them to be public.</b2></p>
@@ -603,17 +603,17 @@ class ProjectsView(TemplateView):
         "page_title": "Future Projects",
         "content": [
             """
-                <p>
-                    <b2>
-                        We have three primary goals for the first stages of this research and website development. We aim to…
-                    <ol>
-                        <li>Collect and accumulate data to expand the database through user contributions and research partners,</li>
-                        <li>Assess the presentational usefulness of the data to practitioners and researchers, and,</li>
-                        <li>Establish a choral ensemble database.</li>
-                    </ol>
-                    </b2>
-                </p>
                 <div class="content-card">
+                    <p>
+                        <b2>
+                            We have three primary goals for the first stages of this research and website development. We aim to…
+                        <ol>
+                            <li>Collect and accumulate data to expand the database through user contributions and research partners,</li>
+                            <li>Assess the presentational usefulness of the data to practitioners and researchers, and,</li>
+                            <li>Establish a choral ensemble database.</li>
+                        </ol>
+                        </b2>
+                    </p>
                     <h2>Data Sharing</h2>
                     <b>
                         We believe that open data sharing promotes transparency and accessibility in research and scholarship. Because of this belief, we are happy to share information and data whenever we can. We designed this website with practitioners in mind to quickly find information about musical selections. If you are interested in taking a deeper dive into the aggregate information we collect from the MIDI files in our database, please contact us.

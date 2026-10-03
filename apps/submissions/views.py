@@ -69,7 +69,7 @@ def submit_form(request):
             # This is the clef the submitted MIDI is written in.
             written_clef_range = form.cleaned_data.get("written_clef_range") or None
 
-            performing_forces = form.cleaned_data["performing_forces"]
+            performing_forces = "solo"
             voice_part = form.cleaned_data["voice_part"]
             additional_comments = form.cleaned_data.get(
                 "additional_comments",

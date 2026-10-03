@@ -16,8 +16,6 @@ class Record(models.Model):
     ("musical_theatre", "Musical Theatre"),
     ("contemporary_commercial", "Contemporary Commercial"),
     ("other", "Other"),
-    ("unknown", "Unknown"),
-    ("n/a", "N/A"),
     ]
 
     INITIAL_KEY_CHOICES = [
@@ -37,7 +35,6 @@ class Record(models.Model):
     ("6 sharps", "6 Sharps"),
     ("7 sharps", "7 Sharps"),
     ("unknown", "Unknown"),
-    ("n/a", "N/A"),
 ]
 
     VOICE_PART_CHOICES = [
