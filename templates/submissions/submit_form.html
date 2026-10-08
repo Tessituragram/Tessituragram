@@ -128,55 +128,59 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('[data-unknown-na]').forEach(el => {
+    function setValue(el, selectValue, textValue) {
+        if (el.tagName === 'SELECT') {
+            let opt = Array.from(el.options).find(o => o.value === selectValue);
+            if (!opt) {
+                opt = new Option(textValue, selectValue);
+                opt.hidden = true;            // shown in the closed box, not in the list
+                opt.dataset.injected = '1';
+                el.add(opt);
+            }
+            el.value = selectValue;
+        } else {
+            el.value = textValue;
+        }
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    document.querySelectorAll('[data-unknown-na], [data-unknown]').forEach(el => {
         const row = document.createElement('div');
         row.className = 'field-with-unknown-na';
         el.insertAdjacentElement('beforebegin', row);
         row.appendChild(el);
 
+        const defs = [['Unknown', 'Unknown']];
+        if (el.hasAttribute('data-unknown-na')) defs.push(['N/A', 'N/A']);
+
         const buttons = document.createElement('div');
         buttons.className = 'unknown-na-buttons';
 
-        [['Unknown', 'unknown'], ['N/A', 'n/a']].forEach(([label, selectValue]) => {
+        defs.forEach(([label, selectValue]) => {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.textContent = label;
-            btn.addEventListener('click', () => {
-                el.value = el.tagName === 'SELECT' ? selectValue : label;
-                el.dispatchEvent(new Event('input', { bubbles: true }));
-                el.dispatchEvent(new Event('change', { bubbles: true }));
-            });
+            btn.addEventListener('click', () => setValue(el, selectValue, label));
             buttons.appendChild(btn);
         });
 
         row.appendChild(buttons);
-    });
-});
-</script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('[data-unknown]').forEach(el => {
-        const row = document.createElement('div');
-        row.className = 'field-with-unknown-na';
-        el.insertAdjacentElement('beforebegin', row);
-        row.appendChild(el);
-
-        const buttons = document.createElement('div');
-        buttons.className = 'unknown-na-buttons';
-
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.textContent = 'Unknown';
-
-        btn.addEventListener('click', () => {
-            el.value = el.tagName === 'SELECT' ? 'unknown' : 'Unknown';
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-        });
-
-        buttons.appendChild(btn);
-        row.appendChild(buttons);
+        if (el.tagName === 'SELECT') {
+            // After a validation error re-render, hide the selected Unknown/N/A from the list
+            const sel = el.selectedOptions[0];
+            if (sel && (sel.value === 'Unknown' || sel.value === 'N/A')) {
+                sel.hidden = true;
+                sel.dataset.injected = '1';
+            }
+            // Drop the injected option once the user picks something else
+            el.addEventListener('change', () => {
+                Array.from(el.options).forEach(o => {
+                    if (o.dataset.injected && o.value !== el.value) o.remove();
+                });
+            });
+        }
     });
 });
 </script>

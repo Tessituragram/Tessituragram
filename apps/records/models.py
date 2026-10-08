@@ -135,7 +135,7 @@ class Record(models.Model):
     )
 
     style = models.CharField(max_length=25, choices=STYLE_CHOICES)
-    style_other = models.CharField(max_length=100, choices=STYLE_CHOICES)
+    style_other = models.CharField(max_length=100, blank=True)
 
     pdf_file = models.FileField(upload_to="pdfs/", null=True, blank=True)
     midi_file = models.FileField(upload_to="midi/", null=True, blank=True)

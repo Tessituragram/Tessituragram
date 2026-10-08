@@ -8,6 +8,8 @@
 
     <form method="post" enctype="multipart/form-data" id="submission-form">
         {% csrf_token %}
+
+        {{ form.non_field_errors }}
         
         {% for field in form %}
             {% if field.name == 'voice_part' %}
@@ -23,6 +25,7 @@
                         {{ field.errors }}
                     </p>
                 </div>
+
             {% elif field.name == 'style_other' %}
                 <div id="style-other-container" style="display: none;">
                     <p>
@@ -35,6 +38,26 @@
                         {{ field.errors }}
                     </p>
                 </div>
+
+            {% elif field.name == 'midi_file' %}
+                <p>
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+
+                    {% if record.midi_file %}
+                        <div class="current-file">
+                            Current file:
+                            <strong>{{ record.midi_file.name|cut:"midi/" }}</strong>
+                        </div>
+                    {% endif %}
+
+                    {{ field }}
+                    {{ field.errors }}
+
+                    <small>Leave blank to keep the current MIDI file.</small>
+                </p>
+
             {% else %}
                 <p>
                     <label for="{{ field.id_for_label }}">
@@ -114,27 +137,73 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('[data-unknown]').forEach(el => {
+    function setValue(el, selectValue, textValue) {
+        if (el.tagName === 'SELECT') {
+            let opt = Array.from(el.options).find(o => o.value === selectValue);
+            if (!opt) {
+                opt = new Option(textValue, selectValue);
+                opt.hidden = true;
+                opt.dataset.injected = '1';
+                el.add(opt);
+            }
+            el.value = selectValue;
+        } else {
+            el.value = textValue;
+        }
+
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    document.querySelectorAll('[data-unknown-na], [data-unknown]').forEach(el => {
         const row = document.createElement('div');
         row.className = 'field-with-unknown-na';
+
         el.insertAdjacentElement('beforebegin', row);
         row.appendChild(el);
+
+        const defs = [['Unknown', 'Unknown']];
+
+        if (el.hasAttribute('data-unknown-na')) {
+            defs.push(['N/A', 'N/A']);
+        }
 
         const buttons = document.createElement('div');
         buttons.className = 'unknown-na-buttons';
 
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.textContent = 'Unknown';
+        defs.forEach(([label, selectValue]) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = label;
 
-        btn.addEventListener('click', () => {
-            el.value = el.tagName === 'SELECT' ? 'unknown' : 'Unknown';
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-            el.dispatchEvent(new Event('change', { bubbles: true }));
+            btn.addEventListener('click', () => {
+                setValue(el, selectValue, label);
+            });
+
+            buttons.appendChild(btn);
         });
 
-        buttons.appendChild(btn);
         row.appendChild(buttons);
+
+        if (el.tagName === 'SELECT') {
+            // If the existing record is already Unknown/N/A,
+            // hide that option from the dropdown list.
+            const sel = el.selectedOptions[0];
+
+            if (sel && (sel.value === 'Unknown' || sel.value === 'N/A')) {
+                sel.hidden = true;
+                sel.dataset.injected = '1';
+            }
+
+            // Remove injected Unknown/N/A when another value is selected.
+            el.addEventListener('change', () => {
+                Array.from(el.options).forEach(o => {
+                    if (o.dataset.injected && o.value !== el.value) {
+                        o.remove();
+                    }
+                });
+            });
+        }
     });
 });
 </script>

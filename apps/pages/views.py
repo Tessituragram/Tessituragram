@@ -543,11 +543,8 @@ class InstructionsView(TemplateView):
                 <p><b3>&nbsp;&nbsp;&nbsp;&nbsp;Ex: XX.X vibrations</b3></p>
                 <p><b1>High, Middle, Low passaggio (H<i>p</i>, M<i>p</i>, L<i>p</i>)</b1> – A generalized range of frequencies where a singer might need to navigate a vocal registration shift. See the chart below for specific ranges. Note that generalized passaggio zones do not transpose based on the clef range of the singer.</b></p>
                 <p><b1>High Voice (HV)</b1> – A generalized voice type that can sustainably support a higher vocal tessitura.</p>
-                <p><b3>&nbsp;&nbsp;&nbsp;&nbsp;Ex: XX.X vibrations</b3></p>
                 <p><b1>Low Voice (LV)</b1> – A generalized voice type that can sustainably support a lower vocal tessitura.</p>
-                <p><b3>&nbsp;&nbsp;&nbsp;&nbsp;Ex: XX.X vibrations</b3></p>
                 <p><b1>Medium Voice (MV)</b1> – A generalized voice type that can sustainably support a middle vocal tessitura.</p>
-                <p><b3>&nbsp;&nbsp;&nbsp;&nbsp;Ex: XX.X vibrations</b3></p>
                 <p><b1>Musical tessitura (Q<sub>1p</sub>–Q<sub>3p</sub>)</b1> – The average pitch range of a melodic line in a piece of music based on a notated musical score or capture of a live performance, measured by applying quartile analysis to equally weighted pitch subdivisions. Also known as the interquartile range, reported as a range in either Hz or using pitch nomenclature.</p>
                 <p><b3>&nbsp;&nbsp;&nbsp;&nbsp;Ex: XX.X–XX.X Hz or Xx–Xx</b3></p>
                 <p><b1>Generalized passaggio Zones</b1> – A generalized range of frequencies where a singer might need to navigate a vocal registration shift. See the chart below for specific ranges. Note that generalized passaggio zones do not transpose based on the clef range of the singer. Reported as %p.</b></p>

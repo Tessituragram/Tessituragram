@@ -6,8 +6,8 @@ from apps.submissions.widgets import KeySignatureWidget
 
 MAX_MIDI_SIZE = 5 * 1024 * 1024
 
-UNKNOWN = "unknown"
-NA = "n/a"
+UNKNOWN = "Unknown"
+NA = "N/A"
 EXTRA_CHOICES = [(UNKNOWN, "Unknown"), (NA, "N/A")]
 UNKNOWN_CHOICES = [(UNKNOWN, "Unknown")]
 
@@ -21,33 +21,59 @@ UNKNOWN_FIELDS = [
 ]
 
 
+class HiddenChoicesField(forms.ChoiceField):
+    def valid_value(self, value):
+        if super().valid_value(value):
+            return True
+        return value in {v for v, _ in self.hidden_valid_choices}
+
+
 class UnknownNAMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        for name in UNKNOWN_NA_FIELDS:
-            field = self.fields[name]
+        groups = (
+            (UNKNOWN_NA_FIELDS, EXTRA_CHOICES, "data-unknown-na"),
+            (UNKNOWN_FIELDS, UNKNOWN_CHOICES, "data-unknown"),
+        )
 
-            if isinstance(field, forms.ChoiceField):
-                existing = {str(v) for v, _ in field.choices}
-                field.choices = list(field.choices) + [
-                    c for c in EXTRA_CHOICES
-                    if c[0] not in existing
-                ]
+        for names, extras, attr in groups:
+            extra_values = {v for v, _ in extras}
 
-            field.widget.attrs["data-unknown-na"] = "1"
+            for name in names:
+                field = self.fields[name]
 
-        for name in UNKNOWN_FIELDS:
-            field = self.fields[name]
+                if isinstance(field, forms.ChoiceField):
+                    field.__class__ = HiddenChoicesField
+                    field.hidden_valid_choices = extras
 
-            if isinstance(field, forms.ChoiceField):
-                existing = {str(v) for v, _ in field.choices}
-                field.choices = list(field.choices) + [
-                    c for c in UNKNOWN_CHOICES
-                    if c[0] not in existing
-                ]
+                    field.choices = [
+                        c for c in field.choices
+                        if c[0] not in extra_values
+                    ]
 
-            field.widget.attrs["data-unknown"] = "1"
+                    if self.is_bound:
+                        submitted = self.data.get(
+                            self.add_prefix(name)
+                        )
+
+                        for value, label in extras:
+                            if submitted == value:
+                                field.choices = (
+                                    list(field.choices)
+                                    + [(value, label)]
+                                )
+                    else:
+                        initial = self.initial.get(name)
+
+                        for value, label in extras:
+                            if initial == value:
+                                field.choices = (
+                                    list(field.choices)
+                                    + [(value, label)]
+                                )
+
+                field.widget.attrs[attr] = "1"
 
 
 class SubmissionForm(UnknownNAMixin, forms.Form):
@@ -96,9 +122,8 @@ class SubmissionForm(UnknownNAMixin, forms.Form):
     written_clef_range = forms.ChoiceField(
         choices=[
             ("", "Select clef range"),
-            ("treble", "Treble"),
-            ("bass", "Bass"),
-            ("unknown", "Unknown"),
+            ("Treble", "Treble"),
+            ("Bass", "Bass"),
         ],
         required=True,
         label="Original Clef",
@@ -214,18 +239,17 @@ class ReviewerEditForm(UnknownNAMixin, forms.Form):
     written_clef_range = forms.ChoiceField(
         choices=[
             ("", "Select clef range"),
-            ("treble", "Treble"),
-            ("bass", "Bass"),
-            ("unknown", "Unknown"),
+            ("Treble", "Treble"),
+            ("Bass", "Bass"),
         ],
         required=True,
         label="Original Clef",
     )
 
-    performing_forces = forms.ChoiceField(
-        choices=Record.PERFORMING_FORCES_CHOICES,
-        widget=forms.RadioSelect,
-    )
+    # performing_forces = forms.ChoiceField(
+    #     choices=Record.PERFORMING_FORCES_CHOICES,
+    #     widget=forms.RadioSelect,
+    # )
 
     voice_part = forms.ChoiceField(
         choices=Record.VOICE_PART_CHOICES,

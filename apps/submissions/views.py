@@ -672,9 +672,7 @@ def edit_resubmit(request, pk):
                         "",
                     )
 
-                    target.performing_forces = form.cleaned_data[
-                        "performing_forces"
-                    ]
+                    target.performing_forces = "solo"
 
                     target.voice_part = form.cleaned_data.get(
                         "voice_part",
@@ -769,14 +767,22 @@ def edit_resubmit(request, pk):
                     # Save MIDI
                     # -----------------------------------------------------
                     if uploaded_file:
+                        # A new MIDI was uploaded, so replace the existing file.
                         if target.midi_file:
-                            target.midi_file.delete(
-                                save=False
-                            )
+                            target.midi_file.delete(save=False)
 
                         with open(midi_path, "rb") as midi_f:
                             target.midi_file.save(
                                 uploaded_file.name,
+                                File(midi_f),
+                                save=False,
+                            )
+                    elif not target.midi_file and record.midi_file:
+                        # No new MIDI was uploaded, so preserve/copy the existing
+                        # MIDI file if this is a newly created target record.
+                        with record.midi_file.open("rb") as midi_f:
+                            target.midi_file.save(
+                                os.path.basename(record.midi_file.name),
                                 File(midi_f),
                                 save=False,
                             )
@@ -891,24 +897,32 @@ def edit_resubmit(request, pk):
                 )
 
     else:
-        # -------------------------------------------------------------
-        # Populate form with the existing record's values
-        # -------------------------------------------------------------
-        form = ReviewerEditForm(
-            initial={
-                "title": record.title,
-                "larger_work": record.larger_work,
-                "composer": record.composer,
-                "author": record.author,
-                "initial_key": record.initial_key,
-                "style": record.style,
-                "style_other": record.style_other,
-                "written_clef_range": record.written_clef_range,
-                "performing_forces": record.performing_forces,
-                "voice_part": record.voice_part,
-                "additional_comments": record.additional_comments,
-            }
-        )
+        form = ReviewerEditForm()
+
+        form.initial["title"] = record.title
+        form.initial["larger_work"] = record.larger_work
+        form.initial["composer"] = record.composer
+        form.initial["author"] = record.author
+        form.initial["initial_key"] = record.initial_key
+        form.initial["style"] = record.style
+        form.initial["style_other"] = record.style_other
+        form.initial["written_clef_range"] = record.written_clef_range
+        form.initial["performing_forces"] = "solo"
+        form.initial["voice_part"] = record.voice_part
+        form.initial["additional_comments"] = record.additional_comments
+
+        # Restore special choices if the existing record uses them.
+        for field_name, value in (
+            ("style", record.style),
+            ("written_clef_range", record.written_clef_range),
+        ):
+            if value and value not in {
+                choice_value
+                for choice_value, _ in form.fields[field_name].choices
+            }:
+                form.fields[field_name].choices = list(
+                    form.fields[field_name].choices
+                ) + [(value, value)]
 
     return render(
         request,
@@ -916,5 +930,6 @@ def edit_resubmit(request, pk):
         {
             "form": form,
             "record": record,
+            "current_midi_file": record.midi_file
         },
     )

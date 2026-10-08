@@ -22,10 +22,10 @@ MS_TENANT_ID = os.environ.get("MS_TENANT_ID")
 MS_CLIENT_ID = os.environ.get("MS_CLIENT_ID")
 MS_CLIENT_SECRET = os.environ.get("MS_CLIENT_SECRET")
 EMAIL_BACKEND = "apps.accounts.graph_email_backend.GraphEmailBackend"
-DEFAULT_FROM_EMAIL = "verify_email@tessituragram.com"
+DEFAULT_FROM_EMAIL = "no-reply@tessituragram.com"
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-#4)gf(6@u*!tkd_i%+ld84=gf2h+=n%=)9&hho@=h4##w#*6q="
+SECRET_KEY = os.environ.get("SECRET_KEY")
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 # SECURITY WARNING: don't run with debug turned on in production! # TODO: Remove when in production
