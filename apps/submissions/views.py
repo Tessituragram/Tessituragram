@@ -136,7 +136,11 @@ def submit_form(request):
                     )
 
                 written_clef_range = form.cleaned_data.get("written_clef_range") or None
-                tess_clef = None if written_clef_range in ("unknown", "n/a") else written_clef_range
+                tess_clef = (
+                    None
+                    if not written_clef_range or written_clef_range.lower() in ("unknown", "n/a")
+                    else written_clef_range.lower()
+                )
 
                 tesses, passaggios, _ = tessitura.get_tessitura_and_passaggio(
                     notes,
@@ -596,10 +600,10 @@ def edit_resubmit(request, pk):
                 # ---------------------------------------------------------
                 # Get written/original clef
                 # ---------------------------------------------------------
-                written_clef_range = form.cleaned_data["written_clef_range"]
+                written_clef_range = form.cleaned_data.get("written_clef_range") or None
                 tess_clef = (
                     None
-                    if written_clef_range in ("", "unknown", "n/a")
+                    if not written_clef_range or written_clef_range.lower() in ("unknown", "n/a")
                     else written_clef_range.lower()
                 )
 
